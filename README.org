@@ -1,0 +1,14 @@
+* Transducers 
+
+This is an implementation of SRFI-171 (Transducers) in Common Lisp. Originally
+inspired by Clojure and adapted to Scheme, Transducers are an excellent way to
+think about - and efficiently operate on - collections or streams of data. In
+the simplest case the data source could be a List, but files can also be treated
+so and have their contents operated over using all the usual functions like =map=,
+=filter=, =fold=, and others.
+
+Transducers make dealing with data an efficient joy!
+
+** Usage
+
+** Installation
