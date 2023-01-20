@@ -15,6 +15,18 @@
              (funcall reducer result))
             (t (funcall reducer))))))
 
+(defun tfilter (pred)
+  (lambda (reducer)
+    (lambda (&optional (result :tfilter-res) (input :tfilter-input))
+      (cond ((and (not (eq result :tfilter-res))
+                  (not (eq input :tfilter-input)))
+             (if (funcall pred input)
+                 (funcall reducer result input)
+                 result))
+            ((and result (eq input :tfilter-input))
+             (funcall reducer result))
+            (t (funcall reducer))))))
+
 (defun rcons ()
   "A transducer-friendly consing reducer with '() as the identity."
   (lambda (&optional (acc :rcons-acc) (input :rcons-input))
@@ -44,4 +56,7 @@
   "A wrapper that signals that reduction has completed."
   val)
 
-;; (list-transduce (tmap #'1+) (rcons) '(1 2 3 4 5))
+;; (list-transduce (alexandria:compose (tmap #'1+)
+;;                                     (tfilter #'evenp))
+;;                 (rcons)
+;;                 '(1 2 3 4 5))
