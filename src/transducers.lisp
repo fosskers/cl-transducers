@@ -1,39 +1,32 @@
 (defpackage transducers
-  (:use :cl)
-  (:import-from :trivia lambda-match match))
+  (:use :cl))
 
 (in-package :transducers)
 
 (defun tmap (f)
   "Map an F across all elements of the transduction."
   (lambda (reducer)
-    (lambda (&optional (result :tmap-res) (input :tmap-input))
-      (cond ((and (not (eq result :tmap-res))
-                  (not (eq input :tmap-input)))
-             (funcall reducer result (funcall f input)))
-            ((and result (eq input :tmap-input))
-             (funcall reducer result))
+    (lambda (&optional (result nil r-p) (input nil i-p))
+      (cond ((and r-p i-p) (funcall reducer result (funcall f input)))
+            ((and r-p (not i-p)) (funcall reducer result))
             (t (funcall reducer))))))
 
 (defun tfilter (pred)
+  "Only keep elements from the transduction that satisfy PRED."
   (lambda (reducer)
-    (lambda (&optional (result :tfilter-res) (input :tfilter-input))
-      (cond ((and (not (eq result :tfilter-res))
-                  (not (eq input :tfilter-input)))
+    (lambda (&optional (result nil r-p) (input nil i-p))
+      (cond ((and r-p i-p)
              (if (funcall pred input)
                  (funcall reducer result input)
                  result))
-            ((and result (eq input :tfilter-input))
-             (funcall reducer result))
+            ((and r-p (not i-p)) (funcall reducer result))
             (t (funcall reducer))))))
 
 (defun rcons ()
   "A transducer-friendly consing reducer with '() as the identity."
-  (lambda (&optional (acc :rcons-acc) (input :rcons-input))
-    (cond ((and (not (eq acc :rcons-acc))
-                (not (eq input :rcons-input))) (cons input acc))
-          ((and (not (eq acc :rcons-acc))
-                (eq input :rcons-input)) (reverse acc))
+  (lambda (&optional (acc nil a-p) (input nil i-p))
+    (cond ((and a-p i-p) (cons input acc))
+          ((and a-p (not i-p)) (reverse acc))
           (t '()))))
 
 (defun list-transduce (xform f coll)
@@ -56,7 +49,11 @@
   "A wrapper that signals that reduction has completed."
   val)
 
-;; (list-transduce (alexandria:compose (tmap #'1+)
-;;                                     (tfilter #'evenp))
-;;                 (rcons)
-;;                 '(1 2 3 4 5))
+(defun do-it (items)
+  ;; (declare (optimize (speed 3) (safety 0)))
+  (list-transduce (alexandria:compose (tmap2 #'1+)
+                                      (tfilter #'evenp))
+                  (rcons)
+                  items))
+
+(do-it '(1 2 3 4 5))

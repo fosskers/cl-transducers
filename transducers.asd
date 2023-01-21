@@ -2,7 +2,7 @@
   :version "0.1.0"
   :author "Colin Woodbury <colin@fosskers.ca>"
   :license ""
-  :depends-on (:trivia)
+  :depends-on ()
   :components ((:module "src"
                 :components
                 ((:file "transducers"))))
