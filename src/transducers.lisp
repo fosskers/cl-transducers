@@ -3,6 +3,12 @@
 
 (in-package :transducers)
 
+;; TODO
+;; tfilter-map
+;; treplace
+
+;; --- Transducers --- ;;
+
 (defun tmap (f)
   "Map an F across all elements of the transduction."
   (lambda (reducer)
@@ -21,6 +27,32 @@
                  result))
             ((and r-p (not i-p)) (funcall reducer result))
             (t (funcall reducer))))))
+
+(defun tremove (pred)
+  "Remove elements from the transduction that satisfy PRED."
+  (lambda (reducer)
+    (lambda (&optional (result nil r-p) (input nil i-p))
+      (cond ((and r-p i-p)
+             (if (not (funcall pred input))
+                 (funcall reducer result input)
+                 result))
+            ((and r-p (not i-p)) (funcall reducer result))
+            (t (funcall reducer))))))
+
+(defun tdrop (n)
+  "Drop the first N elements of the transduction."
+  (lambda (reducer)
+    (let ((new-n (1+ n)))
+      (lambda (&optional (result nil r-p) (input nil i-p))
+        (cond ((and r-p i-p)
+               (setf new-n (1- new-n))
+               (if (> new-n 0)
+                   result
+                   (funcall reducer result input)))
+              ((and r-p (not i-p)) (funcall reducer result))
+              (t (funcall reducer)))))))
+
+;; --- Reducers --- ;;
 
 (defun rcons ()
   "A transducer-friendly consing reducer with '() as the identity."
@@ -51,9 +83,11 @@
 
 (defun do-it (items)
   ;; (declare (optimize (speed 3) (safety 0)))
-  (list-transduce (alexandria:compose (tmap2 #'1+)
-                                      (tfilter #'evenp))
+  (list-transduce (alexandria:compose
+                   (tmap2 #'1+)
+                   (tfilter #'evenp)
+                   (tdrop 3))
                   (rcons)
                   items))
 
-(do-it '(1 2 3 4 5))
+(do-it '(1 2 3 4 5 6 7 8 9 0))
