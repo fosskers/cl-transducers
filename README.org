@@ -1,4 +1,4 @@
-* Transducers 
+#+title: Transducers
 
 This is an implementation of SRFI-171 (Transducers) in Common Lisp. Originally
 inspired by Clojure and adapted to Scheme, Transducers are an excellent way to
@@ -9,6 +9,33 @@ so and have their contents operated over using all the usual functions like =map
 
 Transducers make dealing with data an efficient joy!
 
-** Usage
+* Table of Contents :toc_3_gh:
+- [[#installation][Installation]]
+- [[#usage][Usage]]
+  - [[#differences-with-srfi-171][Differences with SRFI-171]]
+    - [[#scheme][Scheme]]
 
-** Installation
+* Installation
+
+* Usage
+
+** Differences with SRFI-171
+
+*** Scheme
+
+Due to differences in how functions are called in Common Lisp and Scheme, all
+reducers (like =rcons=) have been made functions that must be called once to get
+access to their inner reducing lambda. In practice this means you must do:
+
+#+begin_src lisp
+(list-transduce (tmap #'1+) (rcons) '(1 2 3))
+#+end_src
+
+instead of:
+
+#+begin_src lisp
+(list-transduce (tmap 1+) rcons '(1 2 3))
+#+end_src
+
+Notice also that higher-order functions (like =1+=) must be quoted in Common Lisp,
+but not so in Scheme.
