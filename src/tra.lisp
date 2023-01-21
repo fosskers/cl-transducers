@@ -82,12 +82,14 @@
               ((and r-p (not i-p)) (funcall reducer result))
               (t (funcall reducer)))))))
 
-(defun tconcatenate (reducer)
-  (let ((preserving-reducer (preserving-reduced reducer)))
-    (lambda (&optional (result nil r-p) (input nil i-p))
-      (cond ((and r-p i-p) (list-reduce preserving-reducer result input))
-            ((and r-p (not i-p)) (funcall reducer result))
-            (t (funcall reducer))))))
+(defun tconcatenate ()
+  "Concatenates all the sublists in the transduction."
+  (lambda (reducer)
+    (let ((preserving-reducer (preserving-reduced reducer)))
+      (lambda (&optional (result nil r-p) (input nil i-p))
+        (cond ((and r-p i-p) (list-reduce preserving-reducer result input))
+              ((and r-p (not i-p)) (funcall reducer result))
+              (t (funcall reducer)))))))
 
 ;; --- Reducers --- ;;
 
@@ -155,3 +157,4 @@ try to continue the transducing process."
 ;; (do-it '(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15))
 
 ;; (list-transduce (ttake 3) (rcons) '(2 4 6 8 9 1 2))
+;; (list-transduce (tconcatenate) (rcons) '((1 2 3) (4 5 6) (7 8 9)))
