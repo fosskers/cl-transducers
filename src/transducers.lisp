@@ -52,6 +52,18 @@
               ((and r-p (not i-p)) (funcall reducer result))
               (t (funcall reducer)))))))
 
+(defun tdrop-while (pred)
+  "Drop elements from the front of the transduction that satisfy PRED."
+  (lambda (reducer)
+    (let ((drop? t))
+      (lambda (&optional (result nil r-p) (input nil i-p))
+        (cond ((and r-p i-p) (if (and (funcall pred input) drop?)
+                                 result
+                                 (progn (setf drop? nil)
+                                        (funcall reducer result input))))
+              ((and r-p (not i-p)) (funcall reducer result))
+              (t (funcall reducer)))))))
+
 ;; --- Reducers --- ;;
 
 (defun rcons ()
