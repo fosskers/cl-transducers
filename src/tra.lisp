@@ -1,5 +1,6 @@
 (defpackage tra
-  (:use :cl))
+  (:use :cl)
+  (:shadow #:map #:remove #:concatenate #:cons))
 
 (in-package :tra)
 
@@ -11,7 +12,7 @@
 
 ;; --- Transducers --- ;;
 
-(defun tmap (f)
+(defun map (f)
   "Map an F across all elements of the transduction."
   (lambda (reducer)
     (lambda (&optional (result nil r-p) (input nil i-p))
@@ -19,7 +20,7 @@
             ((and r-p (not i-p)) (funcall reducer result))
             (t (funcall reducer))))))
 
-(defun tfilter (pred)
+(defun filter (pred)
   "Only keep elements from the transduction that satisfy PRED."
   (lambda (reducer)
     (lambda (&optional (result nil r-p) (input nil i-p))
@@ -30,7 +31,7 @@
             ((and r-p (not i-p)) (funcall reducer result))
             (t (funcall reducer))))))
 
-(defun tremove (pred)
+(defun remove (pred)
   "Remove elements from the transduction that satisfy PRED."
   (lambda (reducer)
     (lambda (&optional (result nil r-p) (input nil i-p))
@@ -41,7 +42,7 @@
             ((and r-p (not i-p)) (funcall reducer result))
             (t (funcall reducer))))))
 
-(defun tdrop (n)
+(defun drop (n)
   "Drop the first N elements of the transduction."
   (lambda (reducer)
     (let ((new-n (1+ n)))
@@ -54,7 +55,7 @@
               ((and r-p (not i-p)) (funcall reducer result))
               (t (funcall reducer)))))))
 
-(defun tdrop-while (pred)
+(defun drop-while (pred)
   "Drop elements from the front of the transduction that satisfy PRED."
   (lambda (reducer)
     (let ((drop? t))
@@ -66,7 +67,7 @@
               ((and r-p (not i-p)) (funcall reducer result))
               (t (funcall reducer)))))))
 
-(defun ttake (n)
+(defun take (n)
   "Keep the first N elements of the transduction."
   (lambda (reducer)
     (let ((new-n n))
@@ -82,7 +83,7 @@
               ((and r-p (not i-p)) (funcall reducer result))
               (t (funcall reducer)))))))
 
-(defun tconcatenate ()
+(defun concatenate ()
   "Concatenates all the sublists in the transduction."
   (lambda (reducer)
     (let ((preserving-reducer (preserving-reduced reducer)))
@@ -93,10 +94,10 @@
 
 ;; --- Reducers --- ;;
 
-(defun rcons ()
+(defun cons ()
   "A transducer-friendly consing reducer with '() as the identity."
   (lambda (&optional (acc nil a-p) (input nil i-p))
-    (cond ((and a-p i-p) (cons input acc))
+    (cond ((and a-p i-p) (cl:cons input acc))
           ((and a-p (not i-p)) (reverse acc))
           (t '()))))
 
