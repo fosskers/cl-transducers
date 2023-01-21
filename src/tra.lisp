@@ -1,11 +1,13 @@
-(defpackage transducers
+(defpackage tra
   (:use :cl))
 
-(in-package :transducers)
+(in-package :tra)
 
 ;; TODO
 ;; tfilter-map
 ;; treplace
+;; ttake-while
+;; tappend-map
 
 ;; --- Transducers --- ;;
 
@@ -80,6 +82,13 @@
               ((and r-p (not i-p)) (funcall reducer result))
               (t (funcall reducer)))))))
 
+(defun tconcatenate (reducer)
+  (let ((preserving-reducer (preserving-reduced reducer)))
+    (lambda (&optional (result nil r-p) (input nil i-p))
+      (cond ((and r-p i-p) (list-reduce preserving-reducer result input))
+            ((and r-p (not i-p)) (funcall reducer result))
+            (t (funcall reducer))))))
+
 ;; --- Reducers --- ;;
 
 (defun rcons ()
@@ -119,18 +128,30 @@
       x
       (make-reduced :val x)))
 
+(defun preserving-reduced (reducer)
+ "A helper function that wraps a reduced value twice since reducing
+functions (like list-reduce) unwraps them. tconcatenate is a good example: it
+re-uses its reducer on its input using list-reduce. If that reduction finishes
+early and returns a reduced value, list-reduce would 'unreduce' that value and
+try to continue the transducing process."
+  (lambda (a b)
+    (let ((result (funcall reducer a b)))
+      (if (reduced-p result)
+          (make-reduced :val result)
+          result))))
+
 ;; --- Testing --- ;;
 
-(defun do-it (items)
-  ;; (declare (optimize (speed 3) (safety 0)))
-  (list-transduce (alexandria:compose
-                   (tmap2 #'1+)
-                   (tfilter #'evenp)
-                   (tdrop 3)
-                   (ttake 3))
-                  (rcons)
-                  items))
+;; (defun do-it (items)
+;;   ;; (declare (optimize (speed 3) (safety 0)))
+;;   (list-transduce (alexandria:compose
+;;                    (tmap2 #'1+)
+;;                    (tfilter #'evenp)
+;;                    (tdrop 3)
+;;                    (ttake 3))
+;;                   (rcons)
+;;                   items))
 
-(do-it '(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15))
+;; (do-it '(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15))
 
 ;; (list-transduce (ttake 3) (rcons) '(2 4 6 8 9 1 2))

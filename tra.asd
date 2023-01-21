@@ -1,13 +1,13 @@
-(defsystem "transducers"
+(defsystem "tra"
   :version "0.1.0"
   :author "Colin Woodbury <colin@fosskers.ca>"
   :license ""
   :depends-on ()
   :components ((:module "src"
                 :components
-                ((:file "transducers"))))
-  :description ""
-  :in-order-to ((test-op (test-op "transducers/tests"))))
+                ((:file "tra"))))
+  :description "")
+  ;; :in-order-to ((test-op (test-op "transducers/tests"))))
 
 ;; (defsystem "transducers/tests"
 ;;   :author ""

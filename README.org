@@ -1,4 +1,4 @@
-#+title: Transducers
+#+title: tra: Transducers in Common Lisp
 
 This is an implementation of SRFI-171 (Transducers) in Common Lisp. Originally
 inspired by Clojure and adapted to Scheme, Transducers are an excellent way to
@@ -14,6 +14,7 @@ Transducers make dealing with data an efficient joy!
 - [[#usage][Usage]]
   - [[#differences-with-srfi-171][Differences with SRFI-171]]
     - [[#scheme][Scheme]]
+    - [[#additional-functions][Additional Functions]]
 
 * Installation
 
@@ -39,3 +40,9 @@ instead of:
 
 Notice also that higher-order functions (like =1+=) must be quoted in Common Lisp,
 but not so in Scheme.
+
+*** Additional Functions
+
+A few extra functions have been added here that represent idioms common in other
+languages, but that are nonetheless missing from the original SRFI-171
+specification.
