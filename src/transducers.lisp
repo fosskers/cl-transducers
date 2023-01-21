@@ -64,6 +64,22 @@
               ((and r-p (not i-p)) (funcall reducer result))
               (t (funcall reducer)))))))
 
+(defun ttake (n)
+  "Keep the first N elements of the transduction."
+  (lambda (reducer)
+    (let ((new-n n))
+      (lambda (&optional (result nil r-p) (input nil i-p))
+        (cond ((and r-p i-p)
+               (let ((result (if (> new-n 0)
+                                 (funcall reducer result input)
+                                 result)))
+                 (setf new-n (1- new-n))
+                 (if (not (> new-n 0))
+                     (ensure-reduced result)
+                     result)))
+              ((and r-p (not i-p)) (funcall reducer result))
+              (t (funcall reducer)))))))
+
 ;; --- Reducers --- ;;
 
 (defun rcons ()
@@ -72,6 +88,8 @@
     (cond ((and a-p i-p) (cons input acc))
           ((and a-p (not i-p)) (reverse acc))
           (t '()))))
+
+;; --- Entry Points --- ;;
 
 (defun list-transduce (xform f coll)
   (list-transduce-work xform f (funcall f) coll))
@@ -89,17 +107,30 @@
             (reduced-val v)
             (list-reduce f v (cdr lst))))))
 
+;; --- Other Utilities --- ;;
+
 (defstruct reduced
   "A wrapper that signals that reduction has completed."
   val)
+
+(defun ensure-reduced (x)
+  "Ensure that X is reduced."
+  (if (reduced-p x)
+      x
+      (make-reduced :val x)))
+
+;; --- Testing --- ;;
 
 (defun do-it (items)
   ;; (declare (optimize (speed 3) (safety 0)))
   (list-transduce (alexandria:compose
                    (tmap2 #'1+)
                    (tfilter #'evenp)
-                   (tdrop 3))
+                   (tdrop 3)
+                   (ttake 3))
                   (rcons)
                   items))
 
-(do-it '(1 2 3 4 5 6 7 8 9 0))
+(do-it '(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15))
+
+;; (list-transduce (ttake 3) (rcons) '(2 4 6 8 9 1 2))
