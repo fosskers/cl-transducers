@@ -9,6 +9,7 @@
 ;; treplace
 ;; ttake-while
 ;; tappend-map
+;; tdelete-*
 
 ;; --- Transducers --- ;;
 
@@ -100,6 +101,25 @@
                (funcall reducer result input)))
           ((and r-p (not i-p)) (funcall reducer result))
           (t '()))))
+
+;; TODO Rename this "interpolate"?
+(defun add-between (elem)
+  "Insert an ELEM between each value of the transduction."
+  (lambda (reducer)
+    (let ((send-elem? nil))
+      (lambda (&optional (result nil r-p) (input nil i-p))
+        (cond ((and r-p i-p)
+               (if send-elem?
+                   (let ((result (funcall reducer result elem)))
+                     (if (reduced-p result)
+                         result
+                         (funcall reducer result input)))
+                   (progn (setf send-elem? t)
+                          (funcall reducer result input))))
+              ((and r-p (not i-p)) (funcall reducer result))
+              (t (funcall reducer)))))))
+
+;; (list-transduce (add-between 0) (rcons) '(1 2 3))
 
 ;; --- Reducers --- ;;
 
