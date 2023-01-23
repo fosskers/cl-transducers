@@ -1,7 +1,7 @@
 #+title: tra: Transducers in Common Lisp
 
-This is an implementation of SRFI-171 (Transducers) in Common Lisp. Originally
-inspired by Clojure and adapted to Scheme, Transducers are an excellent way to
+This is an implementation of Transducers in Common Lisp. Originally inspired by
+Clojure and adapted to Scheme as SRFI-171, Transducers are an excellent way to
 think about - and efficiently operate on - collections or streams of data. In
 the simplest case the data source could be a List, but files can also be treated
 so and have their contents operated over using all the usual functions like =map=,
@@ -13,7 +13,8 @@ Transducers make dealing with data an efficient joy!
 - [[#installation][Installation]]
 - [[#usage][Usage]]
   - [[#differences-with-srfi-171][Differences with SRFI-171]]
-    - [[#scheme][Scheme]]
+    - [[#function-names][Function Names]]
+    - [[#function-calls-in-scheme][Function Calls in Scheme]]
     - [[#additional-functions][Additional Functions]]
 
 * Installation
@@ -22,14 +23,21 @@ Transducers make dealing with data an efficient joy!
 
 ** Differences with SRFI-171
 
-*** Scheme
+*** Function Names
+
+As this library is intended to be used in a namespaced way (i.e. without =:use=),
+we're able to name the functions whatever we wish. This has allowed SRFI-171
+functions like =tmap= to have their =t= dropped, meaning the intended call style is
+instead =tra:map=.
+
+*** Function Calls in Scheme
 
 Due to differences in how functions are called in Common Lisp and Scheme, all
 reducers (like =rcons=) have been made functions that must be called once to get
 access to their inner reducing lambda. In practice this means you must do:
 
 #+begin_src lisp
-(list-transduce (tmap #'1+) (rcons) '(1 2 3))
+(tra:list-transduce (tra:map #'1+) (tra:cons) '(1 2 3))
 #+end_src
 
 instead of:

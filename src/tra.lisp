@@ -83,14 +83,23 @@
               ((and r-p (not i-p)) (funcall reducer result))
               (t (funcall reducer)))))))
 
-(defun concatenate ()
+(defun concatenate (reducer)
   "Concatenates all the sublists in the transduction."
-  (lambda (reducer)
-    (let ((preserving-reducer (preserving-reduced reducer)))
-      (lambda (&optional (result nil r-p) (input nil i-p))
-        (cond ((and r-p i-p) (list-reduce preserving-reducer result input))
-              ((and r-p (not i-p)) (funcall reducer result))
-              (t (funcall reducer)))))))
+  (let ((preserving-reducer (preserving-reduced reducer)))
+    (lambda (&optional (result nil r-p) (input nil i-p))
+      (cond ((and r-p i-p) (list-reduce preserving-reducer result input))
+            ((and r-p (not i-p)) (funcall reducer result))
+            (t (funcall reducer))))))
+
+(defun flatten (reducer)
+  "Entirely flattens any list passed through it."
+  (lambda (&optional (result nil r-p) (input nil i-p))
+    (cond ((and r-p i-p)
+           (if (listp input)
+               (list-reduce (preserving-reduced (flatten reducer)) result input)
+               (funcall reducer result input)))
+          ((and r-p (not i-p)) (funcall reducer result))
+          (t '()))))
 
 ;; --- Reducers --- ;;
 
@@ -148,14 +157,15 @@ try to continue the transducing process."
 ;; (defun do-it (items)
 ;;   ;; (declare (optimize (speed 3) (safety 0)))
 ;;   (list-transduce (alexandria:compose
-;;                    (tmap2 #'1+)
-;;                    (tfilter #'evenp)
-;;                    (tdrop 3)
-;;                    (ttake 3))
-;;                   (rcons)
+;;                    (map #'1+)
+;;                    (filter #'evenp)
+;;                    (drop 3)
+;;                    (take 3))
+;;                   (cons)
 ;;                   items))
 
 ;; (do-it '(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15))
 
 ;; (list-transduce (ttake 3) (rcons) '(2 4 6 8 9 1 2))
-;; (list-transduce (tconcatenate) (rcons) '((1 2 3) (4 5 6) (7 8 9)))
+;; (list-transduce #'concatenate (rcons) '((1 2 3) (4 5 6) (7 8 9)))
+;; (list-transduce #'flatten (rcons) '((1 2 3) 1 8 (4 5 6) (7 8 9) 0))
