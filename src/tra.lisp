@@ -121,6 +121,21 @@
 
 ;; (list-transduce (add-between 0) (rcons) '(1 2 3))
 
+(defun enumerate (&optional (n 0))
+  "Index every value passed through the transduction into a cons pair. Starts at N,
+which defaults to 0."
+  (lambda (reducer)
+    (let ((n n))
+      (lambda (&optional (result nil r-p) (input nil i-p))
+        (cond ((and r-p i-p)
+               (let ((input (cl:cons n input)))
+                 (setf n (1+ n))
+                 (funcall reducer result input)))
+              ((and r-p (not i-p) (funcall reducer result)))
+              (t (funcall reducer)))))))
+
+;; (list-transduce (enumerate) (cons) '("a" "b" "c"))
+
 ;; --- Reducers --- ;;
 
 (defun cons ()
@@ -132,6 +147,8 @@
 
 ;; --- Entry Points --- ;;
 
+;; TODO Provide a single `transduce' function that checks the type of its input
+;; and dispatches based on that? I think this is what Clojure does.
 (defun list-transduce (xform f coll)
   (list-transduce-work xform f (funcall f) coll))
 
