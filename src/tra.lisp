@@ -1,6 +1,6 @@
 (defpackage tra
   (:use :cl)
-  (:shadow #:map #:remove #:concatenate #:cons))
+  (:shadow #:map #:remove #:concatenate #:log #:cons))
 
 (in-package :tra)
 
@@ -135,6 +135,18 @@ which defaults to 0."
               (t (funcall reducer)))))))
 
 ;; (list-transduce (enumerate) (cons) '("a" "b" "c"))
+
+(defun log (&optional (log-function (lambda (result input) (format t "~a~%" input))))
+  (lambda (reducer)
+    (lambda (&optional (result nil r-p) (input nil i-p))
+      (cond ((and r-p i-p)
+             (funcall log-function result input)
+             (funcall reducer result input))
+            ((and r-p (not i-p)) (funcall reducer result))
+            (t (funcall reducer))))))
+
+;; (list-transduce (log) (cons) '(1 2 3 4 5))
+;; (list-transduce (log (lambda (_ n) (format t "Got: ~a~%" n))) (cons) '(1 2 3 4 5))
 
 ;; --- Reducers --- ;;
 
