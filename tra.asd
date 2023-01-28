@@ -2,7 +2,7 @@
   :version "0.1.0"
   :author "Colin Woodbury <colin@fosskers.ca>"
   :license ""
-  :depends-on ()
+  :depends-on (:sycamore)
   :components ((:module "src"
                 :components
                 ((:file "tra"))))

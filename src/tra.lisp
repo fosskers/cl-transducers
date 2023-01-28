@@ -1,5 +1,6 @@
 (defpackage tra
   (:use :cl)
+  (:import-from :sycamore)
   (:shadow #:map #:remove #:concatenate #:log #:cons))
 
 (in-package :tra)
@@ -148,6 +149,28 @@ which defaults to 0."
 ;; (list-transduce (log) (cons) '(1 2 3 4 5))
 ;; (list-transduce (log (lambda (_ n) (format t "Got: ~a~%" n))) (cons) '(1 2 3 4 5))
 
+(defun window (n)
+  "Yield N-length windows of overlapping values. This is different from `segment' which
+yields non-overlapping windows. If there were fewer items in the input than N,
+then this yields nothing."
+  (unless (and (integerp n) (> n 0))
+    (error "The arguments to window must be a positive integer."))
+  (lambda (reducer)
+    (let ((i 0)
+          (q (sycamore:make-amortized-queue)))
+      (lambda (&optional (result nil r-p) (input nil i-p))
+        (cond ((and r-p i-p)
+               (setf q (sycamore:amortized-enqueue q input))
+               (setf i (1+ i))
+               (cond ((< i n) result)
+                     ((= i n) (funcall reducer result (sycamore:amortized-queue-list q)))
+                     (t (setf q (sycamore:amortized-dequeue q))
+                        (funcall reducer result (sycamore:amortized-queue-list q)))))
+              ((and r-p (not i-p)) (funcall reducer result))
+              (t (funcall reducer)))))))
+
+;; (list-transduce (window 3) (cons) '(1 2 3 4 5 6 7))
+
 ;; --- Reducers --- ;;
 
 (defun cons ()
@@ -203,17 +226,18 @@ try to continue the transducing process."
 
 ;; --- Testing --- ;;
 
-;; (defun do-it (items)
-;;   ;; (declare (optimize (speed 3) (safety 0)))
-;;   (list-transduce (alexandria:compose
-;;                    (map #'1+)
-;;                    (filter #'evenp)
-;;                    (drop 3)
-;;                    (take 3))
-;;                   (cons)
-;;                   items))
+(defun do-it (items)
+  ;; (declare (optimize (speed 3) (safety 0)))
+  (list-transduce (alexandria:compose
+                   (enumerate)
+                   (map (lambda (pair) (* (car pair) (cdr pair))))
+                   (filter #'evenp)
+                   (drop 3)
+                   (take 3))
+                  (cons)
+                  items))
 
-;; (do-it '(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15))
+(do-it '(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15))
 
 ;; (list-transduce (ttake 3) (rcons) '(2 4 6 8 9 1 2))
 ;; (list-transduce #'concatenate (rcons) '((1 2 3) (4 5 6) (7 8 9)))
