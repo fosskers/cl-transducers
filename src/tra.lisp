@@ -1,6 +1,6 @@
 (defpackage tra
   (:use :cl)
-  (:import-from :sycamore)
+  (:local-nicknames (#:q #:sycamore))
   (:shadow #:map #:remove #:concatenate #:log #:cons))
 
 (in-package :tra)
@@ -137,7 +137,9 @@ which defaults to 0."
 
 ;; (list-transduce (enumerate) (cons) '("a" "b" "c"))
 
-(defun log (&optional (log-function (lambda (result input) (format t "~a~%" input))))
+(defun log (&optional (log-function (lambda (result input)
+                                      (declare (ignore result))
+                                      (format t "~a~%" input))))
   (lambda (reducer)
     (lambda (&optional (result nil r-p) (input nil i-p))
       (cond ((and r-p i-p)
@@ -157,15 +159,15 @@ then this yields nothing."
     (error "The arguments to window must be a positive integer."))
   (lambda (reducer)
     (let ((i 0)
-          (q (sycamore:make-amortized-queue)))
+          (q (q:make-amortized-queue)))
       (lambda (&optional (result nil r-p) (input nil i-p))
         (cond ((and r-p i-p)
-               (setf q (sycamore:amortized-enqueue q input))
+               (setf q (q:amortized-enqueue q input))
                (setf i (1+ i))
                (cond ((< i n) result)
-                     ((= i n) (funcall reducer result (sycamore:amortized-queue-list q)))
-                     (t (setf q (sycamore:amortized-dequeue q))
-                        (funcall reducer result (sycamore:amortized-queue-list q)))))
+                     ((= i n) (funcall reducer result (q:amortized-queue-list q)))
+                     (t (setf q (q:amortized-dequeue q))
+                        (funcall reducer result (q:amortized-queue-list q)))))
               ((and r-p (not i-p)) (funcall reducer result))
               (t (funcall reducer)))))))
 
@@ -226,18 +228,18 @@ try to continue the transducing process."
 
 ;; --- Testing --- ;;
 
-(defun do-it (items)
-  ;; (declare (optimize (speed 3) (safety 0)))
-  (list-transduce (alexandria:compose
-                   (enumerate)
-                   (map (lambda (pair) (* (car pair) (cdr pair))))
-                   (filter #'evenp)
-                   (drop 3)
-                   (take 3))
-                  (cons)
-                  items))
+;; (defun do-it (items)
+;;   ;; (declare (optimize (speed 3) (safety 0)))
+;;   (list-transduce (alexandria:compose
+;;                    (enumerate)
+;;                    (map (lambda (pair) (* (car pair) (cdr pair))))
+;;                    (filter #'evenp)
+;;                    (drop 3)
+;;                    (take 3))
+;;                   (cons)
+;;                   items))
 
-(do-it '(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15))
+;; (do-it '(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15))
 
 ;; (list-transduce (ttake 3) (rcons) '(2 4 6 8 9 1 2))
 ;; (list-transduce #'concatenate (rcons) '((1 2 3) (4 5 6) (7 8 9)))
