@@ -6,7 +6,6 @@
 (in-package :tra)
 
 ;; TODO
-;; tfilter-map
 ;; treplace
 ;; ttake-while
 ;; tappend-map
@@ -43,6 +42,21 @@
                  result))
             ((and r-p (not i-p)) (funcall reducer result))
             (t (funcall reducer))))))
+
+(defun filter-map (f)
+  "Map a function F over the elements of the transduction, but only keep results
+that are non-nil."
+  (lambda (reducer)
+    (lambda (&optional (result nil r-p) (input nil i-p))
+      (cond ((and r-p i-p)
+             (let ((x (funcall f input)))
+               (if x
+                   (funcall reducer result x)
+                   result)))
+            ((and r-p (not i-p)) (funcall reducer result))
+            (t (funcall reducer))))))
+
+;; (list-transduce (filter-map #'first) (cons) '(() (2 3) () (5 6) () (8 9)))
 
 (defun drop (n)
   "Drop the first N elements of the transduction."
