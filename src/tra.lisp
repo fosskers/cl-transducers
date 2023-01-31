@@ -6,8 +6,6 @@
 (in-package :tra)
 
 ;; TODO
-;; treplace
-;; ttake-while
 ;; tappend-map
 ;; tdelete-*
 
@@ -98,6 +96,20 @@ that are non-nil."
                      result)))
               ((and r-p (not i-p)) (funcall reducer result))
               (t (funcall reducer)))))))
+
+(defun take-while (pred)
+  "Keep only elements which satisfy a given PRED, and stop the transduction as
+soon as any element fails the test."
+  (lambda (reducer)
+    (lambda (&optional (result nil r-p) (input nil i-p))
+      (cond ((and r-p i-p)
+             (if (not (funcall pred input))
+                 (ensure-reduced result)
+                 (funcall reducer result input)))
+            ((and r-p (not i-p)) (funcall reducer result))
+            (t (funcall reducer))))))
+
+;; (list-transduce (take-while #'evenp) (cons) '(2 4 6 8 9 2))
 
 (defun concatenate (reducer)
   "Concatenates all the sublists in the transduction."
