@@ -15,7 +15,7 @@ Transducers make dealing with data an efficient joy!
   - [[#differences-with-srfi-171][Differences with SRFI-171]]
     - [[#function-names][Function Names]]
     - [[#function-calls-in-scheme][Function Calls in Scheme]]
-    - [[#additional-functions][Additional Functions]]
+    - [[#function-additions-and-removals][Function Additions and Removals]]
 
 * Installation
 
@@ -49,8 +49,17 @@ instead of:
 (list-transduce (tmap 1+) rcons '(1 2 3))
 #+end_src
 
-*** Additional Functions
+*** Function Additions and Removals
 
 A few extra functions have been added here that represent idioms common in other
 languages, but that are nonetheless missing from the original SRFI-171
 specification.
+
+Likewise, a few have been purposefully left unimplemented. These are:
+
+- tappend-map (just compose =map= and =concatenate= yourself)
+- tdelete-neighbor-duplicates
+- tdelete-duplicates
+- tremove (just use =filter=)
+- treplace
+- reverse-rcons (just use =fold=)

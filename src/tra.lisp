@@ -1,14 +1,14 @@
 (defpackage tra
   (:use :cl)
   (:local-nicknames (#:q #:sycamore))
-  (:shadow #:map #:remove #:concatenate #:log
+  (:shadow #:map #:concatenate #:log
            #:cons #:count #:first #:last #:max #:min #:find))
 
 (in-package :tra)
 
 ;; TODO
-;; tappend-map
-;; tdelete-*
+;; segment
+;; partition, but change the name
 
 ;; --- Transducers --- ;;
 
@@ -26,17 +26,6 @@
     (lambda (&optional (result nil r-p) (input nil i-p))
       (cond ((and r-p i-p)
              (if (funcall pred input)
-                 (funcall reducer result input)
-                 result))
-            ((and r-p (not i-p)) (funcall reducer result))
-            (t (funcall reducer))))))
-
-(defun remove (pred)
-  "Remove elements from the transduction that satisfy PRED."
-  (lambda (reducer)
-    (lambda (&optional (result nil r-p) (input nil i-p))
-      (cond ((and r-p i-p)
-             (if (not (funcall pred input))
                  (funcall reducer result input)
                  result))
             ((and r-p (not i-p)) (funcall reducer result))
