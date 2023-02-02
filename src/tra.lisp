@@ -1,7 +1,8 @@
 (defpackage tra
   (:use :cl)
   (:local-nicknames (#:q #:sycamore))
-  (:shadow #:map #:remove #:concatenate #:log #:cons))
+  (:shadow #:map #:remove #:concatenate #:log
+           #:cons #:count))
 
 (in-package :tra)
 
@@ -206,6 +207,42 @@ then this yields nothing."
   (cond ((and a-p i-p) (cl:cons input acc))
         ((and a-p (not i-p)) (reverse acc))
         (t '())))
+
+(defun count (&optional (acc nil a-p) (input nil i-p))
+  "A counting reducer that counts any elements that made it through the
+transduction."
+  (declare (ignore input))
+  (cond ((and a-p i-p) (1+ acc))
+        ((and a-p (not i-p)) acc)
+        (t 0)))
+
+;; (list-transduce (map #'identity) #'count '(1 2 3 4 5))
+
+(defun any (pred)
+  (lambda (&optional (acc nil a-p) (input nil i-p))
+    (cond ((and a-p i-p)
+           (let ((test (funcall pred input)))
+             (if test
+                 (make-reduced :val test)
+                 nil)))
+          ((and a-p (not i-p)) acc)
+          (t nil))))
+
+;; (list-transduce (map #'identity) (any #'evenp) '(1 3 5 7 9))
+;; (list-transduce (map #'identity) (any #'evenp) '(1 3 5 7 9 2))
+
+(defun all (pred)
+  (lambda (&optional (acc nil a-p) (input nil i-p))
+    (cond ((and a-p i-p)
+           (let ((test (funcall pred input)))
+             (if (and acc test)
+                 test
+                 (make-reduced :val nil))))
+          ((and a-p (not i-p)) acc)
+          (t t))))
+
+;; (list-transduce (map #'identity) (all #'oddp) '(1 3 5 7 9))
+;; (list-transduce (map #'identity) (all #'oddp) '(1 3 5 7 9 2))
 
 ;; --- Entry Points --- ;;
 
