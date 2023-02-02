@@ -2,7 +2,7 @@
   (:use :cl)
   (:local-nicknames (#:q #:sycamore))
   (:shadow #:map #:remove #:concatenate #:log
-           #:cons #:count))
+           #:cons #:count #:first #:last #:max #:min #:find))
 
 (in-package :tra)
 
@@ -55,7 +55,7 @@ that are non-nil."
             ((and r-p (not i-p)) (funcall reducer result))
             (t (funcall reducer))))))
 
-;; (list-transduce (filter-map #'first) #'cons '(() (2 3) () (5 6) () (8 9)))
+;; (list-transduce (filter-map #'cl:first) #'cons '(() (2 3) () (5 6) () (8 9)))
 
 (defun drop (n)
   "Drop the first N elements of the transduction."
@@ -243,6 +243,62 @@ transduction."
 
 ;; (list-transduce (map #'identity) (all #'oddp) '(1 3 5 7 9))
 ;; (list-transduce (map #'identity) (all #'oddp) '(1 3 5 7 9 2))
+
+(defun first (seed)
+  "Yield the first value of the transduction, or the SEED if there were none."
+  (lambda (&optional (acc nil a-p) (input nil i-p))
+    (cond ((and a-p i-p) (make-reduced :val input))
+          ((and a-p (not i-p)) acc)
+          (t seed))))
+
+;; (list-transduce (filter #'oddp) (first 0) '(2 4 6 7 10))
+
+(defun last (seed)
+  "Yield the final value of the transduction, or the SEED if there were none."
+  (lambda (&optional (acc nil a-p) (input nil i-p))
+    (cond ((and a-p i-p) input)
+          ((and a-p (not i-p) acc))
+          (t seed))))
+
+;; (list-transduce (map #'identity) (last 0) '(2 4 6 7 10))
+
+(defun fold (f seed)
+  "The fundamental reducer. `fold' creates an ad-hoc reducer based on
+a given 2-argument function. A SEED is also required as the initial accumulator
+value, which also becomes the return value in case there was no input left in
+the transduction.
+
+Functions like `+' and `*' are automatically valid reducers, because they yield
+sane values even when given 0 or 1 arguments. Other functions like `max' cannot
+be used as-is as reducers since they require at least 2 arguments. For functions
+like this, `fold' is appropriate."
+  (lambda (&optional (acc nil a-p) (input nil i-p))
+    (cond ((and a-p i-p) (funcall f acc input))
+          ((and a-p (not i-p)) acc)
+          (t seed))))
+
+;; (list-transduce (map #'identity) (fold #'max 0) '(1 2 3 4 1000 5 6))
+
+(defun max (seed)
+  "Yield the maximum value of the transduction, or the SEED if there were none."
+  (fold #'cl:max seed))
+
+(defun min (seed)
+  "Yield the minimum value of the transduction, or the SEED if there were none."
+  (fold #'cl:min seed))
+
+(defun find (pred)
+  "Find the first element in the transduction that satisfies a given PRED. Yields
+`nil' if no such element were found."
+  (lambda (&optional (acc nil a-p) (input nil i-p))
+    (cond ((and a-p i-p)
+           (if (funcall pred input)
+               (make-reduced :val input)
+               nil))
+          ((and a-p (not i-p)) acc)
+          (t nil))))
+
+;; (list-transduce (map #'identity) (find #'evenp) '(1 3 5 6 9))
 
 ;; --- Entry Points --- ;;
 
