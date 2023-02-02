@@ -54,7 +54,7 @@ that are non-nil."
             ((and r-p (not i-p)) (funcall reducer result))
             (t (funcall reducer))))))
 
-;; (list-transduce (filter-map #'first) (cons) '(() (2 3) () (5 6) () (8 9)))
+;; (list-transduce (filter-map #'first) #'cons '(() (2 3) () (5 6) () (8 9)))
 
 (defun drop (n)
   "Drop the first N elements of the transduction."
@@ -109,7 +109,7 @@ soon as any element fails the test."
             ((and r-p (not i-p)) (funcall reducer result))
             (t (funcall reducer))))))
 
-;; (list-transduce (take-while #'evenp) (cons) '(2 4 6 8 9 2))
+;; (list-transduce (take-while #'evenp) #'cons '(2 4 6 8 9 2))
 
 (defun concatenate (reducer)
   "Concatenates all the sublists in the transduction."
@@ -118,6 +118,8 @@ soon as any element fails the test."
       (cond ((and r-p i-p) (list-reduce preserving-reducer result input))
             ((and r-p (not i-p)) (funcall reducer result))
             (t (funcall reducer))))))
+
+;; (list-transduce #'concatenate #'cons '((1 2 3) (4 5 6) (7 8 9)))
 
 (defun flatten (reducer)
   "Entirely flattens any list passed through it."
@@ -129,8 +131,9 @@ soon as any element fails the test."
           ((and r-p (not i-p)) (funcall reducer result))
           (t '()))))
 
-;; TODO Rename this "interpolate"?
-(defun add-between (elem)
+;; (list-transduce #'flatten #'cons '((1 2 3) 0 (4 (5) 6) 0 (7 8 9) 0))
+
+(defun interpolate (elem)
   "Insert an ELEM between each value of the transduction."
   (lambda (reducer)
     (let ((send-elem? nil))
@@ -146,36 +149,33 @@ soon as any element fails the test."
               ((and r-p (not i-p)) (funcall reducer result))
               (t (funcall reducer)))))))
 
-;; (list-transduce (add-between 0) (rcons) '(1 2 3))
+;; (list-transduce (interpolate 0) #'cons '(1 2 3))
 
-(defun enumerate (&optional (n 0))
-  "Index every value passed through the transduction into a cons pair. Starts at N,
-which defaults to 0."
-  (lambda (reducer)
-    (let ((n n))
-      (lambda (&optional (result nil r-p) (input nil i-p))
-        (cond ((and r-p i-p)
-               (let ((input (cl:cons n input)))
-                 (setf n (1+ n))
-                 (funcall reducer result input)))
-              ((and r-p (not i-p) (funcall reducer result)))
-              (t (funcall reducer)))))))
+(defun enumerate (reducer)
+  "Index every value passed through the transduction into a cons pair. Starts at 0."
+  (let ((n 0))
+    (lambda (&optional (result nil r-p) (input nil i-p))
+      (cond ((and r-p i-p)
+             (let ((input (cl:cons n input)))
+               (setf n (1+ n))
+               (funcall reducer result input)))
+            ((and r-p (not i-p) (funcall reducer result)))
+            (t (funcall reducer))))))
 
-;; (list-transduce (enumerate) (cons) '("a" "b" "c"))
+;; (list-transduce #'enumerate #'cons '("a" "b" "c"))
 
-(defun log (&optional (log-function (lambda (result input)
-                                      (declare (ignore result))
-                                      (format t "~a~%" input))))
+(defun log (logger)
+  "Call some LOGGER for each step of the transduction. The LOGGER must accept the
+running results and the current element as input."
   (lambda (reducer)
     (lambda (&optional (result nil r-p) (input nil i-p))
       (cond ((and r-p i-p)
-             (funcall log-function result input)
+             (funcall logger result input)
              (funcall reducer result input))
             ((and r-p (not i-p)) (funcall reducer result))
             (t (funcall reducer))))))
 
-;; (list-transduce (log) (cons) '(1 2 3 4 5))
-;; (list-transduce (log (lambda (_ n) (format t "Got: ~a~%" n))) (cons) '(1 2 3 4 5))
+;; (list-transduce (log (lambda (_ n) (format t "Got: ~a~%" n))) #'cons '(1 2 3 4 5))
 
 (defun window (n)
   "Yield N-length windows of overlapping values. This is different from `segment' which
@@ -197,16 +197,15 @@ then this yields nothing."
               ((and r-p (not i-p)) (funcall reducer result))
               (t (funcall reducer)))))))
 
-;; (list-transduce (window 3) (cons) '(1 2 3 4 5 6 7))
+;; (list-transduce (window 3) #'cons '(1 2 3 4 5 6 7))
 
 ;; --- Reducers --- ;;
 
-(defun cons ()
+(defun cons (&optional (acc nil a-p) (input nil i-p))
   "A transducer-friendly consing reducer with '() as the identity."
-  (lambda (&optional (acc nil a-p) (input nil i-p))
-    (cond ((and a-p i-p) (cl:cons input acc))
-          ((and a-p (not i-p)) (reverse acc))
-          (t '()))))
+  (cond ((and a-p i-p) (cl:cons input acc))
+        ((and a-p (not i-p)) (reverse acc))
+        (t '())))
 
 ;; --- Entry Points --- ;;
 
@@ -257,16 +256,16 @@ try to continue the transducing process."
 ;; (defun do-it (items)
 ;;   ;; (declare (optimize (speed 3) (safety 0)))
 ;;   (list-transduce (alexandria:compose
-;;                    (enumerate)
+;;                    #'enumerate
 ;;                    (map (lambda (pair) (* (car pair) (cdr pair))))
 ;;                    (filter #'evenp)
 ;;                    (drop 3)
 ;;                    (take 3))
-;;                   (cons)
+;;                   #'cons
 ;;                   items))
 
 ;; (do-it '(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15))
 
-;; (list-transduce (ttake 3) (rcons) '(2 4 6 8 9 1 2))
-;; (list-transduce #'concatenate (rcons) '((1 2 3) (4 5 6) (7 8 9)))
-;; (list-transduce #'flatten (rcons) '((1 2 3) 1 8 (4 5 6) (7 8 9) 0))
+;; (list-transduce (ttake 3) #'cons '(2 4 6 8 9 1 2))
+;; (list-transduce #'concatenate #'cons '((1 2 3) (4 5 6) (7 8 9)))
+;; (list-transduce #'flatten #'cons '((1 2 3) 1 8 (4 5 6) (7 8 9) 0))
