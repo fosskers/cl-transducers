@@ -30,14 +30,17 @@ we're able to name the functions whatever we wish. This has allowed SRFI-171
 functions like =tmap= to have their =t= dropped, meaning the intended call style is
 instead =tra:map=.
 
+Certain function names have also been renamed from their SRFI-171 variants to
+the names more commonly found in other languages.
+
 *** Function Calls in Scheme
 
 Due to differences in how functions are called in Common Lisp and Scheme, all
-reducers (like =rcons=) have been made functions that must be called once to get
-access to their inner reducing lambda. In practice this means you must do:
+transducers and reducers that don't take other arguments (like =enumerate= and
+=cons= respectively) must be passed quoted:
 
 #+begin_src lisp
-(tra:list-transduce (tra:map #'1+) (tra:cons) '(1 2 3))
+(tra:list-transduce (tra:map #'1+) #'tra:cons '(1 2 3))
 #+end_src
 
 instead of:
@@ -45,9 +48,6 @@ instead of:
 #+begin_src lisp
 (list-transduce (tmap 1+) rcons '(1 2 3))
 #+end_src
-
-Notice also that higher-order functions (like =1+=) must be quoted in Common Lisp,
-but not so in Scheme.
 
 *** Additional Functions
 
