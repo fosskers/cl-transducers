@@ -7,7 +7,6 @@
 (in-package :tra)
 
 ;; TODO
-;; segment
 ;; partition, but change the name
 
 ;; --- Transducers --- ;;
@@ -142,6 +141,38 @@ soon as any element fails the test."
 #+nil
 (list-transduce #'flatten #'cons '((1 2 3) 0 (4 (5) 6) 0 (7 8 9) 0))
 
+(declaim (ftype (function (fixnum)) segment))
+(defun segment (n)
+  "Partitions the input into lists of N items. If the input stops, it flushes any
+accumulated state, which may be shorter than N."
+  (unless (> n 0)
+    (error "The arguments to segment must be a positive integer."))
+  (lambda (reducer)
+    (let ((i 0)
+          (collect '()))
+      (lambda (&optional (result nil r-p) (input nil i-p))
+        (cond ((and r-p i-p)
+               (setf collect (cons collect input))
+               (setf i (1+ i))
+               (if (< i n)
+                   result
+                   (let ((next-input (reverse collect)))
+                     (setf i 0)
+                     (setf collect '())
+                     (funcall reducer result next-input))))
+              ((and r-p (not i-p))
+               (let ((result (if (zerop i)
+                                 result
+                                 (funcall reducer result (reverse collect)))))
+                 (setf i 0)
+                 (if (reduced-p result)
+                     (funcall reducer (reduced-val result))
+                     (funcall reducer result))))
+              (t (funcall reducer)))))))
+
+#+nil
+(list-transduce (segment 3) #'cons '(1 2 3 4 5))
+
 (defun interpolate (elem)
   "Insert an ELEM between each value of the transduction."
   (lambda (reducer)
@@ -189,11 +220,12 @@ running results and the current element as input."
 #+nil
 (list-transduce (log (lambda (_ n) (format t "Got: ~a~%" n))) #'cons '(1 2 3 4 5))
 
+(declaim (ftype (function (fixnum)) window))
 (defun window (n)
   "Yield N-length windows of overlapping values. This is different from `segment' which
 yields non-overlapping windows. If there were fewer items in the input than N,
 then this yields nothing."
-  (unless (and (integerp n) (> n 0))
+  (unless (> n 0)
     (error "The arguments to window must be a positive integer."))
   (lambda (reducer)
     (let ((i 0)
