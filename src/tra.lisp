@@ -20,6 +20,9 @@
             ((and r-p (not i-p)) (funcall reducer result))
             (t (funcall reducer))))))
 
+#+nil
+(list-transduce (map #'1+) #'cons '(1 2 3 4 5))
+
 (defun filter (pred)
   "Only keep elements from the transduction that satisfy PRED."
   (lambda (reducer)
@@ -30,6 +33,9 @@
                  result))
             ((and r-p (not i-p)) (funcall reducer result))
             (t (funcall reducer))))))
+
+#+nil
+(list-transduce (filter #'evenp) #'cons '(1 2 3 4 5))
 
 (defun filter-map (f)
   "Map a function F over the elements of the transduction, but only keep results
@@ -44,7 +50,8 @@ that are non-nil."
             ((and r-p (not i-p)) (funcall reducer result))
             (t (funcall reducer))))))
 
-;; (list-transduce (filter-map #'cl:first) #'cons '(() (2 3) () (5 6) () (8 9)))
+#+nil
+(list-transduce (filter-map #'cl:first) #'cons '(() (2 3) () (5 6) () (8 9)))
 
 (defun drop (n)
   "Drop the first N elements of the transduction."
@@ -59,6 +66,9 @@ that are non-nil."
               ((and r-p (not i-p)) (funcall reducer result))
               (t (funcall reducer)))))))
 
+#+nil
+(list-transduce (drop 3) #'cons '(1 2 3 4 5))
+
 (defun drop-while (pred)
   "Drop elements from the front of the transduction that satisfy PRED."
   (lambda (reducer)
@@ -70,6 +80,9 @@ that are non-nil."
                                         (funcall reducer result input))))
               ((and r-p (not i-p)) (funcall reducer result))
               (t (funcall reducer)))))))
+
+#+nil
+(list-transduce (drop-while #'evenp) #'cons '(2 4 6 7 8 9))
 
 (defun take (n)
   "Keep the first N elements of the transduction."
@@ -87,6 +100,9 @@ that are non-nil."
               ((and r-p (not i-p)) (funcall reducer result))
               (t (funcall reducer)))))))
 
+#+nil
+(list-transduce (take 3) #'cons '(1 2 3 4 5))
+
 (defun take-while (pred)
   "Keep only elements which satisfy a given PRED, and stop the transduction as
 soon as any element fails the test."
@@ -99,7 +115,8 @@ soon as any element fails the test."
             ((and r-p (not i-p)) (funcall reducer result))
             (t (funcall reducer))))))
 
-;; (list-transduce (take-while #'evenp) #'cons '(2 4 6 8 9 2))
+#+nil
+(list-transduce (take-while #'evenp) #'cons '(2 4 6 8 9 2))
 
 (defun concatenate (reducer)
   "Concatenates all the sublists in the transduction."
@@ -109,7 +126,8 @@ soon as any element fails the test."
             ((and r-p (not i-p)) (funcall reducer result))
             (t (funcall reducer))))))
 
-;; (list-transduce #'concatenate #'cons '((1 2 3) (4 5 6) (7 8 9)))
+#+nil
+(list-transduce #'concatenate #'cons '((1 2 3) (4 5 6) (7 8 9)))
 
 (defun flatten (reducer)
   "Entirely flattens any list passed through it."
@@ -121,7 +139,8 @@ soon as any element fails the test."
           ((and r-p (not i-p)) (funcall reducer result))
           (t '()))))
 
-;; (list-transduce #'flatten #'cons '((1 2 3) 0 (4 (5) 6) 0 (7 8 9) 0))
+#+nil
+(list-transduce #'flatten #'cons '((1 2 3) 0 (4 (5) 6) 0 (7 8 9) 0))
 
 (defun interpolate (elem)
   "Insert an ELEM between each value of the transduction."
@@ -139,7 +158,8 @@ soon as any element fails the test."
               ((and r-p (not i-p)) (funcall reducer result))
               (t (funcall reducer)))))))
 
-;; (list-transduce (interpolate 0) #'cons '(1 2 3))
+#+nil
+(list-transduce (interpolate 0) #'cons '(1 2 3))
 
 (defun enumerate (reducer)
   "Index every value passed through the transduction into a cons pair. Starts at 0."
@@ -152,7 +172,8 @@ soon as any element fails the test."
             ((and r-p (not i-p) (funcall reducer result)))
             (t (funcall reducer))))))
 
-;; (list-transduce #'enumerate #'cons '("a" "b" "c"))
+#+nil
+(list-transduce #'enumerate #'cons '("a" "b" "c"))
 
 (defun log (logger)
   "Call some LOGGER for each step of the transduction. The LOGGER must accept the
@@ -165,7 +186,8 @@ running results and the current element as input."
             ((and r-p (not i-p)) (funcall reducer result))
             (t (funcall reducer))))))
 
-;; (list-transduce (log (lambda (_ n) (format t "Got: ~a~%" n))) #'cons '(1 2 3 4 5))
+#+nil
+(list-transduce (log (lambda (_ n) (format t "Got: ~a~%" n))) #'cons '(1 2 3 4 5))
 
 (defun window (n)
   "Yield N-length windows of overlapping values. This is different from `segment' which
@@ -187,7 +209,8 @@ then this yields nothing."
               ((and r-p (not i-p)) (funcall reducer result))
               (t (funcall reducer)))))))
 
-;; (list-transduce (window 3) #'cons '(1 2 3 4 5 6 7))
+#+nil
+(list-transduce (window 3) #'cons '(1 2 3 4 5 6 7))
 
 ;; --- Reducers --- ;;
 
@@ -205,7 +228,8 @@ transduction."
         ((and a-p (not i-p)) acc)
         (t 0)))
 
-;; (list-transduce (map #'identity) #'count '(1 2 3 4 5))
+#+nil
+(list-transduce (map #'identity) #'count '(1 2 3 4 5))
 
 (defun any (pred)
   (lambda (&optional (acc nil a-p) (input nil i-p))
@@ -217,8 +241,10 @@ transduction."
           ((and a-p (not i-p)) acc)
           (t nil))))
 
-;; (list-transduce (map #'identity) (any #'evenp) '(1 3 5 7 9))
-;; (list-transduce (map #'identity) (any #'evenp) '(1 3 5 7 9 2))
+#+nil
+(list-transduce (map #'identity) (any #'evenp) '(1 3 5 7 9))
+#+nil
+(list-transduce (map #'identity) (any #'evenp) '(1 3 5 7 9 2))
 
 (defun all (pred)
   (lambda (&optional (acc nil a-p) (input nil i-p))
@@ -230,8 +256,10 @@ transduction."
           ((and a-p (not i-p)) acc)
           (t t))))
 
-;; (list-transduce (map #'identity) (all #'oddp) '(1 3 5 7 9))
-;; (list-transduce (map #'identity) (all #'oddp) '(1 3 5 7 9 2))
+#+nil
+(list-transduce (map #'identity) (all #'oddp) '(1 3 5 7 9))
+#+nil
+(list-transduce (map #'identity) (all #'oddp) '(1 3 5 7 9 2))
 
 (defun first (seed)
   "Yield the first value of the transduction, or the SEED if there were none."
@@ -240,7 +268,8 @@ transduction."
           ((and a-p (not i-p)) acc)
           (t seed))))
 
-;; (list-transduce (filter #'oddp) (first 0) '(2 4 6 7 10))
+#+nil
+(list-transduce (filter #'oddp) (first 0) '(2 4 6 7 10))
 
 (defun last (seed)
   "Yield the final value of the transduction, or the SEED if there were none."
@@ -249,7 +278,8 @@ transduction."
           ((and a-p (not i-p) acc))
           (t seed))))
 
-;; (list-transduce (map #'identity) (last 0) '(2 4 6 7 10))
+#+nil
+(list-transduce (map #'identity) (last 0) '(2 4 6 7 10))
 
 (defun fold (f seed)
   "The fundamental reducer. `fold' creates an ad-hoc reducer based on
@@ -266,7 +296,8 @@ like this, `fold' is appropriate."
           ((and a-p (not i-p)) acc)
           (t seed))))
 
-;; (list-transduce (map #'identity) (fold #'max 0) '(1 2 3 4 1000 5 6))
+#+nil
+(list-transduce (map #'identity) (fold #'max 0) '(1 2 3 4 1000 5 6))
 
 (defun max (seed)
   "Yield the maximum value of the transduction, or the SEED if there were none."
@@ -287,7 +318,8 @@ like this, `fold' is appropriate."
           ((and a-p (not i-p)) acc)
           (t nil))))
 
-;; (list-transduce (map #'identity) (find #'evenp) '(1 3 5 6 9))
+#+nil
+(list-transduce (map #'identity) (find #'evenp) '(1 3 5 6 9))
 
 ;; --- Entry Points --- ;;
 
