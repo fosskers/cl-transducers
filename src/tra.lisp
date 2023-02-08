@@ -7,9 +7,6 @@
 
 (in-package :tra)
 
-;; TODO From Itertools
-;; dedup: Remove duplicates from sections of consecutive identical elements.
-
 ;; --- Transducers --- ;;
 
 (defun map (f)
@@ -295,6 +292,21 @@ then this yields nothing."
 
 #+nil
 (list-transduce #'unique #'cons '(1 2 1 3 2 1 2 "abc"))
+
+(defun dedup (reducer)
+  "Remove adjacent duplicates from the transduction."
+  (let ((prev 'nothing))
+    (lambda (&optional (result nil r-p) (input nil i-p))
+      (cond ((and r-p i-p)
+             (if (equal prev input)
+                 result
+                 (progn (setf prev input)
+                        (funcall reducer result input))))
+            ((and r-p (not i-p)) (funcall reducer result))
+            (t (funcall reducer))))))
+
+#+nil
+(list-transduce #'dedup #'cons '(1 1 1 2 2 2 3 3 3 4 3 3))
 
 ;; --- Reducers --- ;;
 
