@@ -1,6 +1,7 @@
 (defpackage tra
   (:use :cl)
-  (:local-nicknames (#:q #:sycamore))
+  (:local-nicknames (#:q #:sycamore)
+                    (#:s #:fset))
   (:shadow #:map #:concatenate #:log
            #:cons #:count #:first #:last #:max #:min #:find))
 
@@ -8,7 +9,6 @@
 
 ;; TODO From Itertools
 ;; dedup: Remove duplicates from sections of consecutive identical elements.
-;; unique: Filters out elements that have already been produced once during the iteration.
 
 ;; --- Transducers --- ;;
 
@@ -280,6 +280,21 @@ then this yields nothing."
 
 #+nil
 (list-transduce (window 3) #'cons '(1 2 3 4 5 6 7))
+
+(defun unique (reducer)
+  "Only allow values to pass through the transduction once each."
+  (let ((set (s:empty-set)))
+    (lambda (&optional (result nil r-p) (input nil i-p))
+      (cond ((and r-p i-p)
+             (if (s:contains? set input)
+                 result
+                 (progn (setf set (s:with set input))
+                        (funcall reducer result input))))
+            ((and r-p (not i-p)) (funcall reducer result))
+            (t (funcall reducer))))))
+
+#+nil
+(list-transduce #'unique #'cons '(1 2 1 3 2 1 2 "abc"))
 
 ;; --- Reducers --- ;;
 
