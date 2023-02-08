@@ -6,8 +6,9 @@
 
 (in-package :tra)
 
-;; TODO
-;; partition, but change the name
+;; TODO From Itertools
+;; dedup: Remove duplicates from sections of consecutive identical elements.
+;; unique: Filters out elements that have already been produced once during the iteration.
 
 ;; --- Transducers --- ;;
 
@@ -39,7 +40,10 @@
 (defun filter-map (f)
   "Map a function F over the elements of the transduction, but only keep results
 that are non-nil."
+  ;; (declare (optimize (speed 3) (safety 0)))
+  ;; (declare (type (function (t) t) f))
   (lambda (reducer)
+    ;; (declare (type (function (&optional t t)) reducer))
     (lambda (&optional (result nil r-p) (input nil i-p))
       (cond ((and r-p i-p)
              (let ((x (funcall f input)))
@@ -52,6 +56,7 @@ that are non-nil."
 #+nil
 (list-transduce (filter-map #'cl:first) #'cons '(() (2 3) () (5 6) () (8 9)))
 
+(declaim (ftype (function (fixnum)) drop))
 (defun drop (n)
   "Drop the first N elements of the transduction."
   (lambda (reducer)
@@ -83,6 +88,7 @@ that are non-nil."
 #+nil
 (list-transduce (drop-while #'evenp) #'cons '(2 4 6 7 8 9))
 
+(declaim (ftype (function (fixnum)) take))
 (defun take (n)
   "Keep the first N elements of the transduction."
   (lambda (reducer)
@@ -173,7 +179,38 @@ accumulated state, which may be shorter than N."
 #+nil
 (list-transduce (segment 3) #'cons '(1 2 3 4 5))
 
-(defun interpolate (elem)
+(defun group-by (f)
+  "Group the input stream into sublists via some F. The cutoff criterion is whether
+the return value of F changes between two consecutive elements of the
+transduction."
+  (lambda (reducer)
+    (let ((prev 'nothing)
+          (collect '()))
+      (lambda (&optional (result nil r-p) (input nil i-p))
+        (cond ((and r-p i-p)
+               (let ((fout (funcall f input)))
+                 (if (or (equal fout prev) (eq prev 'nothing))
+                     (progn (setf prev fout)
+                            (setf collect (cl:cons input collect))
+                            result)
+                     (let ((next-input (reverse collect)))
+                       (setf prev fout)
+                       (setf collect (list input))
+                       (funcall reducer result next-input)))))
+              ((and r-p (not i-p))
+               (let ((result (if (null collect)
+                                 result
+                                 (funcall reducer result (reverse collect)))))
+                 (setf collect '())
+                 (if (reduced-p result)
+                     (funcall reducer (reduced-val result))
+                     (funcall reducer result))))
+              (t (funcall reducer)))))))
+
+#+nil
+(list-transduce (group-by #'evenp) #'cons '(2 4 6 7 9 1 2 4 6 3))
+
+(defun intersperse (elem)
   "Insert an ELEM between each value of the transduction."
   (lambda (reducer)
     (let ((send-elem? nil))
@@ -190,7 +227,7 @@ accumulated state, which may be shorter than N."
               (t (funcall reducer)))))))
 
 #+nil
-(list-transduce (interpolate 0) #'cons '(1 2 3))
+(list-transduce (intersperse 0) #'cons '(1 2 3))
 
 (defun enumerate (reducer)
   "Index every value passed through the transduction into a cons pair. Starts at 0."
