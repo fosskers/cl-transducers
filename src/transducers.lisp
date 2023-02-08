@@ -1,11 +1,11 @@
-(defpackage tra
+(defpackage transducers
   (:use :cl)
   (:local-nicknames (#:q #:sycamore)
                     (#:s #:fset))
   (:shadow #:map #:concatenate #:log
            #:cons #:count #:first #:last #:max #:min #:find))
 
-(in-package :tra)
+(in-package :transducers)
 
 ;; --- Transducers --- ;;
 

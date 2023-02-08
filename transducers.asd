@@ -1,11 +1,11 @@
-(defsystem "tra"
+(defsystem "transducers"
   :version "0.1.0"
   :author "Colin Woodbury <colin@fosskers.ca>"
   :license ""
   :depends-on (:sycamore :fset)
   :components ((:module "src"
                 :components
-                ((:file "tra"))))
+                ((:file "transducers"))))
   :description "")
   ;; :in-order-to ((test-op (test-op "transducers/tests"))))
 
