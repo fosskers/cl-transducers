@@ -437,6 +437,29 @@ like this, `fold' is appropriate."
             (reduced-val v)
             (list-reduce f v (cdr lst))))))
 
+(defun vector-transduce (xform f coll)
+  (vector-transduce-work xform f (funcall f) coll))
+
+(defun vector-transduce-work (xform f init coll)
+  (let* ((xf (funcall xform f))
+         (result (vector-reduce xf init coll)))
+    (funcall xf result)))
+
+(defun vector-reduce (f identity vec)
+  (let ((len (length vec)))
+     (vector-reduce-work f vec len 0 identity)))
+
+(defun vector-reduce-work (f vec len i acc)
+  (if (= i len)
+      acc
+      (let ((acc (funcall f acc (aref vec i))))
+        (if (reduced-p acc)
+            (reduced-val acc)
+            (vector-reduce-work f vec len (1+ i) acc)))))
+
+#+nil
+(vector-transduce (map #'1+) #'cons #(1 2 3 4 5))
+
 ;; --- Other Utilities --- ;;
 
 (defstruct reduced
