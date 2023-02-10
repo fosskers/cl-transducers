@@ -460,6 +460,12 @@ like this, `fold' is appropriate."
 #+nil
 (vector-transduce (map #'1+) #'cons #(1 2 3 4 5))
 
+(defun string-transduce (xform f coll)
+  (vector-transduce-work xform f (funcall f) coll))
+
+#+nil
+(string-transduce (map #'char-upcase) #'cons "hello")
+
 ;; --- Other Utilities --- ;;
 
 (defstruct reduced
