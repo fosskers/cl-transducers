@@ -3,7 +3,7 @@
   (:local-nicknames (#:q #:sycamore)
                     (#:s #:fset))
   (:shadow #:map #:concatenate #:log
-           #:cons #:count #:first #:last #:max #:min #:find #:string))
+           #:cons #:count #:first #:last #:max #:min #:find #:string #:vector))
 
 (in-package :transducers)
 
@@ -325,6 +325,15 @@ then this yields nothing."
 
 #+nil
 (string-transduce (map #'char-upcase) #'string "hello")
+
+(defun vector (&optional (acc nil a-p) (input #\z i-p))
+  "Reduce a stream of values into to a vector."
+  (cond ((and a-p i-p) (cl:cons input acc))
+        ((and a-p (not i-p)) (cl:concatenate 'cl:vector (reverse acc)))
+        (t '())))
+
+#+nil
+(vector-transduce (map #'1+) #'vector #(1 2 3))
 
 (declaim (ftype (function (&optional t t) fixnum) count))
 (defun count (&optional (acc nil a-p) (input nil i-p))
