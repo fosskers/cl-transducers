@@ -53,7 +53,7 @@ that are non-nil."
 #+nil
 (list-transduce (filter-map #'cl:first) #'cons '(() (2 3) () (5 6) () (8 9)))
 
-(declaim (ftype (function (fixnum)) drop))
+(declaim (ftype (function (fixnum) *) drop))
 (defun drop (n)
   "Drop the first N elements of the transduction."
   (lambda (reducer)
@@ -85,7 +85,7 @@ that are non-nil."
 #+nil
 (list-transduce (drop-while #'evenp) #'cons '(2 4 6 7 8 9))
 
-(declaim (ftype (function (fixnum)) take))
+(declaim (ftype (function (fixnum) *) take))
 (defun take (n)
   "Keep the first N elements of the transduction."
   (lambda (reducer)
@@ -144,7 +144,7 @@ soon as any element fails the test."
 #+nil
 (list-transduce #'flatten #'cons '((1 2 3) 0 (4 (5) 6) 0 (7 8 9) 0))
 
-(declaim (ftype (function (fixnum)) segment))
+(declaim (ftype (function (fixnum) *) segment))
 (defun segment (n)
   "Partitions the input into lists of N items. If the input stops, it flushes any
 accumulated state, which may be shorter than N."
@@ -326,6 +326,7 @@ then this yields nothing."
 #+nil
 (string-transduce (map #'char-upcase) #'string "hello")
 
+(declaim (ftype (function (&optional t t) fixnum) count))
 (defun count (&optional (acc nil a-p) (input nil i-p))
   "A counting reducer that counts any elements that made it through the
 transduction."
@@ -477,6 +478,38 @@ like this, `fold' is appropriate."
 
 #+nil
 (string-transduce (map #'char-upcase) #'cons "hello")
+
+(declaim (ftype (function (t t hash-table) *) hash-table-transduce))
+(defun hash-table-transduce (xform f coll)
+  "Transduce over the contents of a given Hash Table."
+  (hash-table-transduce-work xform f (funcall f) coll))
+
+(defun hash-table-transduce-work (xform f init coll)
+  (let* ((xf (funcall xform f))
+         (result (hash-table-reduce xf init coll)))
+    (funcall xf result)))
+
+;; FIXME It may be more correct to pass both the key and value together via
+;; `values'.
+(defun hash-table-reduce (f identity ht)
+  (with-hash-table-iterator (iter ht)
+    (labels ((recurse (acc)
+               (multiple-value-bind (entry-p key value) (iter)
+                 (declare (ignore key))
+                 (if (not entry-p)
+                     acc
+                     (let ((acc (funcall f acc value)))
+                       (if (reduced-p acc)
+                           (reduced-val acc)
+                           (recurse acc)))))))
+      (recurse identity))))
+
+#+nil
+(let ((hm (make-hash-table :test #'equal)))
+  (setf (gethash 'a hm) 1)
+  (setf (gethash 'b hm) 2)
+  (setf (gethash 'c hm) 3)
+  (hash-table-transduce (filter #'evenp) (max 0) hm))
 
 ;; --- Other Utilities --- ;;
 
