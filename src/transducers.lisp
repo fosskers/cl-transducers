@@ -3,7 +3,7 @@
   (:local-nicknames (#:q #:sycamore)
                     (#:s #:fset))
   (:shadow #:map #:concatenate #:log
-           #:cons #:count #:first #:last #:max #:min #:find))
+           #:cons #:count #:first #:last #:max #:min #:find #:string))
 
 (in-package :transducers)
 
@@ -254,7 +254,7 @@ running results and the current element as input."
 #+nil
 (list-transduce (log (lambda (_ n) (format t "Got: ~a~%" n))) #'cons '(1 2 3 4 5))
 
-(declaim (ftype (function (fixnum)) window))
+(declaim (ftype (function (fixnum) *) window))
 (defun window (n)
   "Yield N-length windows of overlapping values. This is different from `segment' which
 yields non-overlapping windows. If there were fewer items in the input than N,
@@ -315,6 +315,16 @@ then this yields nothing."
   (cond ((and a-p i-p) (cl:cons input acc))
         ((and a-p (not i-p)) (reverse acc))
         (t '())))
+
+(declaim (ftype (function (&optional list character) *) string))
+(defun string (&optional (acc nil a-p) (input #\z i-p))
+  "Reduce a stream of characters into to a single string."
+  (cond ((and a-p i-p) (cl:cons input acc))
+        ((and a-p (not i-p)) (cl:concatenate 'cl:string (reverse acc)))
+        (t '())))
+
+#+nil
+(string-transduce (map #'char-upcase) #'string "hello")
 
 (defun count (&optional (acc nil a-p) (input nil i-p))
   "A counting reducer that counts any elements that made it through the
@@ -421,6 +431,7 @@ like this, `fold' is appropriate."
 
 ;; TODO Provide a single `transduce' function that checks the type of its input
 ;; and dispatches based on that? I think this is what Clojure does.
+(declaim (ftype (function (t t list) *) list-transduce))
 (defun list-transduce (xform f coll)
   (list-transduce-work xform f (funcall f) coll))
 
@@ -460,6 +471,7 @@ like this, `fold' is appropriate."
 #+nil
 (vector-transduce (map #'1+) #'cons #(1 2 3 4 5))
 
+(declaim (ftype (function (t t cl:string) *) string-transduce))
 (defun string-transduce (xform f coll)
   (vector-transduce-work xform f (funcall f) coll))
 
