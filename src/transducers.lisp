@@ -439,6 +439,34 @@ like this, `fold' is appropriate."
 
 ;; --- Entry Points --- ;;
 
+(defgeneric transduce (xform f source)
+  (:documentation "Transduce it, baby!"))
+
+(defmethod transduce (xform f (source cl:string))
+  (string-transduce xform f source))
+
+(defmethod transduce (xform f (source list))
+  (list-transduce xform f source))
+
+(defmethod transduce (xform f (source cl:vector))
+  (vector-transduce xform f source))
+
+(defmethod transduce (xform f (source hash-table))
+  (hash-table-transduce xform f source))
+
+#+nil
+(transduce (map #'char-upcase) #'string "hello")
+#+nil
+(transduce (map #'1+) #'vector '(1 2 3 4))
+#+nil
+(transduce (map #'1+) #'+ #(1 2 3 4))
+#+nil
+(let ((hm (make-hash-table :test #'equal)))
+  (setf (gethash 'a hm) 1)
+  (setf (gethash 'b hm) 2)
+  (setf (gethash 'c hm) 3)
+  (transduce (filter #'evenp) (max 0) hm))
+
 ;; TODO Provide a single `transduce' function that checks the type of its input
 ;; and dispatches based on that? I think this is what Clojure does.
 (declaim (ftype (function (t t list) *) list-transduce))
