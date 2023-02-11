@@ -520,6 +520,28 @@ like this, `fold' is appropriate."
   (setf (gethash 'c hm) 3)
   (hash-table-transduce (filter #'evenp) (max 0) hm))
 
+(defun file-transduce (xform f filename)
+  "Transduce over the lines of the file named by a FILENAME."
+  (let* ((init   (funcall f))
+         (xf     (funcall xform f))
+         (result (file-reduce xf init filename)))
+    (funcall xf result)))
+
+(defun file-reduce (f identity filename)
+  (with-open-file (stream filename)
+    (labels ((recurse (acc)
+               (let ((line (read-line stream nil)))
+                 (if (not line)
+                     acc
+                     (let ((acc (funcall f acc line)))
+                       (if (reduced-p acc)
+                           (reduced-val acc)
+                           (recurse acc)))))))
+      (recurse identity))))
+
+#+nil
+(file-transduce (map #'identity) #'count "/home/colin/history.txt")
+
 ;; --- Other Utilities --- ;;
 
 (defstruct reduced
