@@ -10,7 +10,7 @@
 ;; --- Transducers --- ;;
 
 (defun map (f)
-  "Map an F across all elements of the transduction."
+  "Apply a function F to all elements of the transduction."
   (lambda (reducer)
     (lambda (&optional (result nil r-p) (input nil i-p))
       (cond ((and r-p i-p) (funcall reducer result (funcall f input)))
@@ -35,12 +35,9 @@
 (list-transduce (filter #'evenp) #'cons '(1 2 3 4 5))
 
 (defun filter-map (f)
-  "Map a function F over the elements of the transduction, but only keep results
+  "Apply a function F to the elements of the transduction, but only keep results
 that are non-nil."
-  ;; (declare (optimize (speed 3) (safety 0)))
-  ;; (declare (type (function (t) t) f))
   (lambda (reducer)
-    ;; (declare (type (function (&optional t t)) reducer))
     (lambda (&optional (result nil r-p) (input nil i-p))
       (cond ((and r-p i-p)
              (let ((x (funcall f input)))
@@ -121,7 +118,7 @@ soon as any element fails the test."
 (list-transduce (take-while #'evenp) #'cons '(2 4 6 8 9 2))
 
 (defun concatenate (reducer)
-  "Concatenates all the sublists in the transduction."
+  "Concatenate all the sublists in the transduction."
   (let ((preserving-reducer (preserving-reduced reducer)))
     (lambda (&optional (result nil r-p) (input nil i-p))
       (cond ((and r-p i-p) (list-reduce preserving-reducer result input))
@@ -132,7 +129,7 @@ soon as any element fails the test."
 (list-transduce #'concatenate #'cons '((1 2 3) (4 5 6) (7 8 9)))
 
 (defun flatten (reducer)
-  "Entirely flattens any list passed through it."
+  "Entirely flatten all lists in the transduction, regardless of nesting."
   (lambda (&optional (result nil r-p) (input nil i-p))
     (cond ((and r-p i-p)
            (if (listp input)
@@ -146,7 +143,7 @@ soon as any element fails the test."
 
 (declaim (ftype (function (fixnum) *) segment))
 (defun segment (n)
-  "Partitions the input into lists of N items. If the input stops, it flushes any
+  "Partition the input into lists of N items. If the input stops, flush any
 accumulated state, which may be shorter than N."
   (unless (> n 0)
     (error "The arguments to segment must be a positive integer."))
@@ -177,8 +174,8 @@ accumulated state, which may be shorter than N."
 (list-transduce (segment 3) #'cons '(1 2 3 4 5))
 
 (defun group-by (f)
-  "Group the input stream into sublists via some F. The cutoff criterion is whether
-the return value of F changes between two consecutive elements of the
+  "Group the input stream into sublists via some function F. The cutoff criterion
+is whether the return value of F changes between two consecutive elements of the
 transduction."
   (lambda (reducer)
     (let ((prev 'nothing)
@@ -241,8 +238,9 @@ transduction."
 (list-transduce #'enumerate #'cons '("a" "b" "c"))
 
 (defun log (logger)
-  "Call some LOGGER for each step of the transduction. The LOGGER must accept the
-running results and the current element as input."
+  "Call some LOGGER function for each step of the transduction. The LOGGER must
+accept the running results and the current element as input. The original
+results of the transduction are passed through as-is."
   (lambda (reducer)
     (lambda (&optional (result nil r-p) (input nil i-p))
       (cond ((and r-p i-p)
@@ -279,7 +277,9 @@ then this yields nothing."
 (list-transduce (window 3) #'cons '(1 2 3 4 5 6 7))
 
 (defun unique (reducer)
-  "Only allow values to pass through the transduction once each."
+  "Only allow values to pass through the transduction once each.
+Stateful; this uses a set internally so could get quite heavy if you're not
+careful."
   (let ((set (s:empty-set)))
     (lambda (&optional (result nil r-p) (input nil i-p))
       (cond ((and r-p i-p)
@@ -310,6 +310,7 @@ then this yields nothing."
 
 ;; --- Reducers --- ;;
 
+(declaim (ftype (function (&optional list t) list) cons))
 (defun cons (&optional (acc nil a-p) (input nil i-p))
   "A transducer-friendly consing reducer with '() as the identity."
   (cond ((and a-p i-p) (cl:cons input acc))
@@ -337,8 +338,7 @@ then this yields nothing."
 
 (declaim (ftype (function (&optional t t) fixnum) count))
 (defun count (&optional (acc nil a-p) (input nil i-p))
-  "A counting reducer that counts any elements that made it through the
-transduction."
+  "Count the number of elements that made it through the transduction."
   (declare (ignore input))
   (cond ((and a-p i-p) (1+ acc))
         ((and a-p (not i-p)) acc)
@@ -348,6 +348,8 @@ transduction."
 (list-transduce (map #'identity) #'count '(1 2 3 4 5))
 
 (defun any (pred)
+  "Yield non-NIL if any element in the transduction satisfies PRED. Short-circuits
+the transduction as soon as the condition is met."
   (lambda (&optional (acc nil a-p) (input nil i-p))
     (cond ((and a-p i-p)
            (let ((test (funcall pred input)))
@@ -363,6 +365,8 @@ transduction."
 (list-transduce (map #'identity) (any #'evenp) '(1 3 5 7 9 2))
 
 (defun all (pred)
+  "Yield non-NIL if all elements of the transduction satisfy PRED. Short-circuits
+with NIL if any element fails the test."
   (lambda (&optional (acc nil a-p) (input nil i-p))
     (cond ((and a-p i-p)
            (let ((test (funcall pred input)))
@@ -400,7 +404,7 @@ transduction."
 (defun fold (f seed)
   "The fundamental reducer. `fold' creates an ad-hoc reducer based on
 a given 2-argument function. A SEED is also required as the initial accumulator
-value, which also becomes the return value in case there was no input left in
+value, which also becomes the return value in case there were no input left in
 the transduction.
 
 Functions like `+' and `*' are automatically valid reducers, because they yield
@@ -413,7 +417,7 @@ like this, `fold' is appropriate."
           (t seed))))
 
 #+nil
-(list-transduce (map #'identity) (fold #'max 0) '(1 2 3 4 1000 5 6))
+(list-transduce (map #'identity) (fold #'cl:max 0) '(1 2 3 4 1000 5 6))
 
 (defun max (seed)
   "Yield the maximum value of the transduction, or the SEED if there were none."
@@ -440,7 +444,7 @@ like this, `fold' is appropriate."
 ;; --- Entry Points --- ;;
 
 (defgeneric transduce (xform f source)
-  (:documentation "Transduce it, baby!"))
+  (:documentation "The entry-point for processing some data source via transductions."))
 
 (defmethod transduce (xform f (source cl:string))
   (string-transduce xform f source))
@@ -454,6 +458,9 @@ like this, `fold' is appropriate."
 (defmethod transduce (xform f (source hash-table))
   (hash-table-transduce xform f source))
 
+(defmethod transduce (xform f (source pathname))
+  (file-transduce xform f source))
+
 #+nil
 (transduce (map #'char-upcase) #'string "hello")
 #+nil
@@ -466,15 +473,13 @@ like this, `fold' is appropriate."
   (setf (gethash 'b hm) 2)
   (setf (gethash 'c hm) 3)
   (transduce (filter #'evenp) (max 0) hm))
+#+nil
+(transduce (map #'identity) #'count #p"/home/colin/history.txt")
 
-;; TODO Provide a single `transduce' function that checks the type of its input
-;; and dispatches based on that? I think this is what Clojure does.
 (declaim (ftype (function (t t list) *) list-transduce))
 (defun list-transduce (xform f coll)
-  (list-transduce-work xform f (funcall f) coll))
-
-(defun list-transduce-work (xform f init coll)
-  (let* ((xf (funcall xform f))
+  (let* ((init   (funcall f))
+         (xf     (funcall xform f))
          (result (list-reduce xf init coll)))
     (funcall xf result)))
 
@@ -486,32 +491,30 @@ like this, `fold' is appropriate."
             (reduced-val v)
             (list-reduce f v (cdr lst))))))
 
+(declaim (ftype (function (t t cl:vector) *) vector-transduce))
 (defun vector-transduce (xform f coll)
-  (vector-transduce-work xform f (funcall f) coll))
-
-(defun vector-transduce-work (xform f init coll)
-  (let* ((xf (funcall xform f))
+  (let* ((init   (funcall f))
+         (xf     (funcall xform f))
          (result (vector-reduce xf init coll)))
     (funcall xf result)))
 
 (defun vector-reduce (f identity vec)
   (let ((len (length vec)))
-     (vector-reduce-work f vec len 0 identity)))
-
-(defun vector-reduce-work (f vec len i acc)
-  (if (= i len)
-      acc
-      (let ((acc (funcall f acc (aref vec i))))
-        (if (reduced-p acc)
-            (reduced-val acc)
-            (vector-reduce-work f vec len (1+ i) acc)))))
+    (labels ((recurse (acc i)
+               (if (= i len)
+                  acc
+                  (let ((acc (funcall f acc (aref vec i))))
+                    (if (reduced-p acc)
+                        (reduced-val acc)
+                        (recurse acc (1+ i)))))))
+      (recurse identity 0))))
 
 #+nil
 (vector-transduce (map #'1+) #'cons #(1 2 3 4 5))
 
 (declaim (ftype (function (t t cl:string) *) string-transduce))
 (defun string-transduce (xform f coll)
-  (vector-transduce-work xform f (funcall f) coll))
+  (vector-transduce xform f coll))
 
 #+nil
 (string-transduce (map #'char-upcase) #'cons "hello")
@@ -519,10 +522,8 @@ like this, `fold' is appropriate."
 (declaim (ftype (function (t t hash-table) *) hash-table-transduce))
 (defun hash-table-transduce (xform f coll)
   "Transduce over the contents of a given Hash Table."
-  (hash-table-transduce-work xform f (funcall f) coll))
-
-(defun hash-table-transduce-work (xform f init coll)
-  (let* ((xf (funcall xform f))
+  (let* ((init   (funcall f))
+         (xf     (funcall xform f))
          (result (hash-table-reduce xf init coll)))
     (funcall xf result)))
 
@@ -598,17 +599,14 @@ try to continue the transducing process."
 
 ;; (defun do-it (items)
 ;;   ;; (declare (optimize (speed 3) (safety 0)))
-;;   (list-transduce (alexandria:compose
-;;                    #'enumerate
-;;                    (map (lambda (pair) (* (car pair) (cdr pair))))
-;;                    (filter #'evenp)
-;;                    (drop 3)
-;;                    (take 3))
-;;                   #'cons
-;;                   items))
+;;   (transduce (alexandria:compose
+;;               #'enumerate
+;;               (map (lambda (pair) (* (car pair) (cdr pair))))
+;;               (filter #'evenp)
+;;               (drop 3)
+;;               (take 3))
+;;              #'cons
+;;              items))
 
 ;; (do-it '(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15))
 
-;; (list-transduce (ttake 3) #'cons '(2 4 6 8 9 1 2))
-;; (list-transduce #'concatenate #'cons '((1 2 3) (4 5 6) (7 8 9)))
-;; (list-transduce #'flatten #'cons '((1 2 3) 1 8 (4 5 6) (7 8 9) 0))
