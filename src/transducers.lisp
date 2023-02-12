@@ -2,7 +2,7 @@
   (:use :cl)
   (:local-nicknames (#:q #:sycamore)
                     (#:s #:fset))
-  (:shadow #:map #:concatenate #:log
+  (:shadow #:map #:concatenate #:log #:step
            #:cons #:count #:first #:last #:max #:min #:find #:string #:vector))
 
 (in-package :transducers)
@@ -308,6 +308,31 @@ careful."
 #+nil
 (list-transduce #'dedup #'cons '(1 1 1 2 2 2 3 3 3 4 3 3))
 
+(declaim (ftype (function (fixnum) *) step))
+(defun step (n)
+  "Only yield every Nth element of the transduction. The first element of the
+transduction is always included. Therefore:
+
+(transduce (step 2) #'cons '(1 2 3 4 5 6 7 8 9))
+=> (1 3 5 7 9)
+"
+  (when (< n 1)
+    (error "The argument to skip must be greater than 0."))
+  (lambda (reducer)
+    (let ((curr 1))
+      (lambda (&optional (result nil r-p) (input nil i-p))
+        (cond ((and r-p i-p)
+               (if (= 1 curr)
+                   (progn (setf curr n)
+                          (funcall reducer result input))
+                   (progn (setf curr (1- curr))
+                          result)))
+              ((and r-p (not i-p)) (funcall reducer result))
+              (t (funcall reducer)))))))
+
+#+nil
+(transduce (step 2) #'cons '(1 2 3 4 5 6 7 8 9))
+
 ;; --- Reducers --- ;;
 
 (declaim (ftype (function (&optional list t) list) cons))
@@ -443,6 +468,7 @@ like this, `fold' is appropriate."
 
 ;; --- Entry Points --- ;;
 
+;; TODO docs and examples.
 (defgeneric transduce (xform f source)
   (:documentation "The entry-point for processing some data source via transductions."))
 
