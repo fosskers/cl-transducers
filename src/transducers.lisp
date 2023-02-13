@@ -636,19 +636,3 @@ try to continue the transducing process."
       (if (reduced-p result)
           (make-reduced :val result)
           result))))
-
-;; --- Testing --- ;;
-
-;; (defun do-it (items)
-;;   ;; (declare (optimize (speed 3) (safety 0)))
-;;   (transduce (alexandria:compose
-;;               #'enumerate
-;;               (map (lambda (pair) (* (car pair) (cdr pair))))
-;;               (filter #'evenp)
-;;               (drop 3)
-;;               (take 3))
-;;              #'cons
-;;              items))
-
-;; (do-it '(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15))
-

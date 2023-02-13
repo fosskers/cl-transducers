@@ -1,5 +1,6 @@
 (defpackage transducers/tests
   (:use :cl :parachute)
+  (:import-from :alexandria :compose)
   (:local-nicknames (#:t #:transducers)))
 
 (in-package :transducers/tests)
@@ -83,6 +84,21 @@
   (is equal '(1 0 2 0 3) (t:transduce (t:intersperse 0) #'t:cons '(1 2 3)))
   (is equal '((0 . "a") (1 . "b") (2 . "c"))
       (t:transduce #'t:enumerate #'t:cons '("a" "b" "c"))))
+
+(define-test "Composition"
+  :depends-on (reduction
+               "Taking and Dropping"
+               "Filtering"
+               "Other")
+  (is equal '(12 20 30)
+      (t:transduce (compose
+                     #'t:enumerate
+                     (t:map (lambda (pair) (* (car pair) (cdr pair))))
+                     (t:filter #'evenp)
+                     (t:drop 3)
+                     (t:take 3))
+                   #'t:cons
+                   '(1 2 3 4 5 6 7 8 9 10))))
 
 #+nil
 (test 'transducers/tests)
