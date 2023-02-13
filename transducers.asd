@@ -7,7 +7,7 @@
                 :components
                 ((:file "transducers"))))
   :description ""
-  :in-order-to ((test-op (test-op "transducers/tests"))))
+  :in-order-to ((test-op (test-op :transducers/tests))))
 
 (defsystem "transducers/tests"
   :author ""
@@ -19,5 +19,5 @@
   :components ((:module "tests"
                 :components
                 ((:file "main"))))
-  :description "Test system for transducers")
-  ;; :perform (test-op (op c) (symbol-call :rove :run c)))
+  :description "Test system for transducers"
+  :perform (test-op (op c) (symbol-call :parachute :test :transducers/tests)))
