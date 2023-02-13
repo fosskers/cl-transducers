@@ -3,7 +3,23 @@
   (:local-nicknames (#:q #:sycamore)
                     (#:s #:fset))
   (:shadow #:map #:concatenate #:log #:step
-           #:cons #:count #:first #:last #:max #:min #:find #:string #:vector))
+           #:cons #:count #:first #:last #:max #:min #:find #:string #:vector)
+  ;; --- Entry Points --- ;;
+  (:export #:transduce)
+  ;; --- Transducers -- ;;
+  (:export #:map
+           #:filter #:filter-map #:unique #:dedup
+           #:drop #:drop-while #:take #:take-while
+           #:concatenate #:flatten
+           #:segment #:window :group-by
+           #:intersperse #:enumerate #:step
+           #:log)
+  ;; --- Reducers -- ;;
+  (:export #:cons #:vector #:string
+           #:count
+           #:any #:all
+           #:first #:last
+           #:fold #:max #:min #:find))
 
 (in-package :transducers)
 
@@ -274,7 +290,7 @@ then this yields nothing."
               (t (funcall reducer)))))))
 
 #+nil
-(list-transduce (window 3) #'cons '(1 2 3 4 5 6 7))
+(list-transduce (window 3) #'cons '(1 2 3 4 5))
 
 (defun unique (reducer)
   "Only allow values to pass through the transduction once each.
