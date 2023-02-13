@@ -1,34 +1,102 @@
-#+title: tra: Transducers in Common Lisp
+#+title: Transducers: Fast, memory-efficient, functional data processing
 
-This is an implementation of Transducers in Common Lisp. Originally inspired by
-Clojure and adapted to Scheme as SRFI-171, Transducers are an excellent way to
-think about - and efficiently operate on - collections or streams of data. In
-the simplest case the data source could be a List, but files can also be treated
-so and have their contents operated over using all the usual functions like =map=,
-=filter=, =fold=, and others.
+#+begin_quote
+If I had thought of transducers earlier I would have based everything on them.
+
+- Rich Hickey
+#+end_quote
+
+Transducers are a fast and extremely memory-efficient way to process a data
+source. Here "data source" means simple collections like Lists or Vectors, but
+also potentially large files.
+
+Transducers...
+
+- allow the chaining of operations like =map= and =filter= without allocating memory between each step.
+- aren't tied to any specific data type; they need only be implemented once.
+- vastly simplify "data transformation code".
 
 Transducers make dealing with data an efficient joy!
 
+Example: /While skipping every second line of a file, sum the lengths of only
+evenly-lengthed lines./
+
+#+begin_src lisp
+(transduce
+  ;; How do we want to process each element?
+  (compose (step 2) (map #'length) (filter #'evenp))
+  ;; How do we want to combine all the elements together?
+  #'+
+  ;; What's our original data source?
+  #p"giant-file.txt")
+#+end_src
+
 * Table of Contents :toc_3_gh:
+- [[#history-and-motivation][History and Motivation]]
 - [[#installation][Installation]]
 - [[#usage][Usage]]
-  - [[#differences-with-srfi-171][Differences with SRFI-171]]
+  - [[#importing][Importing]]
+  - [[#transducers-and-reducers][Transducers and Reducers]]
+  - [[#using-the-fold-reducer][Using the =fold= Reducer]]
+- [[#differences-with-other-approaches][Differences with other Approaches]]
+  - [[#the-common-lisp-loop-macro][The Common Lisp =loop= Macro]]
+  - [[#clojure][Clojure]]
+  - [[#srfi-171][SRFI-171]]
     - [[#function-names][Function Names]]
     - [[#function-calls-in-scheme][Function Calls in Scheme]]
     - [[#function-additions-and-removals][Function Additions and Removals]]
+  - [[#rusts-iterators][Rust's Iterators]]
+  - [[#haskells-laziness][Haskell's Laziness]]
+- [[#limitations][Limitations]]
+
+* History and Motivation
+
+Originally invented in Clojure and adapted to Scheme as SRFI-171, Transducers
+are an excellent way to think about - and efficiently operate on - collections
+or streams of data. Transduction operations are strict and don't involve
+"laziness" or "thunking" in any way, yet only process the amount of data you ask
+them to.
+
+This library draws inspiration from both the original Clojure and SRFI-171,
+while adding many other convenient operations commonly found in other languages.
+It is, in general, the most complete implementation of the Transducer pattern.
 
 * Installation
 
 * Usage
 
-** Differences with SRFI-171
+** Importing
+
+Since this library reuses some symbol names also found in =:cl=, it is expected
+that you import =transducers= as follows in your =defpackage=:
+
+#+begin_src lisp
+(:local-nicknames (#:t #:transducers))
+#+end_src
+
+You can then make relatively clean calls like:
+
+#+begin_src lisp
+(t:transduce (t:map #'+1) #'t:vector '(1 2 3))
+;; => #(2 3 4)
+#+end_src
+
+** Transducers and Reducers
+
+** Using the =fold= Reducer
+
+* Differences with other Approaches
+
+** The Common Lisp =loop= Macro
+** Clojure
+** SRFI-171
 
 *** Function Names
 
 As this library is intended to be used in a namespaced way (i.e. without =:use=),
 we're able to name the functions whatever we wish. This has allowed SRFI-171
 functions like =tmap= to have their =t= dropped, meaning the intended call style is
-instead =tra:map=.
+instead =t:map=.
 
 Certain function names have also been renamed from their SRFI-171 variants to
 the names more commonly found in other languages.
@@ -40,12 +108,12 @@ transducers and reducers that don't take other arguments (like =enumerate= and
 =cons= respectively) must be passed quoted:
 
 #+begin_src lisp
-(tra:list-transduce (tra:map #'1+) #'tra:cons '(1 2 3))
+(t:transduce (t:map #'1+) #'t:cons '(1 2 3))
 #+end_src
 
 instead of:
 
-#+begin_src lisp
+#+begin_src scheme
 (list-transduce (tmap 1+) rcons '(1 2 3))
 #+end_src
 
@@ -58,8 +126,14 @@ specification.
 Likewise, a few have been purposefully left unimplemented. These are:
 
 - tappend-map (just compose =map= and =concatenate= yourself)
-- tdelete-neighbor-duplicates
-- tdelete-duplicates
 - tremove (just use =filter=)
 - treplace
 - reverse-rcons (just use =fold=)
+
+** Rust's Iterators
+** Haskell's Laziness
+
+* Limitations
+
+1. This library is general portable, but assumes your CL implementation supports
+   tail-recursion.
