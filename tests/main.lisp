@@ -83,7 +83,12 @@
       (t:transduce (t:step 2) #'t:cons '(1 2 3 4 5 6 7 8 9)))
   (is equal '(1 0 2 0 3) (t:transduce (t:intersperse 0) #'t:cons '(1 2 3)))
   (is equal '((0 . "a") (1 . "b") (2 . "c"))
-      (t:transduce #'t:enumerate #'t:cons '("a" "b" "c"))))
+      (t:transduce #'t:enumerate #'t:cons '("a" "b" "c")))
+  (is equal '(0 1 3 6 10)
+      (t:transduce (t:scan #'+ 0) #'t:cons '(1 2 3 4)))
+  (is equal '(0 1)
+      (t:transduce (compose (t:scan #'+ 0) (t:take 2))
+                   #'t:cons '(1 2 3 4))))
 
 (define-test "Composition"
   :depends-on (reduction

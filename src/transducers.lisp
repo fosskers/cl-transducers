@@ -12,7 +12,7 @@
            #:drop #:drop-while #:take #:take-while
            #:concatenate #:flatten
            #:segment #:window :group-by
-           #:intersperse #:enumerate #:step
+           #:intersperse #:enumerate #:step #:scan
            #:log)
   ;; --- Reducers -- ;;
   (:export #:cons #:vector #:string
@@ -22,6 +22,10 @@
            #:fold #:max #:min #:find))
 
 (in-package :transducers)
+
+;; TODO
+;; pass/void
+;; unfold
 
 ;; --- Transducers --- ;;
 
@@ -348,6 +352,33 @@ transduction is always included. Therefore:
 
 #+nil
 (transduce (step 2) #'cons '(1 2 3 4 5 6 7 8 9))
+
+(declaim (ftype (function ((function (t t) *) t) *) scan))
+(defun scan (f seed)
+  "Build up successsive values from the results of previous applications of a given
+function F.
+
+(transduce (scan #'+ 0) #'cons '(1 2 3 4))
+=> (0 1 3 6 10)"
+  (lambda (reducer)
+    (let ((prev seed))
+      (lambda (&optional (result nil r-p) (input nil i-p))
+        (cond ((and r-p i-p)
+               (let ((old prev)
+                     (new (funcall f prev input)))
+                 (setf prev new)
+                 (funcall reducer result old)))
+              ((and r-p (not i-p))
+               (let ((result (funcall reducer result prev)))
+                 (cond ((reduced-p result) (funcall reducer (reduced-val result)))
+                       (t (funcall reducer result)))))
+              (t (funcall reducer)))))))
+
+#+nil
+(transduce (scan #'+ 0) #'cons '(1 2 3 4))
+#+nil
+(transduce (alexandria:compose (scan #'+ 0) (take 2))
+           #'cons '(1 2 3 4))
 
 ;; --- Reducers --- ;;
 
