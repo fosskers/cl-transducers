@@ -1,7 +1,9 @@
 #+title: Transducers: Fast, memory-efficient, functional data processing
 
 #+begin_quote
-If I had thought of transducers earlier I would have based everything on them.
+I think Transducers are a fundamental primitive that decouples critical logic
+from list/sequence processing, and if I had to do Clojure all over I would put
+them at the bottom.
 
 - Rich Hickey
 #+end_quote
