@@ -1,4 +1,4 @@
-#+title: Transducers: Fast, memory-efficient, functional data processing
+#+title: Transducers: Ergonomic, efficient data processing
 
 #+begin_quote
 I think Transducers are a fundamental primitive that decouples critical logic
@@ -8,17 +8,16 @@ them at the bottom.
 - Rich Hickey
 #+end_quote
 
-Transducers are a fast and extremely memory-efficient way to process a data
-source. Here "data source" means simple collections like Lists or Vectors, but
-also potentially large files.
+Transducers are an ergonomic and extremely memory-efficient way to process a
+data source. Here "data source" means simple collections like Lists or Vectors,
+but also potentially large files or generators of infinite data.
 
 Transducers...
 
 - allow the chaining of operations like =map= and =filter= without allocating memory between each step.
 - aren't tied to any specific data type; they need only be implemented once.
 - vastly simplify "data transformation code".
-
-Transducers make dealing with data an efficient joy!
+- are a joy to use!
 
 Example: /While skipping every second line of a file, sum the lengths of only
 evenly-lengthed lines./
@@ -79,7 +78,7 @@ that you import =transducers= as follows in your =defpackage=:
 You can then make relatively clean calls like:
 
 #+begin_src lisp
-(t:transduce (t:map #'+1) #'t:vector '(1 2 3))
+(t:transduce (t:map #'1+) #'t:vector '(1 2 3))
 ;; => #(2 3 4)
 #+end_src
 

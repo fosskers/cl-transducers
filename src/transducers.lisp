@@ -11,7 +11,7 @@
            #:filter #:filter-map #:unique #:dedup
            #:drop #:drop-while #:take #:take-while
            #:concatenate #:flatten
-           #:segment #:window :group-by
+           #:segment #:window #:group-by
            #:intersperse #:enumerate #:step #:scan
            #:log)
   ;; --- Reducers -- ;;
@@ -378,9 +378,9 @@ function F.
 
 #+nil
 (transduce (scan #'+ 0) #'cons '(1 2 3 4))
-#+nil
-(transduce (alexandria:compose (scan #'+ 0) (take 2))
-           #'cons '(1 2 3 4))
+;; #+nil
+;; (transduce (alexandria:compose (scan #'+ 0) (take 2))
+;;            #'cons '(1 2 3 4))
 
 ;; --- Reducers --- ;;
 
