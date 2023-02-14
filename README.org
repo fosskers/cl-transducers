@@ -32,7 +32,7 @@ evenly-lengthed lines./
   #p"giant-file.txt")
 #+end_src
 
-* Table of Contents :toc_3_gh:
+* Table of Contents :toc_2_gh:
 - [[#history-and-motivation][History and Motivation]]
 - [[#installation][Installation]]
 - [[#usage][Usage]]
@@ -43,9 +43,6 @@ evenly-lengthed lines./
   - [[#the-common-lisp-loop-macro][The Common Lisp =loop= Macro]]
   - [[#clojure][Clojure]]
   - [[#srfi-171][SRFI-171]]
-    - [[#function-names][Function Names]]
-    - [[#function-calls-in-scheme][Function Calls in Scheme]]
-    - [[#function-additions-and-removals][Function Additions and Removals]]
   - [[#rusts-iterators][Rust's Iterators]]
   - [[#haskells-laziness][Haskell's Laziness]]
 - [[#limitations][Limitations]]
