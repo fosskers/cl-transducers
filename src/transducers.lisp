@@ -19,13 +19,20 @@
            #:count
            #:any #:all
            #:first #:last
-           #:fold #:max #:min #:find))
+           #:fold #:max #:min #:find)
+  ;; --- Generators --- ;;
+  (:export #:range))
 
 (in-package :transducers)
 
 ;; TODO
 ;; pass/void
+;;
+;; GENERATORS
 ;; unfold
+;; range
+;; cycle
+;; prime-sieve?
 
 ;; --- Transducers --- ;;
 
@@ -536,6 +543,9 @@ like this, `fold' is appropriate."
 (defmethod transduce (xform f (source pathname))
   (file-transduce xform f source))
 
+(defmethod transduce (xform f (source generator))
+  (generator-transduce xform f source))
+
 #+nil
 (transduce (map #'char-upcase) #'string "hello")
 #+nil
@@ -645,6 +655,46 @@ like this, `fold' is appropriate."
 
 #+nil
 (file-transduce (map #'identity) #'count "/home/colin/history.txt")
+
+(defun generator-transduce (xform f gen)
+  "Transduce over a potentially endless stream of values from a generator GEN."
+  (let* ((init   (funcall f))
+         (xf     (funcall xform f))
+         (result (generator-reduce xf init gen)))
+    (funcall xf result)))
+
+(defun generator-reduce (f identity gen)
+  (labels ((recurse (acc)
+             (let ((val (funcall (generator-func gen))))
+               (cond ((eq *done* val) acc)
+                     (t (let ((acc (funcall f acc val)))
+                          (if (reduced-p acc)
+                              (reduced-val acc)
+                              (recurse acc))))))))
+    (recurse identity)))
+
+;; --- GENERATORS --- ;;
+
+(defstruct generator
+  "A wrapper around a function that can potentially yield endless values."
+  (func nil :read-only t :type (function () *)))
+
+(defparameter *done* 'done
+  "A value to signal the end of an unfolding process.")
+
+(declaim (ftype (function (fixnum fixnum) generator) range))
+(defun range (start end)
+  "Yield all the numbers from START to END."
+  (let* ((curr start)
+         (func (lambda ()
+                 (cond ((> curr end) *done*)
+                       (t (let ((old curr))
+                            (setf curr (1+ curr))
+                            old))))))
+    (make-generator :func func)))
+
+#+nil
+(transduce (map #'identity) #'cons (range 0 10))
 
 ;; --- Other Utilities --- ;;
 

@@ -39,12 +39,14 @@ evenly-lengthed lines./
   - [[#importing][Importing]]
   - [[#transducers-and-reducers][Transducers and Reducers]]
   - [[#using-the-fold-reducer][Using the =fold= Reducer]]
+  - [[#writing-your-own-transducers--reducers][Writing your own Transducers / Reducers]]
 - [[#differences-with-other-approaches][Differences with other Approaches]]
   - [[#the-common-lisp-loop-macro][The Common Lisp =loop= Macro]]
   - [[#clojure][Clojure]]
   - [[#srfi-171][SRFI-171]]
   - [[#rusts-iterators][Rust's Iterators]]
   - [[#haskells-laziness][Haskell's Laziness]]
+- [[#performance][Performance]]
 - [[#limitations][Limitations]]
 
 * History and Motivation
@@ -82,6 +84,8 @@ You can then make relatively clean calls like:
 ** Transducers and Reducers
 
 ** Using the =fold= Reducer
+
+** Writing your own Transducers / Reducers
 
 * Differences with other Approaches
 
@@ -131,6 +135,7 @@ Likewise, a few have been purposefully left unimplemented. These are:
 ** Rust's Iterators
 ** Haskell's Laziness
 
+* Performance
 * Limitations
 
 1. This library is general portable, but assumes your CL implementation supports
