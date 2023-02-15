@@ -21,7 +21,7 @@
            #:first #:last
            #:fold #:max #:min #:find)
   ;; --- Generators --- ;;
-  (:export #:range))
+  (:export #:range #:cycle))
 
 (in-package :transducers)
 
@@ -30,7 +30,6 @@
 ;;
 ;; GENERATORS
 ;; unfold
-;; range
 ;; cycle
 ;; prime-sieve?
 
@@ -686,15 +685,34 @@ like this, `fold' is appropriate."
 (defun range (start end)
   "Yield all the numbers from START to END."
   (let* ((curr start)
+         (inc (if (< start end) #'1+ #'1-))
          (func (lambda ()
-                 (cond ((> curr end) *done*)
+                 (cond ((= curr end) *done*)
                        (t (let ((old curr))
-                            (setf curr (1+ curr))
+                            (setf curr (funcall inc curr))
                             old))))))
     (make-generator :func func)))
 
 #+nil
 (transduce (map #'identity) #'cons (range 0 10))
+
+(declaim (ftype (function (list) generator) cycle))
+(defun cycle (seq)
+  "Yield the values of a given SEQ endlessly."
+  (if (null seq)
+      (make-generator :func (lambda () *done*))
+      (let* ((curr seq)
+             (func (lambda ()
+                     (cond ((null curr)
+                            (setf curr (cdr seq))
+                            (car seq))
+                           (t (let ((next (car curr)))
+                                (setf curr (cdr curr))
+                                next))))))
+        (make-generator :func func))))
+
+#+nil
+(transduce (take 10) #'cons (cycle '(1 2 3)))
 
 ;; --- Other Utilities --- ;;
 
