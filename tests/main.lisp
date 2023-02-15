@@ -120,6 +120,8 @@
   (is equal '(0 1 2 3) (t:transduce (t:map #'identity) #'t:cons (t:range 0 4)))
   (is equal '(0 -1 -2 -3) (t:transduce (t:map #'identity) #'t:cons (t:range 0 -4)))
   (is equal '(1 2 3 1 2 3 1) (t:transduce (t:take 7) #'t:cons (t:cycle '(1 2 3))))
+  (is equal '(1 2 3 1 2 3 1) (t:transduce (t:take 7) #'t:cons (t:cycle #(1 2 3))))
+  (is equal "hellohe" (t:transduce (t:take 7) #'t:string (t:cycle "hello")))
   (is equal '() (t:transduce (t:take 7) #'t:cons (t:cycle '()))))
 
 #+nil

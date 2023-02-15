@@ -30,7 +30,6 @@
 ;;
 ;; GENERATORS
 ;; unfold
-;; cycle
 ;; prime-sieve?
 
 ;; --- Transducers --- ;;
@@ -696,9 +695,10 @@ like this, `fold' is appropriate."
 #+nil
 (transduce (map #'identity) #'cons (range 0 10))
 
-(declaim (ftype (function (list) generator) cycle))
-(defun cycle (seq)
-  "Yield the values of a given SEQ endlessly."
+(defgeneric cycle (seq)
+  (:documentation "Yield the values of a given SEQ endlessly."))
+
+(defmethod cycle ((seq list))
   (if (null seq)
       (make-generator :func (lambda () *done*))
       (let* ((curr seq)
@@ -708,6 +708,21 @@ like this, `fold' is appropriate."
                             (car seq))
                            (t (let ((next (car curr)))
                                 (setf curr (cdr curr))
+                                next))))))
+        (make-generator :func func))))
+
+(defmethod cycle ((seq cl:vector))
+  "This works for strings as well."
+  (if (zerop (length seq))
+      (make-generator :func (lambda () *done*))
+      (let* ((ix 0)
+             (len (length seq))
+             (func (lambda ()
+                     (cond ((>= ix len)
+                            (setf ix 1)
+                            (aref seq 0))
+                           (t (let ((next (aref seq ix)))
+                                (setf ix (1+ ix))
                                 next))))))
         (make-generator :func func))))
 
