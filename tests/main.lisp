@@ -114,6 +114,11 @@
                    #'t:cons
                    '(1 2 3 4 5 6 7 8 9 10))))
 
+#+nil
+(t:transduce (compose (t:drop 3) (t:take 2)) #'t:cons '(1 2 3 4 5 6))
+#+nil
+(funcall (compose #'1+ (lambda (n) (* 2 n))) 7)
+
 (define-test "Generators"
   :depends-on (reduction transduction)
   (is equal '() (t:transduce (t:map #'identity) #'t:cons (t:range 0 0)))
@@ -123,6 +128,16 @@
   (is equal '(1 2 3 1 2 3 1) (t:transduce (t:take 7) #'t:cons (t:cycle #(1 2 3))))
   (is equal "hellohe" (t:transduce (t:take 7) #'t:string (t:cycle "hello")))
   (is equal '() (t:transduce (t:take 7) #'t:cons (t:cycle '()))))
+
+(define-test "Higher Order Transducers"
+  :depends-on (reduction transduction)
+  (is equal '(1 4 1 4 1)
+      (t:transduce (compose (t:map #'1+)
+                            (t:fork #'evenp
+                                    (t:map (compose #'write-to-string #'1+))
+                                    (t:map (t:const "Odd!")))
+                            (t:map #'length))
+                 #'t:cons (t:range 1 6))))
 
 #+nil
 (test 'transducers/tests)

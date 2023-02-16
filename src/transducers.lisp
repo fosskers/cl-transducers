@@ -14,6 +14,8 @@
            #:segment #:window #:group-by
            #:intersperse #:enumerate #:step #:scan
            #:log)
+  ;; --- Higher Order Transducers --- ;;
+  (:export #:fork)
   ;; --- Reducers -- ;;
   (:export #:cons #:vector #:string
            #:count
@@ -21,7 +23,9 @@
            #:first #:last
            #:fold #:max #:min #:find)
   ;; --- Generators --- ;;
-  (:export #:range #:cycle #:repeat))
+  (:export #:range #:cycle #:repeat)
+  ;; --- Utilities --- ;;
+  (:export #:const))
 
 (in-package :transducers)
 
@@ -399,13 +403,17 @@ within the transduction:
      \\4b-5b---/
 
 Assuming that TA here is some composition of three transducer steps, and TB is a
-composition of two.
+composition of two. Naturally, if you have other steps beyond the fork (Step 7
+above), you should make sure that they can handle the return values of both
+sides!
 
-(transduce (fork #'evenp
-                 (map #'1+)
-                 (map (lambda (_) 'odd)))
+(transduce (compose (map #'1+)
+                    (fork #'evenp
+                          (map (compose #'write-to-string #'1+))
+                          (map (const \"Odd!\")))
+                    (map #'length))
            #'cons (range 1 6))
-=> (ODD 3 ODD 5 ODD)
+=> (1 4 1 4 1)
 "
   (lambda (reducer)
     (let ((fa (funcall ta reducer))
@@ -416,13 +424,22 @@ composition of two.
                    (funcall fa result input)
                    (funcall fb result input)))
               ((and r-p (not i-p))
+               ;; It _shouldn't_ matter that we're skipping the fork, since if
+               ;; no input is left, we want to get access to the "real" reducer
+               ;; at the bottom of the composed transducer stack. We know is at
+               ;; least as deep as the original reducer we were passed.
                (funcall reducer result))
+              ;; The same reasoning applies here. We want to get down to the
+              ;; "real" reducer to retrieve its identity value (e.g. an empty
+              ;; list in the case of `cons').
               (t (funcall reducer)))))))
 
 #+nil
-(transduce (fork #'evenp
-                 (map #'1+)
-                 (map (lambda (_) 'odd)))
+(transduce (alexandria:compose (map #'1+)
+                               (fork #'evenp
+                                     (map (alexandria:compose #'write-to-string #'1+))
+                                     (map (lambda (_) "Odd!")))
+                               (map #'length))
            #'cons (range 1 6))
 
 ;; --- Reducers --- ;;
@@ -709,7 +726,7 @@ like this, `fold' is appropriate."
                               (recurse acc))))))))
     (recurse identity)))
 
-;; --- GENERATORS --- ;;
+;; --- Generators --- ;;
 
 (defstruct generator
   "A wrapper around a function that can potentially yield endless values."
@@ -823,7 +840,13 @@ like this, `fold' is appropriate."
   ;; (setf (aref a 0) 1337)
   ;; (adjust-array a 16 :initial-element 90))
 
-;; --- Other Utilities --- ;;
+;; --- Utilities --- ;;
+
+(defun const (item)
+  "Return a function that ignores its argument and returns ITEM instead."
+  (lambda (x)
+    (declare (ignore x))
+    item))
 
 (defstruct reduced
   "A wrapper that signals that reduction has completed."
