@@ -21,7 +21,7 @@
            #:first #:last
            #:fold #:max #:min #:find)
   ;; --- Generators --- ;;
-  (:export #:range #:cycle))
+  (:export #:range #:cycle #:repeat))
 
 (in-package :transducers)
 
@@ -387,6 +387,44 @@ function F.
 ;; (transduce (alexandria:compose (scan #'+ 0) (take 2))
 ;;            #'cons '(1 2 3 4))
 
+;; --- Higher Order Transducers --- ;;
+
+(defun fork (pred ta tb)
+  "If a PRED yields non-NIL on a value, proceed with transducer chain TA.
+Otherwise, follow chain TB. This produces a kind of diamond pattern of data flow
+within the transduction:
+
+     /4a-5a-6a\\
+1-2-3          7-8-9
+     \\4b-5b---/
+
+Assuming that TA here is some composition of three transducer steps, and TB is a
+composition of two.
+
+(transduce (fork #'evenp
+                 (map #'1+)
+                 (map (lambda (_) 'odd)))
+           #'cons (range 1 6))
+=> (ODD 3 ODD 5 ODD)
+"
+  (lambda (reducer)
+    (let ((fa (funcall ta reducer))
+          (fb (funcall tb reducer)))
+      (lambda (&optional (result nil r-p) (input nil i-p))
+        (cond ((and r-p i-p)
+               (if (funcall pred input)
+                   (funcall fa result input)
+                   (funcall fb result input)))
+              ((and r-p (not i-p))
+               (funcall reducer result))
+              (t (funcall reducer)))))))
+
+#+nil
+(transduce (fork #'evenp
+                 (map #'1+)
+                 (map (lambda (_) 'odd)))
+           #'cons (range 1 6))
+
 ;; --- Reducers --- ;;
 
 (declaim (ftype (function (&optional list t) list) cons))
@@ -680,6 +718,42 @@ like this, `fold' is appropriate."
 (defparameter *done* 'done
   "A value to signal the end of an unfolding process.")
 
+;; TODO type signature, expecting `values' to be called within the given
+;; function.
+(defun unfold (f seed)
+  (let* ((curr seed)
+         (func (lambda ()
+                 (multiple-value-bind (acc next) (funcall f curr)
+                   (cond ((eq *done* next) *done*)
+                         (t (setf curr acc)
+                            next))))))
+    (make-generator :func func)))
+
+;; TODO I don't know if I want this in the library.
+;; (declaim (ftype (function ((function (t) *) t) generator) iterate))
+;; (defun iterate (f seed)
+;;   "Yield repeated applications of a function F to some SEED value.
+
+;; (transduce (take 5) #'cons (iterate #'not t))
+;; => (T NIL T NIL T)"
+;;   (let* ((curr seed)
+;;          (func (lambda ()
+;;                  (let ((old curr))
+;;                    (setf curr (funcall f curr))
+;;                    old))))
+;;     (make-generator :func func)))
+
+;; #+nil
+;; (transduce (take 5) #'cons (iterate #'not t))
+
+(declaim (ftype (function (t) generator) repeat))
+(defun repeat (item)
+  "Endlessly yield a given ITEM."
+  (make-generator :func (constantly item)))
+
+#+nil
+(transduce (take 4) #'cons (repeat 9))
+
 (declaim (ftype (function (fixnum fixnum) generator) range))
 (defun range (start end)
   "Yield all the numbers from START to END."
@@ -694,6 +768,8 @@ like this, `fold' is appropriate."
 
 #+nil
 (transduce (map #'identity) #'cons (range 0 10))
+#+nil
+(transduce (map #'identity) (last 0) (range 0 100000000))
 
 (defgeneric cycle (seq)
   (:documentation "Yield the values of a given SEQ endlessly."))
@@ -729,6 +805,24 @@ like this, `fold' is appropriate."
 #+nil
 (transduce (take 10) #'cons (cycle '(1 2 3)))
 
+;; (declaim (ftype (function () generator) prime-sieve))
+;; (defun prime-sieve ()
+;;   "The Sieve of Erastothenes. Yields all prime numbers."
+;;   (let* ((primes (make-array 32 :element-type 'fixnum :adjustable t))
+;;          (ix 0)
+;;          (func (lambda ()
+;;                  (let (())))))
+;;     (make-generator :func func)))
+
+;; TODO remove
+#+nil
+(let ((a (make-array 8 :element-type 'fixnum
+                       :initial-contents '(2 3 5 7 11 13 17 19)
+                       :adjustable t)))
+  a)
+  ;; (setf (aref a 0) 1337)
+  ;; (adjust-array a 16 :initial-element 90))
+
 ;; --- Other Utilities --- ;;
 
 (defstruct reduced
@@ -752,3 +846,7 @@ try to continue the transducing process."
       (if (reduced-p result)
           (make-reduced :val result)
           result))))
+
+;; (defun fooz ()
+;;   (transduce (alexandria:compose (drop 3) (take 2)) #'cons '(1 2 3 4 5 6)))
+
