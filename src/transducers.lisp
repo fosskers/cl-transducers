@@ -434,13 +434,36 @@ sides!
               ;; list in the case of `cons').
               (t (funcall reducer)))))))
 
+;; #+nil
+;; (transduce (alexandria:compose (map #'1+)
+;;                                (fork #'evenp
+;;                                      (map (alexandria:compose #'write-to-string #'1+))
+;;                                      (map (const "Odd!")))
+;;                                (map #'length))
+;;            #'cons (range 1 6))
+
+(defun inject (f &key (immediate nil))
+  "For each value in the transduction, inject a given transducer into the chain
+immediately after this point. Accumulates, such that each new injection appears
+before the previous one."
+  (lambda (reducer)
+    (let ((reducer reducer))
+      (lambda (&optional (result nil r-p) (input nil i-p))
+        (cond ((and r-p i-p)
+               (let* ((xform (funcall f input))
+                      (next (funcall xform reducer)))
+                 (if immediate
+                     (progn (setf reducer next)
+                            (funcall reducer result input))
+                     (let ((res (funcall reducer result input)))
+                       (setf reducer next)
+                       res))))
+              ((and r-p (not i-p)) (funcall reducer result))
+              (t (funcall reducer)))))))
+
 #+nil
-(transduce (alexandria:compose (map #'1+)
-                               (fork #'evenp
-                                     (map (alexandria:compose #'write-to-string #'1+))
-                                     (map (lambda (_) "Odd!")))
-                               (map #'length))
-           #'cons (range 1 6))
+(transduce (inject (lambda (prime) (filter (lambda (n) (/= 0 (mod n prime))))))
+           #'+ (range 2 10000))
 
 ;; --- Reducers --- ;;
 
