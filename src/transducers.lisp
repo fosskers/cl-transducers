@@ -442,28 +442,28 @@ sides!
 ;;                                (map #'length))
 ;;            #'cons (range 1 6))
 
-(defun inject (f &key (immediate nil))
-  "For each value in the transduction, inject a given transducer into the chain
+(defun inject (f)
+  "For each value in the transduction that actually affects the final
+result (tested with `EQ'), inject an extra transduction step into the chain
 immediately after this point. Accumulates, such that each new injection appears
 before the previous one."
   (lambda (reducer)
     (let ((reducer reducer))
       (lambda (&optional (result nil r-p) (input nil i-p))
         (cond ((and r-p i-p)
-               (let* ((xform (funcall f input))
-                      (next (funcall xform reducer)))
-                 (if immediate
-                     (progn (setf reducer next)
-                            (funcall reducer result input))
-                     (let ((res (funcall reducer result input)))
+               (let ((new-res (funcall reducer result input)))
+                 (if (eq result new-res)
+                     new-res
+                     (let* ((xform (funcall f input))
+                            (next  (funcall xform reducer)))
                        (setf reducer next)
-                       res))))
+                       new-res))))
               ((and r-p (not i-p)) (funcall reducer result))
               (t (funcall reducer)))))))
 
 #+nil
 (transduce (inject (lambda (prime) (filter (lambda (n) (/= 0 (mod n prime))))))
-           #'+ (range 2 10000))
+           #'cons (range 3 100 :step 2))
 
 ;; --- Reducers --- ;;
 
@@ -783,8 +783,8 @@ like this, `fold' is appropriate."
 ;;                    old))))
 ;;     (make-generator :func func)))
 
-;; #+nil
-;; (transduce (take 5) #'cons (iterate #'not t))
+#+nil
+(transduce (take 5) #'cons (iterate #'not t))
 
 (declaim (ftype (function (t) generator) repeat))
 (defun repeat (item)
@@ -794,13 +794,16 @@ like this, `fold' is appropriate."
 #+nil
 (transduce (take 4) #'cons (repeat 9))
 
-(declaim (ftype (function (fixnum fixnum) generator) range))
-(defun range (start end)
+(declaim (ftype (function (fixnum fixnum &key (:step fixnum)) generator) range))
+(defun range (start end &key (step 1))
   "Yield all the numbers from START to END."
   (let* ((curr start)
-         (inc (if (< start end) #'1+ #'1-))
+         (inc (if (< start end)
+                  (lambda (n) (+ n step))
+                  (lambda (n) (- n step))))
+         (check (if (< start end) #'>= #'<=))
          (func (lambda ()
-                 (cond ((= curr end) *done*)
+                 (cond ((funcall check curr end) *done*)
                        (t (let ((old curr))
                             (setf curr (funcall inc curr))
                             old))))))
