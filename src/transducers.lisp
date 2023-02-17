@@ -32,9 +32,9 @@
 ;; TODO
 ;; pass/void
 ;;
-;; GENERATORS
-;; unfold
-;; prime-sieve?
+;; zipping via a `branch' or `par' H.O.T. Can accept as many branches as you
+;; give it, and the re-fusing step at the end has to accept the branch of values
+;; via `multi-value-bind'.
 
 ;; --- Transducers --- ;;
 
@@ -797,6 +797,9 @@ like this, `fold' is appropriate."
 (declaim (ftype (function (fixnum fixnum &key (:step fixnum)) generator) range))
 (defun range (start end &key (step 1))
   "Yield all the numbers from START to END."
+  ;; FIXME How to do this with the type system?
+  (when (< step 1)
+    (error "The step value must be a positive integer."))
   (let* ((curr start)
          (inc (if (< start end)
                   (lambda (n) (+ n step))
