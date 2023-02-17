@@ -13,9 +13,7 @@
   :author ""
   :license ""
   :depends-on (:transducers
-               :parachute
-               ;; TODO Remove when I have my own compose
-               :alexandria)
+               :parachute)
   :components ((:module "tests"
                 :components
                 ((:file "main"))))

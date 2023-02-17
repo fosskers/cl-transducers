@@ -15,7 +15,7 @@
            #:intersperse #:enumerate #:step #:scan
            #:log)
   ;; --- Higher Order Transducers --- ;;
-  (:export #:fork)
+  (:export #:fork #:par)
   ;; --- Reducers -- ;;
   (:export #:cons #:vector #:string
            #:count
@@ -25,7 +25,7 @@
   ;; --- Generators --- ;;
   (:export #:range #:cycle #:repeat)
   ;; --- Utilities --- ;;
-  (:export #:const))
+  (:export #:comp #:const))
 
 (in-package :transducers)
 
@@ -387,9 +387,9 @@ function F.
 
 #+nil
 (transduce (scan #'+ 0) #'cons '(1 2 3 4))
-;; #+nil
-;; (transduce (alexandria:compose (scan #'+ 0) (take 2))
-;;            #'cons '(1 2 3 4))
+#+nil
+(transduce (comp (scan #'+ 0) (take 2))
+           #'cons '(1 2 3 4))
 
 ;; --- Higher Order Transducers --- ;;
 
@@ -407,11 +407,11 @@ composition of two. Naturally, if you have other steps beyond the fork (Step 7
 above), you should make sure that they can handle the return values of both
 sides!
 
-(transduce (compose (map #'1+)
-                    (fork #'evenp
-                          (map (compose #'write-to-string #'1+))
-                          (map (const \"Odd!\")))
-                    (map #'length))
+(transduce (comp (map #'1+)
+                 (fork #'evenp
+                       (map (comp #'write-to-string #'1+))
+                       (map (const \"Odd!\")))
+                 (map #'length))
            #'cons (range 1 6))
 => (1 4 1 4 1)
 "
@@ -434,13 +434,13 @@ sides!
               ;; list in the case of `cons').
               (t (funcall reducer)))))))
 
-;; #+nil
-;; (transduce (alexandria:compose (map #'1+)
-;;                                (fork #'evenp
-;;                                      (map (alexandria:compose #'write-to-string #'1+))
-;;                                      (map (const "Odd!")))
-;;                                (map #'length))
-;;            #'cons (range 1 6))
+#+nil
+(transduce (comp (map #'1+)
+                 (fork #'evenp
+                       (map (comp #'write-to-string #'1+))
+                       (map (const "Odd!")))
+                 (map #'length))
+           #'cons (range 1 6))
 
 (defun inject (f)
   "For each value in the transduction that actually affects the final
@@ -464,6 +464,25 @@ before the previous one."
 #+nil
 (transduce (inject (lambda (prime) (filter (lambda (n) (/= 0 (mod n prime))))))
            #'cons (range 3 100 :step 2))
+
+(defun par (f ta tb)
+  (lambda (reducer)
+    (let ((fa (funcall ta (last *done*)))
+          (fb (funcall tb (last *done*))))
+      (lambda (&optional (result nil r-p) (input nil i-p))
+        (cond ((and r-p i-p)
+               (let ((ra (funcall fa result input))
+                     (rb (funcall fb result input)))
+                 (cond ((reduced-p ra) ra)
+                       ((reduced-p rb) rb)
+                       ((eq ra result) result)
+                       ((eq rb result) result)
+                       (t (funcall reducer result (funcall f ra rb))))))
+              ((and r-p (not i-p) (funcall reducer result)))
+              (t (funcall reducer)))))))
+
+#+nil
+(transduce ())
 
 ;; --- Reducers --- ;;
 
@@ -851,25 +870,25 @@ like this, `fold' is appropriate."
 #+nil
 (transduce (take 10) #'cons (cycle '(1 2 3)))
 
-;; (declaim (ftype (function () generator) prime-sieve))
-;; (defun prime-sieve ()
-;;   "The Sieve of Erastothenes. Yields all prime numbers."
-;;   (let* ((primes (make-array 32 :element-type 'fixnum :adjustable t))
-;;          (ix 0)
-;;          (func (lambda ()
-;;                  (let (())))))
-;;     (make-generator :func func)))
-
-;; TODO remove
-#+nil
-(let ((a (make-array 8 :element-type 'fixnum
-                       :initial-contents '(2 3 5 7 11 13 17 19)
-                       :adjustable t)))
-  a)
-  ;; (setf (aref a 0) 1337)
-  ;; (adjust-array a 16 :initial-element 90))
-
 ;; --- Utilities --- ;;
+
+(defun ensure-function (arg)
+  (cond ((functionp arg) arg)
+        ((symbolp arg) (ensure-function (symbol-function arg)))
+        (t (error "Argument is not a function: ~a" arg))))
+
+;; TODO Make this a macro.
+(defun comp (function &rest functions)
+  (reduce (lambda (f g)
+            (let ((f (ensure-function f))
+                  (g (ensure-function g)))
+              (lambda (&rest arguments)
+                (funcall f (apply g arguments)))))
+          functions
+          :initial-value function))
+
+#+nil
+(funcall (comp (const 1337) (lambda (n) (* 2 n)) #'1+) 1)
 
 (defun const (item)
   "Return a function that ignores its argument and returns ITEM instead."
@@ -898,7 +917,3 @@ try to continue the transducing process."
       (if (reduced-p result)
           (make-reduced :val result)
           result))))
-
-;; (defun fooz ()
-;;   (transduce (alexandria:compose (drop 3) (take 2)) #'cons '(1 2 3 4 5 6)))
-

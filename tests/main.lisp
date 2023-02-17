@@ -1,6 +1,5 @@
 (defpackage transducers/tests
   (:use :cl :parachute)
-  (:import-from :alexandria :compose)
   (:local-nicknames (#:t #:transducers)))
 
 (in-package :transducers/tests)
@@ -95,7 +94,7 @@
   (is equal '(0 1 3 6 10)
       (t:transduce (t:scan #'+ 0) #'t:cons '(1 2 3 4)))
   (is equal '(0 1)
-      (t:transduce (compose (t:scan #'+ 0) (t:take 2))
+      (t:transduce (t:comp (t:scan #'+ 0) (t:take 2))
                    #'t:cons '(1 2 3 4))))
 
 (define-test "Composition"
@@ -105,7 +104,7 @@
                "Filtering"
                "Other")
   (is equal '(12 20 30)
-      (t:transduce (compose
+      (t:transduce (t:comp
                      #'t:enumerate
                      (t:map (lambda (pair) (* (car pair) (cdr pair))))
                      (t:filter #'evenp)
@@ -115,9 +114,9 @@
                    '(1 2 3 4 5 6 7 8 9 10))))
 
 #+nil
-(t:transduce (compose (t:drop 3) (t:take 2)) #'t:cons '(1 2 3 4 5 6))
+(t:transduce (t:comp (t:drop 3) (t:take 2)) #'t:cons '(1 2 3 4 5 6))
 #+nil
-(funcall (compose #'1+ (lambda (n) (* 2 n))) 7)
+(funcall (t:comp #'1+ (lambda (n) (* 2 n))) 7)
 
 (define-test "Generators"
   :depends-on (reduction transduction)
@@ -132,12 +131,12 @@
 (define-test "Higher Order Transducers"
   :depends-on (reduction transduction)
   (is equal '(1 4 1 4 1)
-      (t:transduce (compose (t:map #'1+)
-                            (t:fork #'evenp
-                                    (t:map (compose #'write-to-string #'1+))
-                                    (t:map (t:const "Odd!")))
-                            (t:map #'length))
-                 #'t:cons (t:range 1 6))))
+      (t:transduce (t:comp (t:map #'1+)
+                           (t:fork #'evenp
+                                   (t:map (t:comp #'write-to-string #'1+))
+                                   (t:map (t:const "Odd!")))
+                           (t:map #'length))
+                   #'t:cons (t:range 1 6))))
 
 #+nil
 (test 'transducers/tests)
