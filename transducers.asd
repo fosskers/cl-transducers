@@ -12,8 +12,7 @@
 (defsystem "transducers/tests"
   :author ""
   :license ""
-  :depends-on (:transducers
-               :parachute)
+  :depends-on (:transducers :parachute)
   :components ((:module "tests"
                 :components
                 ((:file "main"))))

@@ -132,9 +132,9 @@
   :depends-on (reduction transduction)
   (is equal '(1 4 1 4 1)
       (t:transduce (t:comp (t:map #'1+)
-                           (t:fork #'evenp
-                                   (t:map (t:comp #'write-to-string #'1+))
-                                   (t:map (t:const "Odd!")))
+                           (t:branch #'evenp
+                                     (t:map (t:comp #'write-to-string #'1+))
+                                     (t:map (t:const "Odd!")))
                            (t:map #'length))
                    #'t:cons (t:range 1 6))))
 

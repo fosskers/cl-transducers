@@ -15,7 +15,7 @@
            #:intersperse #:enumerate #:step #:scan
            #:log)
   ;; --- Higher Order Transducers --- ;;
-  (:export #:fork #:par)
+  (:export #:branch #:par #:inject)
   ;; --- Reducers -- ;;
   (:export #:cons #:vector #:string
            #:count
@@ -35,6 +35,16 @@
 ;; zipping via a `branch' or `par' H.O.T. Can accept as many branches as you
 ;; give it, and the re-fusing step at the end has to accept the branch of values
 ;; via `multi-value-bind'.
+;;
+;; `trident' (or `tri'), for when you want to have 2+ branches iterate AND
+;; reduce completely independently, then optionally fuse their contents all back
+;; together at the end to continue with the normal transduction.
+
+;; FIXME Find a better place for this.
+;; It's only here because of an occasional loading order problem.
+(defstruct generator
+  "A wrapper around a function that can potentially yield endless values."
+  (func nil :read-only t :type (function () *)))
 
 ;; --- Transducers --- ;;
 
@@ -122,7 +132,7 @@ that are non-nil."
                                  (funcall reducer result input)
                                  result)))
                  (setf new-n (1- new-n))
-                 (if (not (> new-n 0))
+                 (if (zerop new-n)
                      (ensure-reduced result)
                      result)))
               ((and r-p (not i-p)) (funcall reducer result))
@@ -393,7 +403,7 @@ function F.
 
 ;; --- Higher Order Transducers --- ;;
 
-(defun fork (pred ta tb)
+(defun branch (pred ta tb)
   "If a PRED yields non-NIL on a value, proceed with transducer chain TA.
 Otherwise, follow chain TB. This produces a kind of diamond pattern of data flow
 within the transduction:
@@ -408,9 +418,9 @@ above), you should make sure that they can handle the return values of both
 sides!
 
 (transduce (comp (map #'1+)
-                 (fork #'evenp
-                       (map (comp #'write-to-string #'1+))
-                       (map (const \"Odd!\")))
+                 (branch #'evenp
+                         (map (comp #'write-to-string #'1+))
+                         (map (const \"Odd!\")))
                  (map #'length))
            #'cons (range 1 6))
 => (1 4 1 4 1)
@@ -436,7 +446,7 @@ sides!
 
 #+nil
 (transduce (comp (map #'1+)
-                 (fork #'evenp
+                 (branch #'evenp
                        (map (comp #'write-to-string #'1+))
                        (map (const "Odd!")))
                  (map #'length))
@@ -466,6 +476,29 @@ before the previous one."
            #'cons (range 3 100 :step 2))
 
 (defun par (f ta tb)
+  "Traverse two transducer paths at the same time, combining the results of each
+path with a given function F before moving on. This is similar to the `zip'
+concept from other languages.
+
+Given the following transducer chain:
+
+     /4a-5a-6a\\
+1-2-3          7-8-9
+     \\4b-5b---/
+
+The function F would be applied right before Step 7. In this case, the function
+would have to expect the output types of Step 6a and 5b as its arguments.
+
+Note 1: If either branch yields a 'reduced' value, then the entire chain
+short-circuits and that is the value applied to the reducer one final time.
+
+Note 2: This function has potentially non-intuitive behaviour with regards to
+functions like `filter' that don't always contribute to the final result. The
+function F will only be applied (and thus pass values on) if both branches
+produced a new value. If either branch 'died' for a particular value, then so
+too will the other branch. If this is undesirable, see the higher-order
+transducer `tri' for an alternative.
+"
   (lambda (reducer)
     (let ((fa (funcall ta (last *done*)))
           (fb (funcall tb (last *done*))))
@@ -482,7 +515,12 @@ before the previous one."
               (t (funcall reducer)))))))
 
 #+nil
-(transduce ())
+(transduce (comp (map (lambda (n) (* 3 n)))
+                 (par (lambda (a b) (+ a b))
+                      (comp (map (lambda (a) (* 1000 a))))
+                      (comp (map (lambda (b) (* 3 b)))))
+                 (map (lambda (n) (* 2 n))))
+           #'+ (range 1 2))
 
 ;; --- Reducers --- ;;
 
@@ -769,10 +807,6 @@ like this, `fold' is appropriate."
     (recurse identity)))
 
 ;; --- Generators --- ;;
-
-(defstruct generator
-  "A wrapper around a function that can potentially yield endless values."
-  (func nil :read-only t :type (function () *)))
 
 (defparameter *done* 'done
   "A value to signal the end of an unfolding process.")
