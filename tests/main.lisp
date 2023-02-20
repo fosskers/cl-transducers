@@ -136,7 +136,12 @@
                                      (t:map (t:comp #'write-to-string #'1+))
                                      (t:map (t:const "Odd!")))
                            (t:map #'length))
-                   #'t:cons (t:range 1 6))))
+                   #'t:cons (t:range 1 6)))
+  (is equal '((1 2 3 4 5 6 7 8 9) . 12)
+      (t:transduce (t:comp (t:map #'1+)
+                           (t:split (t:comp (t:filter #'evenp) (t:take 3)) #'+)
+                           (t:map #'1-))
+           #'t:cons (t:range 1 10))))
 
 #+nil
 (test 'transducers/tests)

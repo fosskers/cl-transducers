@@ -2,7 +2,7 @@
   (:use :cl)
   (:local-nicknames (#:q #:sycamore)
                     (#:s #:fset))
-  (:shadow #:map #:concatenate #:log #:step
+  (:shadow #:map #:concatenate #:log #:step #:split
            #:cons #:count #:first #:last #:max #:min #:find #:string #:vector)
   ;; --- Entry Points --- ;;
   (:export #:transduce)
@@ -15,7 +15,7 @@
            #:intersperse #:enumerate #:step #:scan
            #:log)
   ;; --- Higher Order Transducers --- ;;
-  (:export #:branch #:par #:inject)
+  (:export #:branch #:inject #:split)
   ;; --- Reducers -- ;;
   (:export #:cons #:vector #:string
            #:count
@@ -452,6 +452,30 @@ sides!
                  (map #'length))
            #'cons (range 1 6))
 
+(defun split (ta ra)
+  "Split off a new transducer chain, feeding it each input as well. It reduces on
+its own given RA reducer. The final result is a cons-cell where the first value
+is the result of the original transduction, and the second is that of the
+branch."
+  (lambda (reducer)
+    (let ((fa (funcall ta ra))
+          (other-res (funcall ra)))
+      (lambda (&optional (result nil r-p) (input nil i-p))
+        (cond ((and r-p i-p)
+               (unless (reduced-p other-res)
+                 (setf other-res (funcall fa other-res input)))
+               (funcall reducer result input))
+              ((and r-p (not i-p))
+               (cl:cons (funcall reducer result)
+                        (funcall fa (ensure-unreduced other-res))))
+              (t (funcall reducer)))))))
+
+#+nil
+(transduce (comp (map #'1+)
+                 (split (comp (filter #'evenp) (take 3)) #'+)
+                 (map #'1-))
+           #'cons (range 1 10))
+
 (defun inject (f)
   "For each value in the transduction that actually affects the final
 result (tested with `EQ'), inject an extra transduction step into the chain
@@ -521,6 +545,45 @@ transducer `tri' for an alternative.
                       (comp (map (lambda (b) (* 3 b)))))
                  (map (lambda (n) (* 2 n))))
            #'+ (range 1 2))
+
+;; FIXME There is a problem here. If one side reduces early (thus waiting for
+;; the other), new input values are lost on the waiting branch. I must decide if
+;; this is acceptable.
+(defun tri (f ta ra tb rb)
+  "The Trident."
+  (lambda (reducer)
+    (let* ((fa (funcall ta ra))
+           (fb (funcall tb rb))
+           (a-id (funcall ra))
+           (b-id (funcall rb))
+           (res-a a-id)
+           (res-b b-id))
+      (lambda (&optional (result nil r-p) (input nil i-p))
+        (cond ((and r-p i-p)
+               (unless (reduced-p res-a)
+                 (setf res-a (funcall fa res-a input)))
+               (unless (reduced-p res-b)
+                 (setf res-b (funcall fb res-b input)))
+               (when (and (reduced-p res-a)
+                          (reduced-p res-b))
+                 (let* ((fused (funcall f
+                                        (funcall fa (reduced-val res-a))
+                                        (funcall fb (reduced-val res-b))))
+                        (res (funcall reducer result fused)))
+                   (setf res-a a-id)
+                   (setf res-b b-id)
+                   res)))
+              ((and r-p (not i-p)) (funcall reducer result))
+              (t (funcall reducer)))))))
+
+#+nil
+(transduce (comp (map #'1+)
+                 (tri #'*
+                      (comp (filter #'evenp) (take 3)) #'+
+                      (comp (filter #'oddp)  (take 4)) #'*)
+                 (map #'1+))
+           #'cons
+           (range 1 20))
 
 ;; --- Reducers --- ;;
 
@@ -939,6 +1002,12 @@ like this, `fold' is appropriate."
   (if (reduced-p x)
       x
       (make-reduced :val x)))
+
+(defun ensure-unreduced (x)
+  "Ensure that X is unreduced."
+  (if (reduced-p x)
+      (reduced-val x)
+      x))
 
 (defun preserving-reduced (reducer)
  "A helper function that wraps a reduced value twice since reducing
