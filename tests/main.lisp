@@ -10,33 +10,33 @@
 
 (define-test "Collecting"
   :parent reduction
-  (is equal '() (t:transduce (t:map #'identity) #'t:cons '()))
-  (is equalp #() (t:transduce (t:map #'identity) #'t:vector #()))
-  (is equal "hello" (t:transduce (t:map #'identity) #'t:string "hello")))
+  (is equal '() (t:transduce #'t:pass #'t:cons '()))
+  (is equalp #() (t:transduce #'t:pass #'t:vector #()))
+  (is equal "hello" (t:transduce #'t:pass #'t:string "hello")))
 
 (define-test "Counting"
   :parent reduction
-  (is = 0 (t:transduce (t:map #'identity) #'t:count '()))
-  (is = 3 (t:transduce (t:map #'identity) #'t:count '(1 2 3)))
-  (is = 0 (t:transduce (t:map #'identity) #'t:count #()))
-  (is = 3 (t:transduce (t:map #'identity) #'t:count #(1 2 3))))
+  (is = 0 (t:transduce #'t:pass #'t:count '()))
+  (is = 3 (t:transduce #'t:pass #'t:count '(1 2 3)))
+  (is = 0 (t:transduce #'t:pass #'t:count #()))
+  (is = 3 (t:transduce #'t:pass #'t:count #(1 2 3))))
 
 (define-test "Predicates"
   :parent reduction
-  (false (t:transduce (t:map #'identity) (t:any #'evenp) '(1 3 5 7 9)))
-  (true  (t:transduce (t:map #'identity) (t:any #'evenp) '(1 3 5 7 9 2)))
-  (true  (t:transduce (t:map #'identity) (t:all #'oddp) '(1 3 5 7 9)))
-  (false (t:transduce (t:map #'identity) (t:all #'oddp) '(1 3 5 7 9 2))))
+  (false (t:transduce #'t:pass (t:any #'evenp) '(1 3 5 7 9)))
+  (true  (t:transduce #'t:pass (t:any #'evenp) '(1 3 5 7 9 2)))
+  (true  (t:transduce #'t:pass (t:all #'oddp) '(1 3 5 7 9)))
+  (false (t:transduce #'t:pass (t:all #'oddp) '(1 3 5 7 9 2))))
 
 (define-test "First and Last"
   :parent reduction
   (is = 7  (t:transduce (t:filter #'oddp) (t:first 0) '(2 4 6 7 10)))
-  (is = 10 (t:transduce (t:map #'identity) (t:last 0) '(2 4 6 7 10))))
+  (is = 10 (t:transduce #'t:pass (t:last 0) '(2 4 6 7 10))))
 
 (define-test "Folding and Finding"
   :parent reduction
-  (is = 1000 (t:transduce (t:map #'identity) (t:fold #'cl:max 0) '(1 2 3 4 1000 5 6)))
-  (is = 6 (t:transduce (t:map #'identity) (t:find #'evenp) '(1 3 5 6 9))))
+  (is = 1000 (t:transduce #'t:pass (t:fold #'cl:max 0) '(1 2 3 4 1000 5 6)))
+  (is = 6 (t:transduce #'t:pass (t:find #'evenp) '(1 3 5 6 9))))
 
 (define-test transduction)
 

@@ -7,7 +7,7 @@
   ;; --- Entry Points --- ;;
   (:export #:transduce)
   ;; --- Transducers -- ;;
-  (:export #:map
+  (:export #:pass #:map
            #:filter #:filter-map #:unique #:dedup
            #:drop #:drop-while #:take #:take-while
            #:concatenate #:flatten
@@ -30,15 +30,7 @@
 (in-package :transducers)
 
 ;; TODO
-;; pass/void
-;;
-;; zipping via a `branch' or `par' H.O.T. Can accept as many branches as you
-;; give it, and the re-fusing step at the end has to accept the branch of values
-;; via `multi-value-bind'.
-;;
-;; `trident' (or `tri'), for when you want to have 2+ branches iterate AND
-;; reduce completely independently, then optionally fuse their contents all back
-;; together at the end to continue with the normal transduction.
+;; Check the third arity branch: does it ever happen?
 
 ;; FIXME Find a better place for this.
 ;; It's only here because of an occasional loading order problem.
@@ -47,6 +39,14 @@
   (func nil :read-only t :type (function () *)))
 
 ;; --- Transducers --- ;;
+
+(defun pass (reducer)
+  "Just pass along each value of the transduction. Same in intent with applying
+`map' to `identity', but this should be slightly more efficient."
+  (lambda (&optional (result nil r-p) (input nil i-p))
+    (cond ((and r-p i-p) (funcall reducer result input))
+          ((and r-p (not i-p)) (funcall reducer result))
+          (t (funcall reducer)))))
 
 (defun map (f)
   "Apply a function F to all elements of the transduction."
@@ -498,8 +498,12 @@ before the previous one."
               (t (funcall reducer)))))))
 
 #+nil
-(transduce (inject (lambda (prime) (filter (lambda (n) (/= 0 (mod n prime))))))
-           #'cons (range 3 100 :step 2))
+(transduce (comp (inject (lambda (prime) (filter (lambda (n) (/= 0 (mod n prime))))))
+                 (take 10))
+           #'cons (ints 3 :step 2))
+
+#+nil
+(transduce (map #'length) #'+ #p"transducers.lisp")
 
 (defun par (f ta tb)
   "Traverse two transducer paths at the same time, combining the results of each
@@ -624,7 +628,7 @@ transducer `tri' for an alternative.
         (t 0)))
 
 #+nil
-(list-transduce (map #'identity) #'count '(1 2 3 4 5))
+(list-transduce #'pass #'count '(1 2 3 4 5))
 
 (defun any (pred)
   "Yield non-NIL if any element in the transduction satisfies PRED. Short-circuits
@@ -639,9 +643,9 @@ the transduction as soon as the condition is met."
           (t nil))))
 
 #+nil
-(list-transduce (map #'identity) (any #'evenp) '(1 3 5 7 9))
+(list-transduce #'pass (any #'evenp) '(1 3 5 7 9))
 #+nil
-(list-transduce (map #'identity) (any #'evenp) '(1 3 5 7 9 2))
+(list-transduce #'pass (any #'evenp) '(1 3 5 7 9 2))
 
 (defun all (pred)
   "Yield non-NIL if all elements of the transduction satisfy PRED. Short-circuits
@@ -656,9 +660,9 @@ with NIL if any element fails the test."
           (t t))))
 
 #+nil
-(list-transduce (map #'identity) (all #'oddp) '(1 3 5 7 9))
+(list-transduce #'pass (all #'oddp) '(1 3 5 7 9))
 #+nil
-(list-transduce (map #'identity) (all #'oddp) '(1 3 5 7 9 2))
+(list-transduce #'pass (all #'oddp) '(1 3 5 7 9 2))
 
 (defun first (seed)
   "Yield the first value of the transduction, or the SEED if there were none."
@@ -678,7 +682,7 @@ with NIL if any element fails the test."
           (t seed))))
 
 #+nil
-(list-transduce (map #'identity) (last 0) '(2 4 6 7 10))
+(list-transduce #'pass (last 0) '(2 4 6 7 10))
 
 (defun fold (f seed)
   "The fundamental reducer. `fold' creates an ad-hoc reducer based on
@@ -696,7 +700,7 @@ like this, `fold' is appropriate."
           (t seed))))
 
 #+nil
-(list-transduce (map #'identity) (fold #'cl:max 0) '(1 2 3 4 1000 5 6))
+(list-transduce #'pass (fold #'cl:max 0) '(1 2 3 4 1000 5 6))
 
 (defun max (seed)
   "Yield the maximum value of the transduction, or the SEED if there were none."
@@ -718,7 +722,7 @@ like this, `fold' is appropriate."
           (t nil))))
 
 #+nil
-(list-transduce (map #'identity) (find #'evenp) '(1 3 5 6 9))
+(list-transduce #'pass (find #'evenp) '(1 3 5 6 9))
 
 ;; --- Entry Points --- ;;
 
@@ -757,7 +761,7 @@ like this, `fold' is appropriate."
   (setf (gethash 'c hm) 3)
   (transduce (filter #'evenp) (max 0) hm))
 #+nil
-(transduce (map #'identity) #'count #p"/home/colin/history.txt")
+(transduce #'pass #'count #p"/home/colin/history.txt")
 
 (declaim (ftype (function (t t list) *) list-transduce))
 (defun list-transduce (xform f coll)
@@ -852,7 +856,7 @@ like this, `fold' is appropriate."
       (recurse identity))))
 
 #+nil
-(file-transduce (map #'identity) #'count "/home/colin/history.txt")
+(file-transduce #'pass #'count "/home/colin/history.txt")
 
 (defun generator-transduce (xform f gen)
   "Transduce over a potentially endless stream of values from a generator GEN."
