@@ -23,7 +23,7 @@
            #:first #:last
            #:fold #:max #:min #:find)
   ;; --- Generators --- ;;
-  (:export #:range #:cycle #:repeat)
+  (:export #:ints #:cycle #:repeat)
   ;; --- Utilities --- ;;
   (:export #:comp #:const))
 
@@ -132,7 +132,7 @@ that are non-nil."
                                  (funcall reducer result input)
                                  result)))
                  (setf new-n (1- new-n))
-                 (if (zerop new-n)
+                 (if (<= new-n 0)
                      (ensure-reduced result)
                      result)))
               ((and r-p (not i-p)) (funcall reducer result))
@@ -140,6 +140,8 @@ that are non-nil."
 
 #+nil
 (list-transduce (take 3) #'cons '(1 2 3 4 5))
+#+nil
+(list-transduce (take 0) #'cons '(1 2 3 4 5))
 
 (defun take-while (pred)
   "Keep only elements which satisfy a given PRED, and stop the transduction as
@@ -910,28 +912,20 @@ like this, `fold' is appropriate."
 #+nil
 (transduce (take 4) #'cons (repeat 9))
 
-(declaim (ftype (function (fixnum fixnum &key (:step fixnum)) generator) range))
-(defun range (start end &key (step 1))
-  "Yield all the numbers from START to END."
-  ;; FIXME How to do this with the type system?
-  (when (< step 1)
-    (error "The step value must be a positive integer."))
+(declaim (ftype (function (integer &key (:step fixnum)) generator) ints))
+(defun ints (start &key (step 1))
+  "Yield all integers, beginning with START and advancing by an optional STEP value
+which can be positive or negative. If you only want a specific range within the
+transduction, then use `take-while' within your transducer chain."
   (let* ((curr start)
-         (inc (if (< start end)
-                  (lambda (n) (+ n step))
-                  (lambda (n) (- n step))))
-         (check (if (< start end) #'>= #'<=))
          (func (lambda ()
-                 (cond ((funcall check curr end) *done*)
-                       (t (let ((old curr))
-                            (setf curr (funcall inc curr))
-                            old))))))
+                 (let ((old curr))
+                   (setf curr (+ curr step))
+                   old))))
     (make-generator :func func)))
 
 #+nil
-(transduce (map #'identity) #'cons (range 0 10))
-#+nil
-(transduce (map #'identity) (last 0) (range 0 100000000))
+(transduce (take 10) #'cons (ints 0 :step 2))
 
 (defgeneric cycle (seq)
   (:documentation "Yield the values of a given SEQ endlessly."))
