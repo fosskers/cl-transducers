@@ -59,6 +59,14 @@ transduction, then use `take-while' within your transducer chain."
 #+nil
 (transduce (take 10) #'cons (ints 0 :step 2))
 
+(declaim (ftype (function ((or single-float double-float integer)) generator) random))
+(defun random (limit)
+  "Yield an endless stream of random numbers."
+  (make-generator :func (lambda () (cl:random limit))))
+
+#+nil
+(transduce (take 5) #'cons (random 1.0))
+
 (defgeneric cycle (seq)
   (:documentation "Yield the values of a given SEQ endlessly."))
 

@@ -3,7 +3,8 @@
   (:local-nicknames (#:q #:sycamore)
                     (#:s #:fset))
   (:shadow #:map #:concatenate #:log #:step #:split
-           #:cons #:count #:first #:last #:max #:min #:find #:string #:vector)
+           #:cons #:count #:first #:last #:max #:min #:find #:string #:vector
+           #:random)
   ;; --- Entry Points --- ;;
   (:export #:transduce)
   ;; --- Transducers -- ;;
@@ -23,7 +24,7 @@
            #:first #:last
            #:fold #:max #:min #:find)
   ;; --- Generators --- ;;
-  (:export #:ints #:cycle #:repeat)
+  (:export #:ints #:cycle #:repeat #:random)
   ;; --- Utilities --- ;;
   (:export #:comp #:const)
   (:documentation "Ergonomic, efficient data processing."))
