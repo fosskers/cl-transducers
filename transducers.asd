@@ -5,7 +5,11 @@
   :depends-on (:sycamore :fset)
   :components ((:module "src"
                 :components
-                ((:file "transducers"))))
+                ((:file "transducers")
+                 (:file "reducers")
+                 (:file "generators")
+                 (:file "entry")
+                 (:file "utils"))))
   :description ""
   :in-order-to ((test-op (test-op :transducers/tests))))
 
