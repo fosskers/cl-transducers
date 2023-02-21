@@ -17,7 +17,8 @@
 #+nil
 (string-transduce (map #'char-upcase) #'string "hello")
 
-(defun vector (&optional (acc nil a-p) (input #\z i-p))
+(declaim (ftype (function (&optional list t) *) vector))
+(defun vector (&optional (acc nil a-p) (input nil i-p))
   "Reduce a stream of values into to a vector."
   (cond ((and a-p i-p) (cl:cons input acc))
         ((and a-p (not i-p)) (cl:concatenate 'cl:vector (reverse acc)))
@@ -26,8 +27,8 @@
 #+nil
 (vector-transduce (map #'1+) #'vector #(1 2 3))
 
-(declaim (ftype (function (&optional t t) fixnum) count))
-(defun count (&optional (acc nil a-p) (input nil i-p))
+(declaim (ftype (function (&optional fixnum t) fixnum) count))
+(defun count (&optional (acc 0 a-p) (input nil i-p))
   "Count the number of elements that made it through the transduction."
   (declare (ignore input))
   (cond ((and a-p i-p) (1+ acc))
@@ -37,6 +38,7 @@
 #+nil
 (transduce #'pass #'count '(1 2 3 4 5))
 
+(declaim (ftype (function ((function (t) *)) *) any))
 (defun any (pred)
   "Yield non-NIL if any element in the transduction satisfies PRED. Short-circuits
 the transduction as soon as the condition is met."
@@ -54,6 +56,7 @@ the transduction as soon as the condition is met."
 #+nil
 (transduce #'pass (any #'evenp) '(1 3 5 7 9 2))
 
+(declaim (ftype (function ((function (t) *)) *) all))
 (defun all (pred)
   "Yield non-NIL if all elements of the transduction satisfy PRED. Short-circuits
 with NIL if any element fails the test."
@@ -91,6 +94,7 @@ with NIL if any element fails the test."
 #+nil
 (transduce #'pass (last 0) '(2 4 6 7 10))
 
+(declaim (ftype (function ((function (t t) *) t) *) fold))
 (defun fold (f seed)
   "The fundamental reducer. `fold' creates an ad-hoc reducer based on
 a given 2-argument function. A SEED is also required as the initial accumulator
@@ -117,6 +121,7 @@ like this, `fold' is appropriate."
   "Yield the minimum value of the transduction, or the SEED if there were none."
   (fold #'cl:min seed))
 
+(declaim (ftype (function ((function (t) *)) *) find))
 (defun find (pred)
   "Find the first element in the transduction that satisfies a given PRED. Yields
 `nil' if no such element were found."

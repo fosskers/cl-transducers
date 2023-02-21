@@ -37,6 +37,7 @@ shorter to type."
     (if i-p (funcall reducer result input)
         (funcall reducer result))))
 
+(declaim (ftype (function ((function (t) *)) *) map))
 (defun map (f)
   "Apply a function F to all elements of the transduction."
   (lambda (reducer)
@@ -47,6 +48,7 @@ shorter to type."
 #+nil
 (transduce (map #'1+) #'cons '(1 2 3 4 5))
 
+(declaim (ftype (function ((function (t) *)) *) filter))
 (defun filter (pred)
   "Only keep elements from the transduction that satisfy PRED."
   (lambda (reducer)
@@ -59,6 +61,7 @@ shorter to type."
 #+nil
 (transduce (filter #'evenp) #'cons '(1 2 3 4 5))
 
+(declaim (ftype (function ((function (t) *)) *) filter-map))
 (defun filter-map (f)
   "Apply a function F to the elements of the transduction, but only keep results
 that are non-nil."
@@ -89,6 +92,7 @@ that are non-nil."
 #+nil
 (transduce (drop 3) #'cons '(1 2 3 4 5))
 
+(declaim (ftype (function ((function (t) *)) *) drop-while))
 (defun drop-while (pred)
   "Drop elements from the front of the transduction that satisfy PRED."
   (lambda (reducer)
@@ -123,6 +127,7 @@ that are non-nil."
 #+nil
 (transduce (take 0) #'cons '(1 2 3 4 5))
 
+(declaim (ftype (function ((function (t) *)) *) take-while))
 (defun take-while (pred)
   "Keep only elements which satisfy a given PRED, and stop the transduction as
 soon as any element fails the test."
@@ -187,6 +192,7 @@ accumulated state, which may be shorter than N."
 #+nil
 (transduce (segment 3) #'cons '(1 2 3 4 5))
 
+(declaim (ftype (function ((function (t) *)) *) group-by))
 (defun group-by (f)
   "Group the input stream into sublists via some function F. The cutoff criterion
 is whether the return value of F changes between two consecutive elements of the

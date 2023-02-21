@@ -28,12 +28,14 @@
   "A wrapper that signals that reduction has completed."
   val)
 
+(declaim (ftype (function ((or t reduced)) reduced) ensure-reduced))
 (defun ensure-reduced (x)
   "Ensure that X is reduced."
   (if (reduced-p x)
       x
       (make-reduced :val x)))
 
+(declaim (ftype (function ((or t reduced)) *) ensure-unreduced))
 (defun ensure-unreduced (x)
   "Ensure that X is unreduced."
   (if (reduced-p x)

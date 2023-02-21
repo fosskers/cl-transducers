@@ -9,6 +9,7 @@
 
 ;; TODO type signature, expecting `values' to be called within the given
 ;; function.
+(declaim (ftype (function ((function (t) *) t) generator) unfold))
 (defun unfold (f seed)
   (let* ((curr seed)
          (func (lambda ()
