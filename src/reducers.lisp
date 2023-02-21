@@ -2,14 +2,14 @@
 
 (declaim (ftype (function (&optional list t) list) cons))
 (defun cons (&optional (acc nil a-p) (input nil i-p))
-  "A transducer-friendly consing reducer with '() as the identity."
+  "Collect all results as a list."
   (cond ((and a-p i-p) (cl:cons input acc))
         ((and a-p (not i-p)) (reverse acc))
         (t '())))
 
 (declaim (ftype (function (&optional list character) *) string))
 (defun string (&optional (acc nil a-p) (input #\z i-p))
-  "Reduce a stream of characters into to a single string."
+  "Collect a stream of characters into to a single string."
   (cond ((and a-p i-p) (cl:cons input acc))
         ((and a-p (not i-p)) (cl:concatenate 'cl:string (reverse acc)))
         (t '())))
@@ -19,7 +19,7 @@
 
 (declaim (ftype (function (&optional list t) *) vector))
 (defun vector (&optional (acc nil a-p) (input nil i-p))
-  "Reduce a stream of values into to a vector."
+  "Collect a stream of values into to a vector."
   (cond ((and a-p i-p) (cl:cons input acc))
         ((and a-p (not i-p)) (cl:concatenate 'cl:vector (reverse acc)))
         (t '())))

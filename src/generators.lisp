@@ -7,7 +7,7 @@
 (defparameter *done* 'done
   "A value to signal the end of an unfolding process.")
 
-;; TODO type signature, expecting `values' to be called within the given
+;; FIXME type signature, expecting `values' to be called within the given
 ;; function.
 (declaim (ftype (function ((function (t) *) t) generator) unfold))
 (defun unfold (f seed)

@@ -25,7 +25,8 @@
   ;; --- Generators --- ;;
   (:export #:ints #:cycle #:repeat)
   ;; --- Utilities --- ;;
-  (:export #:comp #:const))
+  (:export #:comp #:const)
+  (:documentation "Ergonomic, efficient data processing."))
 
 (in-package :transducers)
 
@@ -64,7 +65,11 @@ shorter to type."
 (declaim (ftype (function ((function (t) *)) *) filter-map))
 (defun filter-map (f)
   "Apply a function F to the elements of the transduction, but only keep results
-that are non-nil."
+that are non-nil.
+
+(transduce (filter-map #'cl:first) #'cons '(() (2 3) () (5 6) () (8 9)))
+=> (2 5 8)
+"
   (lambda (reducer)
     (lambda (result &optional (input nil i-p))
       (if i-p (let ((x (funcall f input)))
@@ -196,7 +201,11 @@ accumulated state, which may be shorter than N."
 (defun group-by (f)
   "Group the input stream into sublists via some function F. The cutoff criterion
 is whether the return value of F changes between two consecutive elements of the
-transduction."
+transduction.
+
+(transduce (group-by #'evenp) #'cons '(2 4 6 7 9 1 2 4 6 3))
+=> ((2 4 6) (7 9 1) (2 4 6) (3))
+"
   (lambda (reducer)
     (let ((prev 'nothing)
           (collect '()))
