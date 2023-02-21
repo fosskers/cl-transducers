@@ -65,7 +65,22 @@ transduction, then use `take-while' within your transducer chain."
   (make-generator :func (lambda () (cl:random limit))))
 
 #+nil
-(transduce (take 5) #'cons (random 1.0))
+(transduce (take 20) #'cons (random 10))
+
+(declaim (ftype (function (cl:vector) generator) shuffle))
+(defun shuffle (vec)
+  "Endlessly yield random elements from a given vector. Recall also that strings
+are vectors too, so:
+
+(transduce (take 5) #'string (shuffle \"Númenor\"))
+=> \"mNNrú\"
+"
+  (let* ((len (length vec))
+         (func (lambda () (aref vec (cl:random len)))))
+    (make-generator :func func)))
+
+#+nil
+(transduce (take 5) #'cons (shuffle #("Colin" "Tamayo" "Natsume")))
 
 (defgeneric cycle (seq)
   (:documentation "Yield the values of a given SEQ endlessly."))

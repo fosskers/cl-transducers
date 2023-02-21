@@ -24,7 +24,7 @@
            #:first #:last
            #:fold #:max #:min #:find)
   ;; --- Generators --- ;;
-  (:export #:ints #:cycle #:repeat #:random)
+  (:export #:ints #:cycle #:repeat #:random #:shuffle)
   ;; --- Utilities --- ;;
   (:export #:comp #:const)
   (:documentation "Ergonomic, efficient data processing."))
