@@ -701,6 +701,9 @@ like this, `fold' is appropriate."
 (defmethod transduce (xform f (source generator))
   (generator-transduce xform f source))
 
+(defmethod transduce (xform f (source stream))
+  (stream-transduce xform f source))
+
 #+nil
 (transduce (map #'char-upcase) #'string "hello")
 #+nil
@@ -713,8 +716,6 @@ like this, `fold' is appropriate."
   (setf (gethash 'b hm) 2)
   (setf (gethash 'c hm) 3)
   (transduce (filter #'evenp) (max 0) hm))
-#+nil
-(transduce #'pass #'count #p"/home/colin/history.txt")
 
 (declaim (ftype (function (t t list) *) list-transduce))
 (defun list-transduce (xform f coll)
@@ -798,18 +799,30 @@ like this, `fold' is appropriate."
 
 (defun file-reduce (f identity filename)
   (with-open-file (stream filename)
-    (labels ((recurse (acc)
-               (let ((line (read-line stream nil)))
-                 (if (not line)
-                     acc
-                     (let ((acc (funcall f acc line)))
-                       (if (reduced-p acc)
-                           (reduced-val acc)
-                           (recurse acc)))))))
-      (recurse identity))))
+    (stream-reduce f identity stream)))
 
 #+nil
 (file-transduce #'pass #'count "/home/colin/history.txt")
+
+(defun stream-transduce (xform f stream)
+  "Transduce over the lines of a given STREAM. Note: Closing the stream is the
+responsiblity of the caller!"
+  (let* ((init   (funcall f))
+         (xf     (funcall xform f))
+         (result (stream-reduce xf init stream)))
+    (funcall xf result)))
+
+(defun stream-reduce (f identity stream)
+  (labels ((recurse (acc)
+            (let ((line (read-line stream nil)))
+              (if (not line)
+                  acc
+                  (let ((acc (funcall f acc line)))
+                    (if (reduced-p acc)
+                        (reduced-val acc)
+                        (recurse acc)))))))
+   (recurse identity)))
+
 
 (defun generator-transduce (xform f gen)
   "Transduce over a potentially endless stream of values from a generator GEN."
