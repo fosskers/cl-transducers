@@ -32,3 +32,13 @@
                 :components
                 ((:file "csv"))))
   :description "CSV extension for Transducers.")
+
+(defsystem "transducers-jzon"
+  :version "0.1.0"
+  :author "Colin Woodbury <colin@fosskers.ca>"
+  :license ""
+  :depends-on (:transducers :com.inuoe.jzon)
+  :components ((:module "jzon"
+                :components
+                ((:file "jzon"))))
+  :description "JSON extension for Transducers.")
