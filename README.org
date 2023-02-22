@@ -25,7 +25,7 @@ evenly-lengthed lines./
 #+begin_src lisp
 (transduce
   ;; How do we want to process each element?
-  (compose (step 2) (map #'length) (filter #'evenp))
+  (comp (step 2) (map #'length) (filter #'evenp))
   ;; How do we want to combine all the elements together?
   #'+
   ;; What's our original data source?
@@ -37,31 +37,36 @@ evenly-lengthed lines./
 - [[#installation][Installation]]
 - [[#usage][Usage]]
   - [[#importing][Importing]]
-  - [[#transducers-and-reducers][Transducers and Reducers]]
+  - [[#transducers-reducers-and-sources][Transducers, Reducers, and Sources]]
   - [[#using-the-fold-reducer][Using the =fold= Reducer]]
+  - [[#processing-json-data][Processing JSON Data]]
+  - [[#processing-csv-data][Processing CSV Data]]
   - [[#writing-your-own-transducers--reducers][Writing your own Transducers / Reducers]]
-- [[#differences-with-other-approaches][Differences with other Approaches]]
-  - [[#the-common-lisp-loop-macro][The Common Lisp =loop= Macro]]
-  - [[#clojure][Clojure]]
-  - [[#srfi-171][SRFI-171]]
-  - [[#rusts-iterators][Rust's Iterators]]
-  - [[#haskells-laziness][Haskell's Laziness]]
-- [[#performance][Performance]]
+- [[#compatibility-chart][Compatibility Chart]]
+- [[#examples][Examples]]
+  - [[#words-in-a-file][Words in a File]]
+  - [[#sieve-of-eratosthenes][Sieve of Eratosthenes]]
 - [[#limitations][Limitations]]
+- [[#further-work][Further Work]]
+- [[#resources][Resources]]
 
 * History and Motivation
 
 Originally invented in Clojure and adapted to Scheme as SRFI-171, Transducers
 are an excellent way to think about - and efficiently operate on - collections
 or streams of data. Transduction operations are strict and don't involve
-"laziness" or "thunking" in any way, yet only process the amount of data you ask
-them to.
+"laziness" or "thunking" in any way, yet only process the exact amount of data
+you ask them to.
 
 This library draws inspiration from both the original Clojure and SRFI-171,
 while adding many other convenient operations commonly found in other languages.
 It is, in general, the most complete implementation of the Transducer pattern.
 
 * Installation
+
+As this library hasn't been officially released yet, it is not yet available on
+Ultralisp. If you want to try it, you will have to clone the project yourself
+for now.
 
 * Usage
 
@@ -81,62 +86,186 @@ You can then make relatively clean calls like:
 ;; => #(2 3 4)
 #+end_src
 
-** Transducers and Reducers
+** Transducers, Reducers, and Sources
+
+#+begin_src lisp
+;; The fundamental pattern.
+(t:transduce <transducer-chain> <reducer> <source>)
+#+end_src
+
+Data processing largely has three concerns:
+
+1. Where is my data coming from? (sources)
+2. What do I want to do to each element? (transducers)
+3. How do I want to collect the results? (reducers)
+
+Each full "transduction" requires all three. We pass one of each to the
+=transduce= function, which drives the process. It knows how to pull values from
+the source, feed them through the transducer chain, and wrap everything together
+via the reducer.
+
+- Typical transducers are =map=, =filter=, and =take=.
+- Typical reducers are =+=, =cons=, =count=, and =fold=.
+- Typical sources are lists, vectors, strings, hash tables, and files.
+
+/Generators/ are a special kind of source that yield infinite data. Typical
+generators are =repeat=, =cycle=, and =ints=.
+
+Let's sum the squares of the first 1000 odd integers:
+
+#+begin_src lisp
+(transduce
+ (comp (filter #'oddp)        ;; (2) Keep only odd numbers.
+       (take 1000)            ;; (3) Keep the first 1000 filtered odds.
+       (map (lambda (n) (* n n)))) ;; (4) Square those 1000.
+ #'+       ;; (5) Reducer: Add up all the squares.
+ (ints 1)) ;; (1) Source: Generate all positive integers.
+;; => 1333333000 (31 bits, #x4F790C08)
+#+end_src
+
+Two things of note here:
+
+1. =comp= is used here to chain together different transducer steps. Notice that
+   the order appears "backwards" from usual function composition. It may help to
+   image that =comp= is acting like the =->>= macro here. =comp= is supplied here as a
+   convenience; you're free to use =alexandria:compose= if you wish.
+2. The reduction via =+= is listed as Step 5, but really it's occuring throughout
+   the transduction process. Each value that makes it through the composed
+   transducer chain is immediately added to an internal accumulator.
+
+Explore the other transducers and reducers to see what's possible! You'll never
+write a =loop= again.
 
 ** Using the =fold= Reducer
 
-** Writing your own Transducers / Reducers
+=fold= is the ultimate reducer, and thus deserves special attention. =fold= creates
+an ad-hoc reducer based on a given 2-argument function. A SEED is also required
+as the initial accumulator value, which also becomes the return value in case
+there were no input left in the transduction.
 
-* Differences with other Approaches
-
-** The Common Lisp =loop= Macro
-** Clojure
-** SRFI-171
-
-*** Function Names
-
-As this library is intended to be used in a namespaced way (i.e. without =:use=),
-we're able to name the functions whatever we wish. This has allowed SRFI-171
-functions like =tmap= to have their =t= dropped, meaning the intended call style is
-instead =t:map=.
-
-Certain function names have also been renamed from their SRFI-171 variants to
-the names more commonly found in other languages.
-
-*** Function Calls in Scheme
-
-Due to differences in how functions are called in Common Lisp and Scheme, all
-transducers and reducers that don't take other arguments (like =enumerate= and
-=cons= respectively) must be passed quoted:
+The normal CL functions =+= and =*= are automatically valid reducers, because they
+yield sane values even when given 0 or 1 arguments. Other functions like =max=
+cannot be used as-is as reducers since they require at least 2 arguments. For
+functions like this, =fold= is appropriate.
 
 #+begin_src lisp
-(t:transduce (t:map #'1+) #'t:cons '(1 2 3))
+;; The length of the longest word in this README.
+(let ((xf (comp (map #'str:words)
+                #'concatenate
+                (filter (lambda (w) (every #'alpha-char-p w)))
+                (map #'length))))
+  (transduce xf (fold #'cl:max 0) #p"README.org"))
+;; => 14
 #+end_src
 
-instead of:
+** Processing JSON Data
 
-#+begin_src scheme
-(list-transduce (tmap 1+) rcons '(1 2 3))
+Like =transducers= itself, it is expected that you import this system with a
+nickname:
+
+#+begin_src lisp
+(:local-nicknames (#:tj #:transducers-jzon))
 #+end_src
 
-*** Function Additions and Removals
+** Processing CSV Data
 
-A few extra functions have been added here that represent idioms common in other
-languages, but that are nonetheless missing from the original SRFI-171
-specification.
+Like =transducers= itself, it is expected that you import this system with a
+nickname:
 
-Likewise, a few have been purposefully left unimplemented. These are:
+#+begin_src lisp
+(:local-nicknames (#:tc #:transducers-csv))
+#+end_src
 
-- tappend-map (just compose =map= and =concatenate= yourself)
-- tremove (just use =filter=)
-- treplace
-- reverse-rcons (just use =fold=)
+** Writing your own Transducers / Reducers
 
-** Rust's Iterators
-** Haskell's Laziness
+* Compatibility Chart
 
-* Performance
+|             | CL =transducers= | =loop= macro | Clojure | Scheme      | Racket | Rust         | Haskell  |
+|-------------+----------------+------------+---------+-------------+--------+--------------+----------|
+| =pass=        | ✓              |            |         |             |        | Just =collect= |          |
+| =map=         | ✓              |            |         | ✓           |        | ✓            | ✓        |
+| =filter=      | ✓              |            |         | ✓           |        | ✓            | ✓        |
+| =filter-map=  | ✓              |            |         |             |        | ✓            | =mapMaybe= |
+| =unique=      | ✓              |            |         | ✓           |        |              | =nub=      |
+| =dedup=       | ✓              |            |         | ✓           |        |              |          |
+| =drop=        | ✓              |            |         | ✓           |        | ✓            | ✓        |
+| =drop-while=  | ✓              |            |         | ✓           |        | ✓            | ✓        |
+| =take=        | ✓              |            |         | ✓           |        | ✓            | ✓        |
+| =take-while=  | ✓              |            |         | ✓           |        | ✓            | ✓        |
+| Flat Map    |                |            |         | =tappend-map= |        | =flat_map=     | ~>>=~      |
+| =concatenate= | ✓              |            |         | ✓           |        | =flatten=      | =join=     |
+| =flatten=     | ✓              |            |         | ✓           |        |              |          |
+| =segment=     | ✓              |            |         | ✓           |        | ✓            |          |
+| =window=      | ✓              |            |         |             |        | =chunks=       |          |
+| =group-by=    | ✓              |            |         |             |        |              | ✓        |
+| =intersperse= | ✓              |            |         | ✓           |        | ✓            | ✓        |
+| =enumerate=   | ✓              |            |         | ✓           |        | ✓            |          |
+| =step=        | ✓              |            |         |             |        |              |          |
+| =scan=        | ✓              |            |         |             |        |              | ✓        |
+| =log=         | ✓              |            |         | ✓           |        | =trace=        |          |
+|-------------+----------------+------------+---------+-------------+--------+--------------+----------|
+| =branch=      | ✓              |            |         |             |        |              |          |
+| =inject=      | ✓              |            |         |             |        |              |          |
+| =split=       | ✓              |            |         |             |        |              |          |
+|-------------+----------------+------------+---------+-------------+--------+--------------+----------|
+| Into List   | ✓              |            |         | ✓           |        | ✓            | ✓        |
+| Into Vector | ✓              |            |         |             |        | ✓            | ✓        |
+| Into String | ✓              |            |         |             |        | ✓            | ✓        |
+| Into Map    |                |            |         |             |        | ✓            | ✓        |
+| =count=       | ✓              |            |         | ✓           |        | ✓            | ✓        |
+| =any=         | ✓              |            |         | ✓           |        | ✓            | ✓        |
+| =all=         | ✓              |            |         | ✓           |        | ✓            | ✓        |
+| =first=       | ✓              |            |         |             |        | ✓            | ✓        |
+| =last=        | ✓              |            |         |             |        | ✓            | ✓        |
+| =fold=        | ✓              |            |         |             |        | ✓            | ✓        |
+| =max=         | ✓              |            |         |             |        | ✓            | ✓        |
+| =min=         | ✓              |            |         |             |        | ✓            | ✓        |
+| =find=        | ✓              |            |         |             |        | ✓            |          |
+|-------------+----------------+------------+---------+-------------+--------+--------------+----------|
+| =ints=        | ✓              |            |         |             |        |              | =[1..]=    |
+| =cycle=       | ✓              |            |         |             |        |              | ✓        |
+| =repeat=      | ✓              |            |         |             |        |              | ✓        |
+| =random=      | ✓              |            |         |             |        |              |          |
+| =shuffle=     | ✓              |            |         |             |        |              |          |
+|-------------+----------------+------------+---------+-------------+--------+--------------+----------|
+| JSON Stream | ✓              |            |         |             |        | ✓            | ✓        |
+| CSV Stream  | ✓              |            |         |             |        | ✓            | ✓        |
+
+* Examples
+
+** Words in a File
+
+#+begin_src lisp
+(t:transduce (t:comp (t:map #'str:words) #'t:concatenate)
+             #'t:count #p"README.org")
+;; => 977
+#+end_src
+
+** Sieve of Eratosthenes
+
+An ancient method of calculating Prime Numbers.
+
+#+begin_src lisp
+(let ((xf (t:comp (t:inject (lambda (prime) (t:filter (lambda (n) (/= 0 (mod n prime))))))
+                  (t:take 10))))
+  (cons 2 (t:transduce xf #'t:cons (t:ints 3 :step 2))))
+;; => (2 3 5 7 11 13 17 19 23 29 31)
+#+end_src
+
 * Limitations
 
-1. This library is general portable, but assumes your CL implementation supports
-   tail-recursion.
+1. This library is generally portable, but assumes your CL implementation
+   supports tail-recursion.
+
+* Further Work
+
+- [ ] Notes on performance.
+- [ ] More higher-order transducers.
+- [ ] =transducers-csv=
+  - [ ] Decoding numbers.
+  - [ ] Encoding from classes.
+
+* Resources
+
+- [[https://clojure.org/reference/transducers][Clojure: Transducers]]
+- [[https://clojure.org/guides/faq#transducers_vs_seqs][Clojure: What are good uses cases for transducers?]]
