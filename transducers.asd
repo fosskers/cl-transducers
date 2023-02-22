@@ -22,3 +22,13 @@
                 ((:file "main"))))
   :description "Test system for transducers"
   :perform (test-op (op c) (symbol-call :parachute :test :transducers/tests)))
+
+(defsystem "transducers-csv"
+  :version "0.1.0"
+  :author "Colin Woodbury <colin@fosskers.ca>"
+  :license ""
+  :depends-on (:transducers :str)
+  :components ((:module "csv"
+                :components
+                ((:file "csv"))))
+  :description "CSV extension for Transducers.")
