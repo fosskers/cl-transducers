@@ -26,7 +26,8 @@
   ;; --- Generators --- ;;
   (:export #:ints #:cycle #:repeat #:random #:shuffle)
   ;; --- Utilities --- ;;
-  (:export #:comp #:const)
+  (:export #:comp #:const
+           #:reduced-p #:reduced-val)
   (:documentation "Ergonomic, efficient data processing."))
 
 (in-package :transducers)

@@ -3,14 +3,14 @@
   :author "Colin Woodbury <colin@fosskers.ca>"
   :license ""
   :depends-on (:sycamore :fset)
-  :components ((:module "src"
+  :components ((:module "transducers"
                 :components
                 ((:file "transducers")
                  (:file "reducers")
                  (:file "generators")
                  (:file "entry")
                  (:file "utils"))))
-  :description ""
+  :description "Ergonomic, efficient data processing."
   :in-order-to ((test-op (test-op :transducers/tests))))
 
 (defsystem "transducers/tests"
