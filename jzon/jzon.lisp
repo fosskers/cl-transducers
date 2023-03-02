@@ -4,6 +4,7 @@
   (:import-from #:trivia #:match)
   (:local-nicknames (#:t #:transducers)
                     (#:j #:com.inuoe.jzon))
+  (:export #:read #:write)
   (:documentation "JSON extensions for Transducers."))
 
 (in-package :transducers-jzon)
@@ -39,7 +40,7 @@
       (when (not (eq :begin-array event))
         (error "Given JSON data is not an Array."))
       (labels ((recurse (acc)
-                 (match (j:parse-next-element parser :max-depth 2
+                 (match (j:parse-next-element parser :max-depth t
                                                      :eof-error-p nil
                                                      :eof-value :done)
                    (:done acc)
@@ -52,3 +53,18 @@
 #+nil
 (t:transduce #'t:pass #'t:cons (read "[{\"name\": \"A\"}, {\"name\": \"B\"}]"))
 
+(defun write (stream &key (pretty nil))
+  "Serialize every value that passes through the transduction into JSON, and
+output that JSON into the given STREAM."
+  (let ((writer (j:make-writer :stream stream :pretty pretty)))
+    (lambda (&optional (acc nil a-p) (input nil i-p))
+      (declare (ignore acc))
+      (cond ((and a-p i-p) (j:write-value writer input))
+            ((and a-p (not i-p))
+             (j:end-array writer)
+             (j:close-writer writer))
+            (t (j:begin-array writer))))))
+
+#+nil
+(with-output-to-string (stream)
+  (t:transduce #'t:pass (write stream) (read "[{\"name\": \"A\"}, {\"name\": \"B\"}]")))
