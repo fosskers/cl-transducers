@@ -144,7 +144,6 @@ responsiblity of the caller!"
                         (recurse acc)))))))
    (recurse identity)))
 
-
 (defun generator-transduce (xform f gen)
   "Transduce over a potentially endless stream of values from a generator GEN."
   (let* ((init   (funcall f))

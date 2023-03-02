@@ -37,7 +37,7 @@
   :version "0.1.0"
   :author "Colin Woodbury <colin@fosskers.ca>"
   :license ""
-  :depends-on (:transducers :com.inuoe.jzon)
+  :depends-on (:transducers :com.inuoe.jzon :trivia)
   :components ((:module "jzon"
                 :components
                 ((:file "jzon"))))
