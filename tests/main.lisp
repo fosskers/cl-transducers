@@ -1,10 +1,9 @@
 (defpackage transducers/tests
   (:use :cl :parachute)
-  (:local-nicknames (#:t #:transducers)))
+  (:local-nicknames (#:t #:transducers)
+                    (#:j #:transducers-jzon)))
 
 (in-package :transducers/tests)
-
-;; NOTE: To run this test file, execute `(asdf:test-system :transducers)' in your Lisp.
 
 (define-test reduction)
 
@@ -144,6 +143,14 @@
                            (t:split (t:comp (t:filter #'evenp) (t:take 3)) #'+)
                            (t:map #'1-))
            #'t:cons (t:ints 1))))
+
+(define-test json)
+
+(define-test "Reading and Writing"
+  :parent json
+  (is equal "[{\"name\":\"A\"},{\"name\":\"B\"}]"
+      (with-output-to-string (stream)
+       (t:transduce #'t:pass (j:write stream) (j:read "[{\"name\": \"A\"}, {\"name\": \"B\"}]")))))
 
 #+nil
 (test 'transducers/tests)
