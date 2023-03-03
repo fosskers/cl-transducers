@@ -1,6 +1,6 @@
 (defpackage transducers-csv
   (:use :cl)
-  (:shadow #:read)
+  (:shadow #:read #:write)
   (:local-nicknames (#:t #:transducers))
   (:documentation "CSV extensions for Transducers."))
 
@@ -9,6 +9,14 @@
 (defstruct csv
   "The source of some CSV data."
   (source nil :read-only t :type (or pathname stream string)))
+
+(declaim (ftype (function (stream list) *) write))
+(defun write (stream headers)
+  "Given some HEADERS, write each object into a STREAM as csv data."
+  (lambda (reducer)
+    (lambda (result &optional (input nil i-p))
+      (if i-p (funcall reducer result input)
+          (funcall reducer result)))))
 
 (declaim (ftype (function ((or pathname stream string)) csv) read))
 (defun read (source)
@@ -20,8 +28,8 @@
 
 (declaim (ftype (function (t t (or pathname stream string)) *) csv-transduce))
 (defun csv-transduce (xform f source)
-  (let* ((init   (funcall f))
-         (xf     (funcall xform f)))
+  (let* ((init (funcall f))
+         (xf   (funcall xform f)))
     (etypecase source
       (stream (funcall xf (csv-reduce xf init source)))
       (pathname (with-open-file (stream source)

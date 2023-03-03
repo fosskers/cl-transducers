@@ -53,6 +53,9 @@
 #+nil
 (t:transduce #'t:pass #'t:cons (read "[{\"name\": \"A\"}, {\"name\": \"B\"}]"))
 
+;; FIXME Thu Mar  2 21:02:05 2023
+;;
+;; I suspect I'm missing some `unwind-protect' business here!
 (defun write (stream &key (pretty nil))
   "Serialize every value that passes through the transduction into JSON, and
 output that JSON into the given STREAM."
@@ -68,3 +71,10 @@ output that JSON into the given STREAM."
 #+nil
 (with-output-to-string (stream)
   (t:transduce #'t:pass (write stream) (read "[{\"name\": \"A\"}, {\"name\": \"B\"}]")))
+
+#+nil
+(with-open-file (stream #p"big.json" :direction :output :if-exists :supersede)
+  (t:transduce (t:take 100000000) (write stream :pretty t) (t:ints 0)))
+
+#+nil
+(time (t:transduce #'t:pass #'t:count (read #p"big.json")))
