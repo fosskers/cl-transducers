@@ -1,7 +1,7 @@
 (defsystem "transducers"
   :version "0.1.0"
   :author "Colin Woodbury <colin@fosskers.ca>"
-  :license ""
+  :license "GPL-3.0-only"
   :depends-on (:sycamore :fset)
   :components ((:module "transducers"
                 :components
@@ -14,8 +14,8 @@
   :in-order-to ((test-op (test-op :transducers/tests))))
 
 (defsystem "transducers/tests"
-  :author ""
-  :license ""
+  :author "Colin Woodbury <colin@fosskers.ca>"
+  :license "GPL-3.0-only"
   :depends-on (:transducers :transducers-jzon :parachute)
   :components ((:module "tests"
                 :components
@@ -26,7 +26,7 @@
 (defsystem "transducers-jzon"
   :version "0.1.0"
   :author "Colin Woodbury <colin@fosskers.ca>"
-  :license ""
+  :license "GPL-3.0-only"
   :depends-on (:transducers :com.inuoe.jzon :trivia)
   :components ((:module "jzon"
                 :components
