@@ -198,7 +198,7 @@ to it, and outputting it again to a new string:
 #+end_src
 
 Note that the JSON data _must_ be a JSON array. There is otherwise no size limit;
-the library can handle amount of JSON input.
+the library can handle any amount of JSON input.
 
 For more examples, see the Gallery below.
 
@@ -245,7 +245,7 @@ Transducers which can alter the transduction chain itself during runtime.
 | =branch= | ✓              |            |         |        |      |         |
 | =inject= | ✓              |            |         |        |      |         |
 | =split=  | ✓              |            |         |        |      |         |
-| =zip=    |                |            |         |        | ✓    | ✓       |
+| =zip=    |                | ✓          |         |        | ✓    | ✓       |
 
 ** Reducers
 
