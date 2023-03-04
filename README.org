@@ -5,7 +5,7 @@ I think Transducers are a fundamental primitive that decouples critical logic
 from list/sequence processing, and if I had to do Clojure all over I would put
 them at the bottom.
 
-- Rich Hickey
+-- Rich Hickey
 #+end_quote
 
 Transducers are an ergonomic and extremely memory-efficient way to process a
@@ -122,12 +122,12 @@ generators are =repeat=, =cycle=, and =ints=.
 Let's sum the squares of the first 1000 odd integers:
 
 #+begin_src lisp
-(transduce
- (comp (filter #'oddp)        ;; (2) Keep only odd numbers.
-       (take 1000)            ;; (3) Keep the first 1000 filtered odds.
-       (map (lambda (n) (* n n)))) ;; (4) Square those 1000.
- #'+       ;; (5) Reducer: Add up all the squares.
- (ints 1)) ;; (1) Source: Generate all positive integers.
+(t:transduce
+ (t:comp (t:filter #'oddp)             ;; (2) Keep only odd numbers.
+         (t:take 1000)                 ;; (3) Keep the first 1000 filtered odds.
+         (t:map (lambda (n) (* n n)))) ;; (4) Square those 1000.
+ #'+         ;; (5) Reducer: Add up all the squares.
+ (t:ints 1)) ;; (1) Source: Generate all positive integers.
 ;; => 1333333000 (31 bits, #x4F790C08)
 #+end_src
 
@@ -158,11 +158,11 @@ functions like this, =fold= is appropriate.
 
 #+begin_src lisp
 ;; The length of the longest word in this README.
-(let ((xf (comp (map #'str:words)
-                #'concatenate
-                (filter (lambda (w) (every #'alpha-char-p w)))
-                (map #'length))))
-  (transduce xf (fold #'cl:max 0) #p"README.org"))
+(let ((xf (t:comp (t:map #'str:words)
+                  #'t:concatenate
+                  (t:filter (lambda (w) (every #'alpha-char-p w)))
+                  (t:map #'length))))
+  (t:transduce xf (t:fold #'cl:max 0) #p"README.org"))
 ;; => 14
 #+end_src
 
@@ -206,7 +206,7 @@ across a number of languages.
 
 |               | CL =transducers= | =loop= macro         | Clojure       | Scheme       | Rust         | Haskell  |
 |---------------+----------------+--------------------+---------------+--------------+--------------+----------|
-| =pass=          | ✓              |                    |               | =map identity= | Just =collect= | =map id=   |
+| =pass=          | ✓              |                    | =map identity=  | =map identity= | Just =collect= | =map id=   |
 | =map=           | ✓              | =for x being the...= | ✓             | ✓            | ✓            | ✓        |
 | =filter=        | ✓              | =if=  / =when=         | ✓             | ✓            | ✓            | ✓        |
 | =filter-map=    | ✓              |                    | =keep=          |              | ✓            | =mapMaybe= |
