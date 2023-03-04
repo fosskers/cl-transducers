@@ -40,7 +40,12 @@ evenly-lengthed lines./
   - [[#transducers-reducers-and-sources][Transducers, Reducers, and Sources]]
   - [[#using-the-fold-reducer][Using the =fold= Reducer]]
   - [[#processing-json-data][Processing JSON Data]]
-- [[#compatibility-chart][Compatibility Chart]]
+- [[#compatibility-charts][Compatibility Charts]]
+  - [[#transducers][Transducers]]
+  - [[#higher-order-transducers][Higher-order Transducers]]
+  - [[#reducers][Reducers]]
+  - [[#generators][Generators]]
+  - [[#data-sources][Data Sources]]
 - [[#example-gallery][Example Gallery]]
   - [[#words-in-a-file][Words in a File]]
   - [[#sieve-of-eratosthenes][Sieve of Eratosthenes]]
@@ -48,8 +53,8 @@ evenly-lengthed lines./
 - [[#limitations][Limitations]]
 - [[#further-work][Further Work]]
 - [[#api][API]]
-  - [[#transducers][Transducers]]
-  - [[#reducers][Reducers]]
+  - [[#transducers-1][Transducers]]
+  - [[#reducers-1][Reducers]]
   - [[#sources][Sources]]
 - [[#resources][Resources]]
 
@@ -192,57 +197,89 @@ the library can handle amount of JSON input.
 
 For more examples, see the Gallery below.
 
-* Compatibility Chart
+* Compatibility Charts
 
-|             | CL =transducers= | =loop= macro | Clojure | Scheme        | Racket | Rust         | Haskell  |
-|-------------+----------------+------------+---------+---------------+--------+--------------+----------|
-| =pass=        | ✓              |            |         | =map identity=  |        | Just =collect= | =map id=   |
-| =map=         | ✓              |            |         | ✓             |        | ✓            | ✓        |
-| =filter=      | ✓              |            |         | ✓             |        | ✓            | ✓        |
-| =filter-map=  | ✓              |            |         |               |        | ✓            | =mapMaybe= |
-| =unique=      | ✓              |            |         | ✓             |        |              | =nub=      |
-| =dedup=       | ✓              |            |         | ✓             |        |              |          |
-| =drop=        | ✓              |            |         | ✓             |        | ✓            | ✓        |
-| =drop-while=  | ✓              |            |         | ✓             |        | ✓            | ✓        |
-| =take=        | ✓              |            |         | ✓             |        | ✓            | ✓        |
-| =take-while=  | ✓              |            |         | ✓             |        | ✓            | ✓        |
-| Flat Map    |                |            |         | =tappend-map=   |        | =flat_map=     | ~>>=~      |
-| =concatenate= | ✓              |            |         | ✓             |        | =flatten=      | =join=     |
-| =flatten=     | ✓              |            |         | ✓             |        |              |          |
-| =segment=     | ✓              |            |         | ✓             |        |              |          |
-| =window=      | ✓              |            |         |               |        | =chunks=       |          |
-| =group-by=    | ✓              |            |         |               |        |              | ✓        |
-| =intersperse= | ✓              |            |         | ✓             |        | ✓            | ✓        |
-| =enumerate=   | ✓              |            |         | ✓             |        | ✓            |          |
-| =step=        | ✓              |            |         |               |        |              |          |
-| =scan=        | ✓              |            |         |               |        |              | ✓        |
-| =log=         | ✓              |            |         | ✓             |        | =trace=        |          |
-|-------------+----------------+------------+---------+---------------+--------+--------------+----------|
-| =branch=      | ✓              |            |         |               |        |              |          |
-| =inject=      | ✓              |            |         |               |        |              |          |
-| =split=       | ✓              |            |         |               |        |              |          |
-|-------------+----------------+------------+---------+---------------+--------+--------------+----------|
-| Into List   | ✓              |            |         | ✓             |        | ✓            | ✓        |
-| Into Vector | ✓              |            |         |               |        | ✓            | ✓        |
-| Into String | ✓              |            |         |               |        | ✓            | ✓        |
-| Into Map    |                |            |         |               |        | ✓            | ✓        |
-| =count=       | ✓              |            |         | ✓             |        | ✓            | ✓        |
-| =any=         | ✓              |            |         | ✓             |        | ✓            | ✓        |
-| =all=         | ✓              |            |         | ✓             |        | ✓            | ✓        |
-| =first=       | ✓              |            |         |               |        | ✓            | ✓        |
-| =last=        | ✓              |            |         |               |        | ✓            | ✓        |
-| =fold=        | ✓              |            |         |               |        | ✓            | ✓        |
-| =max=         | ✓              |            |         |               |        | ✓            | ✓        |
-| =min=         | ✓              |            |         |               |        | ✓            | ✓        |
-| =find=        | ✓              |            |         |               |        | ✓            |          |
-|-------------+----------------+------------+---------+---------------+--------+--------------+----------|
-| =ints=        | ✓              |            |         |               |        |              | =[1..]=    |
-| =cycle=       | ✓              |            |         |               |        |              | ✓        |
-| =repeat=      | ✓              |            |         |               |        |              | ✓        |
-| =random=      | ✓              |            |         |               |        |              |          |
-| =shuffle=     | ✓              |            |         |               |        |              |          |
-|-------------+----------------+------------+---------+---------------+--------+--------------+----------|
-| JSON Stream | ✓              |            |         |               |        | ✓            | ✓        |
+This library offers the most complete implementation of the Transducer pattern
+across a number of languages.
+
+** Transducers
+
+|               | CL =transducers= | =loop= macro         | Clojure       | Scheme       | Rust         | Haskell  |
+|---------------+----------------+--------------------+---------------+--------------+--------------+----------|
+| =pass=          | ✓              |                    |               | =map identity= | Just =collect= | =map id=   |
+| =map=           | ✓              | =for x being the...= | ✓             | ✓            | ✓            | ✓        |
+| =filter=        | ✓              | =if=  / =when=         | ✓             | ✓            | ✓            | ✓        |
+| =filter-map=    | ✓              |                    | =keep=          |              | ✓            | =mapMaybe= |
+| =remove=        |                | =unless=             | ✓             |              |              |          |
+| =unique=        | ✓              |                    | =distinct=      | ✓            |              | =nub=      |
+| =dedup=         | ✓              |                    | =dedupe=        | ✓            |              |          |
+| =drop=          | ✓              |                    | ✓             | ✓            | ✓            | ✓        |
+| =drop-while=    | ✓              |                    | ✓             | ✓            | ✓            | ✓        |
+| =take=          | ✓              |                    | ✓             | ✓            | ✓            | ✓        |
+| =take-while=    | ✓              | =while= etc.         | ✓             | ✓            | ✓            | ✓        |
+| =replace=       |                |                    | ✓             | ✓            |              |          |
+| Flat Map      |                |                    | =mapcat=        | =tappend-map=  | =flat_map=     | ~>>=~      |
+| =concatenate=   | ✓              |                    | =cat=           | ✓            | =flatten=      | =join=     |
+| =flatten=       | ✓              |                    |               | ✓            |              |          |
+| =segment=       | ✓              |                    | =partition-all= | ✓            |              |          |
+| =window=        | ✓              |                    |               |              | =chunks=       |          |
+| =group-by=      | ✓              |                    | =partition-by=  |              |              | ✓        |
+| =intersperse=   | ✓              |                    | =interpose=     | ✓            | ✓            | ✓        |
+| =enumerate=     | ✓              |                    | =map-indexed=   | ✓            | ✓            |          |
+| =step=          | ✓              | =by=                 | =take-nth=      |              |              |          |
+| =scan=          | ✓              |                    |               |              |              | ✓        |
+| =random-sample= |                |                    | ✓             |              |              |          |
+| =log=           | ✓              | Print in loop body |               | ✓            | =trace=        |          |
+
+** Higher-order Transducers
+
+Transducers which can alter the transduction chain itself during runtime.
+
+|        | CL =transducers= | =loop= macro | Clojure | Scheme | Rust | Haskell |
+|--------+----------------+------------+---------+--------+------+---------|
+| =branch= | ✓              |            |         |        |      |         |
+| =inject= | ✓              |            |         |        |      |         |
+| =split=  | ✓              |            |         |        |      |         |
+| =zip=    |                |            |         |        | ✓    | ✓       |
+
+** Reducers
+
+|             | CL =transducers= | =loop= macro        | Clojure | Scheme | Rust | Haskell |
+|-------------+----------------+-------------------+---------+--------+------+---------|
+| Into List   | ✓              | =collect=           |         | ✓      | ✓    | ✓       |
+| Into Vector | ✓              | =vconcat=           | =into=    |        | ✓    | ✓       |
+| Into String | ✓              | =concat=            |         |        | ✓    | ✓       |
+| Into Map    |                |                   |         |        | ✓    | ✓       |
+| =count=       | ✓              | ✓                 |         | ✓      | ✓    | ✓       |
+| =average=     | ✓              |                   |         |        |      |         |
+| =any=         | ✓              |                   |         | ✓      | ✓    | ✓       |
+| =all=         | ✓              |                   |         | ✓      | ✓    | ✓       |
+| =first=       | ✓              | ~return~ etc.       |         |        | ✓    | ✓       |
+| =last=        | ✓              |                   |         |        | ✓    | ✓       |
+| =fold=        | ✓              |                   |         |        | ✓    | ✓       |
+| =max=         | ✓              | =maximize=          |         |        | ✓    | ✓       |
+| =min=         | ✓              | =minimize=          |         |        | ✓    | ✓       |
+| =find=        | ✓              | ~return~ etc.       |         |        | ✓    |         |
+
+Why oh why is it so difficult to find an implementation of =average= in many
+languages?
+
+** Generators
+
+|         | CL =transducers= | =loop= macro        | Clojure | Scheme | Rust | Haskell |
+|---------+----------------+-------------------+---------+--------+------+---------|
+| =ints=    | ✓              | =for x from N to M= |         |        | =1..=  | =[1..]=   |
+| =cycle=   | ✓              |                   |         |        | ✓    | ✓       |
+| =repeat=  | ✓              | =repeat=            |         |        | ✓    | ✓       |
+| =random=  | ✓              |                   |         |        |      |         |
+| =shuffle= | ✓              |                   |         |        |      |         |
+
+** Data Sources
+
+|             | CL =transducers= | =loop= macro | Clojure | Scheme | Rust | Haskell |
+|-------------+----------------+------------+---------+--------+------+---------|
+| File Lines  | ✓              |            |         | ✓      | ✓    | ✓       |
+| JSON Stream | ✓              |            |         |        | ✓    | ✓       |
 
 * Example Gallery
 
@@ -253,6 +290,7 @@ For more examples, see the Gallery below.
              #'t:count #p"README.org")
 ;; => 977
 #+end_src
+
 ** Sieve of Eratosthenes
 
 An ancient method of calculating Prime Numbers.
@@ -280,6 +318,7 @@ retrieve fields we want.
 
 1. This library is generally portable, but assumes your CL implementation
    supports tail-recursion.
+2. A way to model the common =zip= function has not yet been found.
 
 * Further Work
 
@@ -288,6 +327,7 @@ retrieve fields we want.
 - [ ] =transducers-csv=
   - [ ] Decoding numbers.
   - [ ] Encoding from classes.
+
 * API
 ** Transducers
 ** Reducers
