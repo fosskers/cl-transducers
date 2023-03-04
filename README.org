@@ -40,14 +40,17 @@ evenly-lengthed lines./
   - [[#transducers-reducers-and-sources][Transducers, Reducers, and Sources]]
   - [[#using-the-fold-reducer][Using the =fold= Reducer]]
   - [[#processing-json-data][Processing JSON Data]]
-  - [[#processing-csv-data][Processing CSV Data]]
-  - [[#writing-your-own-transducers--reducers][Writing your own Transducers / Reducers]]
 - [[#compatibility-chart][Compatibility Chart]]
-- [[#examples][Examples]]
+- [[#example-gallery][Example Gallery]]
   - [[#words-in-a-file][Words in a File]]
   - [[#sieve-of-eratosthenes][Sieve of Eratosthenes]]
+  - [[#json-calculating-average-age][JSON: Calculating average age]]
 - [[#limitations][Limitations]]
 - [[#further-work][Further Work]]
+- [[#api][API]]
+  - [[#transducers][Transducers]]
+  - [[#reducers][Reducers]]
+  - [[#sources][Sources]]
 - [[#resources][Resources]]
 
 * History and Motivation
@@ -105,7 +108,7 @@ the source, feed them through the transducer chain, and wrap everything together
 via the reducer.
 
 - Typical transducers are =map=, =filter=, and =take=.
-- Typical reducers are =+=, =cons=, =count=, and =fold=.
+- Typical reducers are =+=, =count=, and =fold=.
 - Typical sources are lists, vectors, strings, hash tables, and files.
 
 /Generators/ are a special kind of source that yield infinite data. Typical
@@ -160,78 +163,88 @@ functions like this, =fold= is appropriate.
 
 ** Processing JSON Data
 
-Like =transducers= itself, it is expected that you import this system with a
-nickname:
+The system =transducers-jzon= provides automatic JSON streaming support via the
+[[https://github.com/Zulu-Inuoe/jzon][jzon]] library. Like =transducers= itself, it is expected that you import this
+system with a nickname:
 
 #+begin_src lisp
-(:local-nicknames (#:tj #:transducers-jzon))
+(:local-nicknames (#:j #:transducers-jzon))
 #+end_src
 
-** Processing CSV Data
+Only two functions are exposed: =read= and =write=.
 
-Like =transducers= itself, it is expected that you import this system with a
-nickname:
+- =read= is a /source/ that accepts a pathname, open stream, or a string. It
+  produces parsed JSON values as Lisp types. JSON Objects become Hash Tables.
+- =write= is a /reducer/ that expects an open stream. It writes the stream of Lisp
+  types into their logical JSON equivalents.
+
+Here is a simple example of reading some JSON data from a string, doing nothing
+to it, and outputting it again to a new string:
 
 #+begin_src lisp
-(:local-nicknames (#:tc #:transducers-csv))
+(with-output-to-string (stream)
+  (t:transduce #'t:pass (j:write stream) (j:read "[{\"name\": \"A\"}, {\"name\": \"B\"}]")))
+;; => "[{\"name\":\"A\"},{\"name\":\"B\"}]"
 #+end_src
 
-** Writing your own Transducers / Reducers
+Note that the JSON data _must_ be a JSON array. There is otherwise no size limit;
+the library can handle amount of JSON input.
+
+For more examples, see the Gallery below.
 
 * Compatibility Chart
 
-|             | CL =transducers= | =loop= macro | Clojure | Scheme      | Racket | Rust         | Haskell  |
-|-------------+----------------+------------+---------+-------------+--------+--------------+----------|
-| =pass=        | ✓              |            |         |             |        | Just =collect= |          |
-| =map=         | ✓              |            |         | ✓           |        | ✓            | ✓        |
-| =filter=      | ✓              |            |         | ✓           |        | ✓            | ✓        |
-| =filter-map=  | ✓              |            |         |             |        | ✓            | =mapMaybe= |
-| =unique=      | ✓              |            |         | ✓           |        |              | =nub=      |
-| =dedup=       | ✓              |            |         | ✓           |        |              |          |
-| =drop=        | ✓              |            |         | ✓           |        | ✓            | ✓        |
-| =drop-while=  | ✓              |            |         | ✓           |        | ✓            | ✓        |
-| =take=        | ✓              |            |         | ✓           |        | ✓            | ✓        |
-| =take-while=  | ✓              |            |         | ✓           |        | ✓            | ✓        |
-| Flat Map    |                |            |         | =tappend-map= |        | =flat_map=     | ~>>=~      |
-| =concatenate= | ✓              |            |         | ✓           |        | =flatten=      | =join=     |
-| =flatten=     | ✓              |            |         | ✓           |        |              |          |
-| =segment=     | ✓              |            |         | ✓           |        | ✓            |          |
-| =window=      | ✓              |            |         |             |        | =chunks=       |          |
-| =group-by=    | ✓              |            |         |             |        |              | ✓        |
-| =intersperse= | ✓              |            |         | ✓           |        | ✓            | ✓        |
-| =enumerate=   | ✓              |            |         | ✓           |        | ✓            |          |
-| =step=        | ✓              |            |         |             |        |              |          |
-| =scan=        | ✓              |            |         |             |        |              | ✓        |
-| =log=         | ✓              |            |         | ✓           |        | =trace=        |          |
-|-------------+----------------+------------+---------+-------------+--------+--------------+----------|
-| =branch=      | ✓              |            |         |             |        |              |          |
-| =inject=      | ✓              |            |         |             |        |              |          |
-| =split=       | ✓              |            |         |             |        |              |          |
-|-------------+----------------+------------+---------+-------------+--------+--------------+----------|
-| Into List   | ✓              |            |         | ✓           |        | ✓            | ✓        |
-| Into Vector | ✓              |            |         |             |        | ✓            | ✓        |
-| Into String | ✓              |            |         |             |        | ✓            | ✓        |
-| Into Map    |                |            |         |             |        | ✓            | ✓        |
-| =count=       | ✓              |            |         | ✓           |        | ✓            | ✓        |
-| =any=         | ✓              |            |         | ✓           |        | ✓            | ✓        |
-| =all=         | ✓              |            |         | ✓           |        | ✓            | ✓        |
-| =first=       | ✓              |            |         |             |        | ✓            | ✓        |
-| =last=        | ✓              |            |         |             |        | ✓            | ✓        |
-| =fold=        | ✓              |            |         |             |        | ✓            | ✓        |
-| =max=         | ✓              |            |         |             |        | ✓            | ✓        |
-| =min=         | ✓              |            |         |             |        | ✓            | ✓        |
-| =find=        | ✓              |            |         |             |        | ✓            |          |
-|-------------+----------------+------------+---------+-------------+--------+--------------+----------|
-| =ints=        | ✓              |            |         |             |        |              | =[1..]=    |
-| =cycle=       | ✓              |            |         |             |        |              | ✓        |
-| =repeat=      | ✓              |            |         |             |        |              | ✓        |
-| =random=      | ✓              |            |         |             |        |              |          |
-| =shuffle=     | ✓              |            |         |             |        |              |          |
-|-------------+----------------+------------+---------+-------------+--------+--------------+----------|
-| JSON Stream | ✓              |            |         |             |        | ✓            | ✓        |
-| CSV Stream  | ✓              |            |         |             |        | ✓            | ✓        |
+|             | CL =transducers= | =loop= macro | Clojure | Scheme        | Racket | Rust         | Haskell  |
+|-------------+----------------+------------+---------+---------------+--------+--------------+----------|
+| =pass=        | ✓              |            |         | =map identity=  |        | Just =collect= | =map id=   |
+| =map=         | ✓              |            |         | ✓             |        | ✓            | ✓        |
+| =filter=      | ✓              |            |         | ✓             |        | ✓            | ✓        |
+| =filter-map=  | ✓              |            |         |               |        | ✓            | =mapMaybe= |
+| =unique=      | ✓              |            |         | ✓             |        |              | =nub=      |
+| =dedup=       | ✓              |            |         | ✓             |        |              |          |
+| =drop=        | ✓              |            |         | ✓             |        | ✓            | ✓        |
+| =drop-while=  | ✓              |            |         | ✓             |        | ✓            | ✓        |
+| =take=        | ✓              |            |         | ✓             |        | ✓            | ✓        |
+| =take-while=  | ✓              |            |         | ✓             |        | ✓            | ✓        |
+| Flat Map    |                |            |         | =tappend-map=   |        | =flat_map=     | ~>>=~      |
+| =concatenate= | ✓              |            |         | ✓             |        | =flatten=      | =join=     |
+| =flatten=     | ✓              |            |         | ✓             |        |              |          |
+| =segment=     | ✓              |            |         | ✓             |        |              |          |
+| =window=      | ✓              |            |         |               |        | =chunks=       |          |
+| =group-by=    | ✓              |            |         |               |        |              | ✓        |
+| =intersperse= | ✓              |            |         | ✓             |        | ✓            | ✓        |
+| =enumerate=   | ✓              |            |         | ✓             |        | ✓            |          |
+| =step=        | ✓              |            |         |               |        |              |          |
+| =scan=        | ✓              |            |         |               |        |              | ✓        |
+| =log=         | ✓              |            |         | ✓             |        | =trace=        |          |
+|-------------+----------------+------------+---------+---------------+--------+--------------+----------|
+| =branch=      | ✓              |            |         |               |        |              |          |
+| =inject=      | ✓              |            |         |               |        |              |          |
+| =split=       | ✓              |            |         |               |        |              |          |
+|-------------+----------------+------------+---------+---------------+--------+--------------+----------|
+| Into List   | ✓              |            |         | ✓             |        | ✓            | ✓        |
+| Into Vector | ✓              |            |         |               |        | ✓            | ✓        |
+| Into String | ✓              |            |         |               |        | ✓            | ✓        |
+| Into Map    |                |            |         |               |        | ✓            | ✓        |
+| =count=       | ✓              |            |         | ✓             |        | ✓            | ✓        |
+| =any=         | ✓              |            |         | ✓             |        | ✓            | ✓        |
+| =all=         | ✓              |            |         | ✓             |        | ✓            | ✓        |
+| =first=       | ✓              |            |         |               |        | ✓            | ✓        |
+| =last=        | ✓              |            |         |               |        | ✓            | ✓        |
+| =fold=        | ✓              |            |         |               |        | ✓            | ✓        |
+| =max=         | ✓              |            |         |               |        | ✓            | ✓        |
+| =min=         | ✓              |            |         |               |        | ✓            | ✓        |
+| =find=        | ✓              |            |         |               |        | ✓            |          |
+|-------------+----------------+------------+---------+---------------+--------+--------------+----------|
+| =ints=        | ✓              |            |         |               |        |              | =[1..]=    |
+| =cycle=       | ✓              |            |         |               |        |              | ✓        |
+| =repeat=      | ✓              |            |         |               |        |              | ✓        |
+| =random=      | ✓              |            |         |               |        |              |          |
+| =shuffle=     | ✓              |            |         |               |        |              |          |
+|-------------+----------------+------------+---------+---------------+--------+--------------+----------|
+| JSON Stream | ✓              |            |         |               |        | ✓            | ✓        |
 
-* Examples
+* Example Gallery
 
 ** Words in a File
 
@@ -240,7 +253,6 @@ nickname:
              #'t:count #p"README.org")
 ;; => 977
 #+end_src
-
 ** Sieve of Eratosthenes
 
 An ancient method of calculating Prime Numbers.
@@ -250,6 +262,18 @@ An ancient method of calculating Prime Numbers.
                   (t:take 10))))
   (cons 2 (t:transduce xf #'t:cons (t:ints 3 :step 2))))
 ;; => (2 3 5 7 11 13 17 19 23 29 31)
+#+end_src
+
+** JSON: Calculating average age
+
+Since JSON Objects are parsed as Hash Tables, we use the usual functions to
+retrieve fields we want.
+
+#+begin_src lisp
+(t:transduce (t:filter-map (lambda (ht) (gethash "age" ht)))
+             (t:average :none)
+             (j:read "[{\"age\": 34}, {\"age\": 25}]"))
+;; => 59/2 (29.5)
 #+end_src
 
 * Limitations
@@ -264,6 +288,10 @@ An ancient method of calculating Prime Numbers.
 - [ ] =transducers-csv=
   - [ ] Decoding numbers.
   - [ ] Encoding from classes.
+* API
+** Transducers
+** Reducers
+** Sources
 
 * Resources
 
