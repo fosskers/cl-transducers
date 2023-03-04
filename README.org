@@ -249,22 +249,22 @@ Transducers which can alter the transduction chain itself during runtime.
 
 ** Reducers
 
-|             | CL =transducers= | =loop= macro        | Clojure | Scheme | Rust | Haskell |
-|-------------+----------------+-------------------+---------+--------+------+---------|
-| Into List   | ✓              | =collect=           |         | ✓      | ✓    | ✓       |
-| Into Vector | ✓              | =vconcat=           | =into=    |        | ✓    | ✓       |
-| Into String | ✓              | =concat=            |         |        | ✓    | ✓       |
-| Into Map    |                |                   |         |        | ✓    | ✓       |
-| =count=       | ✓              | ✓                 |         | ✓      | ✓    | ✓       |
-| =average=     | ✓              |                   |         |        |      |         |
-| =any=         | ✓              |                   |         | ✓      | ✓    | ✓       |
-| =all=         | ✓              |                   |         | ✓      | ✓    | ✓       |
-| =first=       | ✓              | ~return~ etc.       |         |        | ✓    | ✓       |
-| =last=        | ✓              |                   |         |        | ✓    | ✓       |
-| =fold=        | ✓              |                   |         |        | ✓    | ✓       |
-| =max=         | ✓              | =maximize=          |         |        | ✓    | ✓       |
-| =min=         | ✓              | =minimize=          |         |        | ✓    | ✓       |
-| =find=        | ✓              | ~return~ etc.       |         |        | ✓    |         |
+|             | CL =transducers= | =loop= macro  | Clojure | Scheme | Rust | Haskell |
+|-------------+----------------+-------------+---------+--------+------+---------|
+| Into List   | ✓              | =collect=     | =into=    | ✓      | ✓    | ✓       |
+| Into Vector | ✓              | =vconcat=     | =into=    |        | ✓    | ✓       |
+| Into String | ✓              | =concat=      |         |        | ✓    | ✓       |
+| Into Map    |                |             | =into=    |        | ✓    | ✓       |
+| =count=       | ✓              | ✓           |         | ✓      | ✓    | ✓       |
+| =average=     | ✓              |             |         |        |      |         |
+| =any=         | ✓              |             |         | ✓      | ✓    | ✓       |
+| =all=         | ✓              |             |         | ✓      | ✓    | ✓       |
+| =first=       | ✓              | ~return~ etc. |         |        | ✓    | ✓       |
+| =last=        | ✓              |             |         |        | ✓    | ✓       |
+| =fold=        | ✓              |             |         |        | ✓    | ✓       |
+| =max=         | ✓              | =maximize=    |         |        | ✓    | ✓       |
+| =min=         | ✓              | =minimize=    |         |        | ✓    | ✓       |
+| =find=        | ✓              | ~return~ etc. |         |        | ✓    |         |
 
 Why oh why is it so difficult to find an implementation of =average= in many
 languages?
