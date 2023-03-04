@@ -56,6 +56,7 @@
 ;; FIXME Thu Mar  2 21:02:05 2023
 ;;
 ;; I suspect I'm missing some `unwind-protect' business here!
+(declaim (ftype (function (stream &key (:pretty t)) *) write))
 (defun write (stream &key (pretty nil))
   "Serialize every value that passes through the transduction into JSON, and
 output that JSON into the given STREAM."
@@ -78,3 +79,8 @@ output that JSON into the given STREAM."
 
 #+nil
 (time (t:transduce #'t:pass #'t:count (read #p"big.json")))
+
+#+nil
+(t:transduce (t:filter-map (lambda (ht) (gethash "age" ht)))
+             (t:average :none)
+             (read "[{\"age\": 34}, {\"age\": 25}]"))
