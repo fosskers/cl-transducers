@@ -40,7 +40,7 @@ evenly-lengthed lines./
   - [[#transducers-reducers-and-sources][Transducers, Reducers, and Sources]]
   - [[#using-the-fold-reducer][Using the =fold= Reducer]]
   - [[#processing-json-data][Processing JSON Data]]
-- [[#compatibility-charts][Compatibility Charts]]
+- [[#api-and-compatibility-charts][API and Compatibility Charts]]
   - [[#transducers][Transducers]]
   - [[#higher-order-transducers][Higher-order Transducers]]
   - [[#reducers][Reducers]]
@@ -193,7 +193,7 @@ the library can handle amount of JSON input.
 
 For more examples, see the Gallery below.
 
-* Compatibility Charts
+* API and Compatibility Charts
 
 This library offers the most complete implementation of the Transducer pattern
 across a number of languages.
