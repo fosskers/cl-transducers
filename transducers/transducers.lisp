@@ -19,7 +19,7 @@
   (:export #:branch #:inject #:split)
   ;; --- Reducers -- ;;
   (:export #:cons #:vector #:string
-           #:count
+           #:count #:average
            #:any #:all
            #:first #:last
            #:fold #:max #:min #:find)

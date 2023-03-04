@@ -38,6 +38,20 @@
 #+nil
 (transduce #'pass #'count '(1 2 3 4 5))
 
+(defun average (fallback)
+  "Calculate the average value of all numeric elements in a transduction. A
+FALLBACK must be provided in case no elements made it through the
+transduction (thus protecting from division-by-zero)."
+  (let ((items 0))
+    (lambda (&optional (acc 0 a-p) (input 0 i-p))
+      (cond ((and a-p i-p)
+             (incf items)
+             (+ acc input))
+            ((and a-p (not i-p))
+             (if (= 0 items) fallback
+                 (/ acc items)))
+            (t 0)))))
+
 (declaim (ftype (function ((function (t) *)) *) any))
 (defun any (pred)
   "Yield non-NIL if any element in the transduction satisfies PRED. Short-circuits
