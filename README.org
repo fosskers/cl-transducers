@@ -52,10 +52,6 @@ evenly-lengthed lines./
   - [[#json-calculating-average-age][JSON: Calculating average age]]
 - [[#limitations][Limitations]]
 - [[#further-work][Further Work]]
-- [[#api][API]]
-  - [[#transducers-1][Transducers]]
-  - [[#reducers-1][Reducers]]
-  - [[#sources][Sources]]
 - [[#resources][Resources]]
 
 * History and Motivation
@@ -327,11 +323,6 @@ retrieve fields we want.
 - [ ] =transducers-csv=
   - [ ] Decoding numbers.
   - [ ] Encoding from classes.
-
-* API
-** Transducers
-** Reducers
-** Sources
 
 * Resources
 
