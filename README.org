@@ -68,9 +68,18 @@ It is, in general, the most complete implementation of the Transducer pattern.
 
 * Installation
 
-As this library hasn't been officially released yet, it is not yet available on
-Ultralisp. If you want to try it, you will have to clone the project yourself
-for now.
+This library is available on [[https://ultralisp.org/projects/fosskers/cl-transducers][Ultralisp]]. With [[https://ultralisp.org/][Ultralisp installed as a
+distribution]], you can simply run the following to download the main system:
+
+#+begin_src lisp
+(ql:quickload :transducers)
+#+end_src
+
+For the JSON extensions:
+
+#+begin_src lisp
+(ql:quickload :transducers-jzon)
+#+end_src
 
 * Usage
 
