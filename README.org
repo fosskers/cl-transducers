@@ -205,7 +205,8 @@ For more examples, see the Gallery below.
 * API and Compatibility Charts
 
 This library offers the most complete implementation of the Transducer pattern
-across a number of languages.
+across a number of languages. Note that the [[https://github.com/cgrand/xforms][xforms]] library offers a number
+extensions to what is normally available in Clojure.
 
 ** Transducers
 
@@ -337,3 +338,5 @@ retrieve fields we want.
 
 - [[https://clojure.org/reference/transducers][Clojure: Transducers]]
 - [[https://clojure.org/guides/faq#transducers_vs_seqs][Clojure: What are good uses cases for transducers?]]
+- [[https://github.com/cgrand/xforms][Clojure: xforms]]  (extension library)
+- [[https://package.elm-lang.org/packages/avh4-experimental/elm-transducers/1.0.0/][Elm: Transducers]]
