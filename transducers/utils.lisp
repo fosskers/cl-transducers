@@ -7,6 +7,9 @@
 
 ;; TODO Make this a macro.
 (defun comp (function &rest functions)
+  "Function composition.
+
+(funcall (comp #'1+ #'length) \"foo\") == (1+ (length \"foo\"))"
   (reduce (lambda (f g)
             (let ((f (ensure-function f))
                   (g (ensure-function g)))
