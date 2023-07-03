@@ -64,7 +64,6 @@ you ask them to.
 
 This library draws inspiration from both the original Clojure and SRFI-171,
 while adding many other convenient operations commonly found in other languages.
-It is, in general, the most complete implementation of the Transducer pattern.
 
 * Installation
 
@@ -140,8 +139,8 @@ Two things of note here:
 
 1. =comp= is used here to chain together different transducer steps. Notice that
    the order appears "backwards" from usual function composition. It may help to
-   image that =comp= is acting like the =->>= macro here. =comp= is supplied here as a
-   convenience; you're free to use =alexandria:compose= if you wish.
+   imagine that =comp= is acting like the =->>= macro here. =comp= is supplied here as
+   a convenience; you're free to use =alexandria:compose= if you wish.
 2. The reduction via =+= is listed as Step 5, but really it's occuring throughout
    the transduction process. Each value that makes it through the composed
    transducer chain is immediately added to an internal accumulator.
@@ -151,10 +150,14 @@ write a =loop= again.
 
 ** Using the =fold= Reducer
 
+A /reducer/ is a function that "reduces" or "folds" the results of the transducer
+chain into some single value. This could be a collection or some scalar. Some
+reducers can even short-circuit, yielding a desired value early.
+
 =fold= is the ultimate reducer, and thus deserves special attention. =fold= creates
-an ad-hoc reducer based on a given 2-argument function. A SEED is also required
-as the initial accumulator value, which also becomes the return value in case
-there were no input left in the transduction.
+an ad-hoc reducer based on a given 2-argument function. A SEED is required as
+the initial accumulator value, which also becomes the return value in case there
+were no input left in the transduction.
 
 The normal CL functions =+= and =*= are automatically valid reducers, because they
 yield sane values even when given 0 or 1 arguments. Other functions like =max=
@@ -204,8 +207,8 @@ For more examples, see the Gallery below.
 
 * API and Compatibility Charts
 
-This library offers the most complete implementation of the Transducer pattern
-across a number of languages. Note that the [[https://github.com/cgrand/xforms][xforms]] library offers a number
+This library offers an extensive implementation of the Transducer pattern
+compared to a number of languages. Note that the [[https://github.com/cgrand/xforms][xforms]] library offers a number
 extensions to what is normally available in Clojure.
 
 ** Transducers
@@ -252,10 +255,11 @@ Transducers which can alter the transduction chain itself during runtime.
 
 |             | CL =transducers= | =loop= macro  | Clojure | Scheme | Rust | Haskell |
 |-------------+----------------+-------------+---------+--------+------+---------|
-| Into List   | ✓              | =collect=     | =into=    | ✓      | ✓    | ✓       |
-| Into Vector | ✓              | =vconcat=     | =into=    |        | ✓    | ✓       |
-| Into String | ✓              | =concat=      |         |        | ✓    | ✓       |
-| Into Map    |                |             | =into=    |        | ✓    | ✓       |
+| Into List   | ✓              | =collect=     | =conj=    | ✓      | ✓    | ✓       |
+| Into Vector | ✓              | =vconcat=     | =conj=    |        | ✓    | ✓       |
+| Into String | ✓              | =concat=      | =str=     |        | ✓    | ✓       |
+| Into Map    |                |             | =conj=    |        | ✓    | ✓       |
+| Into Set    |                |             | =conj=    |        |      |         |
 | =count=       | ✓              | ✓           |         | ✓      | ✓    | ✓       |
 | =average=     | ✓              |             |         |        |      |         |
 | =any=         | ✓              |             |         | ✓      | ✓    | ✓       |
