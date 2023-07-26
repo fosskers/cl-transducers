@@ -32,28 +32,6 @@ evenly-lengthed lines./
   #p"giant-file.txt")
 #+end_src
 
-* Table of Contents :toc_2_gh:
-- [[#history-and-motivation][History and Motivation]]
-- [[#installation][Installation]]
-- [[#usage][Usage]]
-  - [[#importing][Importing]]
-  - [[#transducers-reducers-and-sources][Transducers, Reducers, and Sources]]
-  - [[#using-the-fold-reducer][Using the =fold= Reducer]]
-  - [[#processing-json-data][Processing JSON Data]]
-- [[#api-and-compatibility-charts][API and Compatibility Charts]]
-  - [[#transducers][Transducers]]
-  - [[#higher-order-transducers][Higher-order Transducers]]
-  - [[#reducers][Reducers]]
-  - [[#generators][Generators]]
-  - [[#data-sources][Data Sources]]
-- [[#example-gallery][Example Gallery]]
-  - [[#words-in-a-file][Words in a File]]
-  - [[#sieve-of-eratosthenes][Sieve of Eratosthenes]]
-  - [[#json-calculating-average-age][JSON: Calculating average age]]
-- [[#limitations][Limitations]]
-- [[#further-work][Further Work]]
-- [[#resources][Resources]]
-
 * History and Motivation
 
 Originally invented in Clojure and adapted to Scheme as SRFI-171, Transducers
