@@ -1,0 +1,39 @@
+image: archlinux
+secrets:
+- 5c5bf3b5-a730-49d9-b46a-cb6baa48092d
+packages:
+- sbcl
+- quicklisp
+- emacs-nox
+- jq
+sources:
+- https://git.sr.ht/~fosskers/cl-transducers
+tasks:
+# If our project isn't in the special `common-lisp` directory, quicklisp won't
+# be able to find it for loading.
+- move: |
+    mkdir common-lisp
+    mv cl-transducers ~/common-lisp
+- quicklisp: |
+    sbcl --non-interactive --load /usr/share/quicklisp/quicklisp.lisp --eval "(quicklisp-quickstart:install)"
+- test: |
+    cd common-lisp/cl-transducers
+    sbcl --non-interactive --load ~/quicklisp/setup.lisp --load run-tests.lisp
+- readme: |
+    cd common-lisp/cl-transducers
+    emacs README.org --batch --eval "(setq org-html-head-include-default-style nil)" -f org-html-export-to-html --kill
+    sed -i '/<title>/d; /<\/title>/d' README.html
+- upload: |
+    cd common-lisp/cl-transducers
+    set +x  # Avoid echoing the token
+    jq -sR '{
+        "query": "mutation UpdateRepo($id: Int!, $readme: String!) {
+          updateRepository(id: $id, input: { readme: $readme }) { id }
+        }", "variables": {
+          "id": 363617,
+          "readme": .
+        } }' < README.html \
+      | curl --oauth2-bearer $(cat ~/.readme-token) \
+        -H "Content-Type: application/json" \
+        -d@- https://git.sr.ht/query
+    echo "README Uploaded."
