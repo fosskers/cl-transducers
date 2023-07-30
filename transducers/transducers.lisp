@@ -105,7 +105,7 @@ that are non-nil.
   (lambda (reducer)
     (let ((drop? t))
       (lambda (result &optional (input nil i-p))
-        (if i-p (if (and (funcall pred input) drop?)
+        (if i-p (if (and drop? (funcall pred input))
                     result
                     (progn (setf drop? nil)
                            (funcall reducer result input)))
