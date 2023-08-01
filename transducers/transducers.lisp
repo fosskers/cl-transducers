@@ -180,7 +180,7 @@ accumulated state, which may be shorter than N."
           (collect '()))
       (lambda (result &optional (input nil i-p))
         (cond (i-p
-               (setf collect (cons collect input))
+               (setf collect (cl:cons input collect))
                (setf i (1+ i))
                (if (< i n)
                    result
