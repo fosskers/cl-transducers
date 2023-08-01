@@ -116,7 +116,7 @@ that are non-nil.
 
 (declaim (ftype (function (fixnum) *) take))
 (defun take (n)
-  "Keep the first N elements of the transduction."
+  "Keep only the first N elements of the transduction."
   (lambda (reducer)
     (let ((new-n n))
       (lambda (result &optional (input nil i-p))
@@ -141,7 +141,7 @@ soon as any element fails the test."
   (lambda (reducer)
     (lambda (result &optional (input nil i-p))
       (if i-p (if (not (funcall pred input))
-                  (ensure-reduced result)
+                  (make-reduced :val result)
                   (funcall reducer result input))
           (funcall reducer result)))))
 

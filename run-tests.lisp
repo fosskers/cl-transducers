@@ -1,4 +1,3 @@
-(ql:quickload :transducers)
 (ql:quickload :transducers/tests)
 (in-package :transducers/tests)
 
