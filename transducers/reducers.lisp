@@ -52,8 +52,13 @@ transduction (thus protecting from division-by-zero)."
                  (/ acc items)))
             (t 0)))))
 
-(declaim (ftype (function ((function (t) *)) *) any))
-(defun any (pred)
+(defmacro any (pred)
+  "Deprecated: Use `anyp'."
+  (warn "`any' is deprecated; use `anyp' instead.")
+  `(anyp ,pred))
+
+(declaim (ftype (function ((function (t) *)) *) anyp))
+(defun anyp (pred)
   "Reducer: Yield non-NIL if any element in the transduction satisfies PRED.
 Short-circuits the transduction as soon as the condition is met."
   (lambda (&optional (acc nil a-p) (input nil i-p))
@@ -70,8 +75,13 @@ Short-circuits the transduction as soon as the condition is met."
 #+nil
 (transduce #'pass (any #'evenp) '(1 3 5 7 9 2))
 
-(declaim (ftype (function ((function (t) *)) *) all))
-(defun all (pred)
+(defmacro all (pred)
+  "Deprecated: Use `allp'."
+  (warn "`all' is deprecated; use `allp' instead.")
+  `(allp ,pred))
+
+(declaim (ftype (function ((function (t) *)) *) allp))
+(defun allp (pred)
   "Reducer: Yield non-NIL if all elements of the transduction satisfy PRED.
 Short-circuits with NIL if any element fails the test."
   (lambda (&optional (acc nil a-p) (input nil i-p))

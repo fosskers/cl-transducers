@@ -20,7 +20,7 @@
   ;; --- Reducers -- ;;
   (:export #:cons #:vector #:string
            #:count #:average
-           #:any #:all
+           #:anyp #:allp #:any #:all
            #:first #:last
            #:fold #:max #:min #:find
            #:for-each)

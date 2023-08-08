@@ -22,10 +22,10 @@
 
 (define-test "Predicates"
   :parent reduction
-  (false (t:transduce #'t:pass (t:any #'evenp) '(1 3 5 7 9)))
-  (true  (t:transduce #'t:pass (t:any #'evenp) '(1 3 5 7 9 2)))
-  (true  (t:transduce #'t:pass (t:all #'oddp) '(1 3 5 7 9)))
-  (false (t:transduce #'t:pass (t:all #'oddp) '(1 3 5 7 9 2))))
+  (false (t:transduce #'t:pass (t:anyp #'evenp) '(1 3 5 7 9)))
+  (true  (t:transduce #'t:pass (t:anyp #'evenp) '(1 3 5 7 9 2)))
+  (true  (t:transduce #'t:pass (t:allp #'oddp) '(1 3 5 7 9)))
+  (false (t:transduce #'t:pass (t:allp #'oddp) '(1 3 5 7 9 2))))
 
 (define-test "First and Last"
   :parent reduction
