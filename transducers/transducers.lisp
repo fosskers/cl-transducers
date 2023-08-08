@@ -1,7 +1,6 @@
 (defpackage transducers
   (:use :cl)
-  (:local-nicknames (#:q #:sycamore)
-                    (#:s #:fset))
+  (:local-nicknames (#:q #:sycamore))
   (:shadow #:map #:concatenate #:log #:step #:split
            #:cons #:count #:first #:last #:max #:min #:find #:string #:vector
            #:random)
@@ -304,13 +303,13 @@ input than N, then this yields nothing."
 
 (defun unique (reducer)
   "Transducer: Only allow values to pass through the transduction once each.
-Stateful; this uses a set internally so could get quite heavy if you're not
-careful."
-  (let ((set (s:empty-set)))
+Stateful; this uses a hash table internally so could get quite heavy if you're
+not careful."
+  (let ((seen (make-hash-table :test #'equal)))
     (lambda (result &optional (input nil i-p))
-      (if i-p (if (s:contains? set input)
+      (if i-p (if (gethash input seen)
                   result
-                  (progn (setf set (s:with set input))
+                  (progn (setf (gethash input seen) t)
                          (funcall reducer result input)))
           (funcall reducer result)))))
 
