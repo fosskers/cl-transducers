@@ -34,16 +34,16 @@
 (in-package :transducers)
 
 (defun pass (reducer)
-  "Just pass along each value of the transduction. Same in intent with applying
-`map' to `identity', but this should be slightly more efficient. It is at least
-shorter to type."
+  "Transducer: Just pass along each value of the transduction. Same in intent with
+applying `map' to `identity', but this should be slightly more efficient. It is
+at least shorter to type."
   (lambda (result &optional (input nil i-p))
     (if i-p (funcall reducer result input)
         (funcall reducer result))))
 
 (declaim (ftype (function ((function (t) *)) *) map))
 (defun map (f)
-  "Apply a function F to all elements of the transduction."
+  "Transducer: Apply a function F to all elements of the transduction."
   (lambda (reducer)
     (lambda (result &optional (input nil i-p))
       (if i-p (funcall reducer result (funcall f input))
@@ -54,7 +54,7 @@ shorter to type."
 
 (declaim (ftype (function ((function (t) *)) *) filter))
 (defun filter (pred)
-  "Only keep elements from the transduction that satisfy PRED."
+  "Transducer: Only keep elements from the transduction that satisfy PRED."
   (lambda (reducer)
     (lambda (result &optional (input nil i-p))
       (if i-p (if (funcall pred input)
@@ -67,8 +67,8 @@ shorter to type."
 
 (declaim (ftype (function ((function (t) *)) *) filter-map))
 (defun filter-map (f)
-  "Apply a function F to the elements of the transduction, but only keep results
-that are non-nil.
+  "Transducer: Apply a function F to the elements of the transduction, but only
+keep results that are non-nil.
 
 (transduce (filter-map #'cl:first) #'cons '(() (2 3) () (5 6) () (8 9)))
 => (2 5 8)
@@ -86,7 +86,7 @@ that are non-nil.
 
 (declaim (ftype (function (fixnum) *) drop))
 (defun drop (n)
-  "Drop the first N elements of the transduction."
+  "Transducer: Drop the first N elements of the transduction."
   (lambda (reducer)
     (let ((new-n (1+ n)))
       (lambda (result &optional (input nil i-p))
@@ -102,7 +102,7 @@ that are non-nil.
 
 (declaim (ftype (function ((function (t) *)) *) drop-while))
 (defun drop-while (pred)
-  "Drop elements from the front of the transduction that satisfy PRED."
+  "Transducer: Drop elements from the front of the transduction that satisfy PRED."
   (lambda (reducer)
     (let ((drop? t))
       (lambda (result &optional (input nil i-p))
@@ -117,7 +117,7 @@ that are non-nil.
 
 (declaim (ftype (function (fixnum) *) take))
 (defun take (n)
-  "Keep only the first N elements of the transduction."
+  "Transducer: Keep only the first N elements of the transduction."
   (lambda (reducer)
     (let ((new-n n))
       (lambda (result &optional (input nil i-p))
@@ -137,8 +137,8 @@ that are non-nil.
 
 (declaim (ftype (function ((function (t) *)) *) take-while))
 (defun take-while (pred)
-  "Keep only elements which satisfy a given PRED, and stop the transduction as
-soon as any element fails the test."
+  "Transducer: Keep only elements which satisfy a given PRED, and stop the
+transduction as soon as any element fails the test."
   (lambda (reducer)
     (lambda (result &optional (input nil i-p))
       (if i-p (if (not (funcall pred input))
@@ -150,7 +150,7 @@ soon as any element fails the test."
 (transduce (take-while #'evenp) #'cons '(2 4 6 8 9 2))
 
 (defun concatenate (reducer)
-  "Concatenate all the sublists in the transduction."
+  "Transducer: Concatenate all the sublists in the transduction."
   (let ((preserving-reducer (preserving-reduced reducer)))
     (lambda (result &optional (input nil i-p))
       (if i-p (list-reduce preserving-reducer result input)
@@ -160,7 +160,8 @@ soon as any element fails the test."
 (transduce #'concatenate #'cons '((1 2 3) (4 5 6) (7 8 9)))
 
 (defun flatten (reducer)
-  "Entirely flatten all lists in the transduction, regardless of nesting."
+  "Transducer: Entirely flatten all lists in the transduction, regardless of
+nesting."
   (lambda (result &optional (input nil i-p))
     (if i-p (if (listp input)
                 (list-reduce (preserving-reduced (flatten reducer)) result input)
@@ -172,8 +173,8 @@ soon as any element fails the test."
 
 (declaim (ftype (function (fixnum) *) segment))
 (defun segment (n)
-  "Partition the input into lists of N items. If the input stops, flush any
-accumulated state, which may be shorter than N."
+  "Transducer: Partition the input into lists of N items. If the input stops, flush
+any accumulated state, which may be shorter than N."
   (unless (> n 0)
     (error "The arguments to segment must be a positive integer."))
   (lambda (reducer)
@@ -202,8 +203,8 @@ accumulated state, which may be shorter than N."
 
 (declaim (ftype (function ((function (t) *)) *) group-by))
 (defun group-by (f)
-  "Group the input stream into sublists via some function F. The cutoff criterion
-is whether the return value of F changes between two consecutive elements of the
+  "Transducer: Group the input stream into sublists via some function F. The cutoff
+criterion is whether the return value of F changes between two consecutive elements of the
 transduction.
 
 (transduce (group-by #'evenp) #'cons '(2 4 6 7 9 1 2 4 6 3))
@@ -234,7 +235,7 @@ transduction.
 (transduce (group-by #'evenp) #'cons '(2 4 6 7 9 1 2 4 6 3))
 
 (defun intersperse (elem)
-  "Insert an ELEM between each value of the transduction."
+  "Transducer: Insert an ELEM between each value of the transduction."
   (lambda (reducer)
     (let ((send-elem? nil))
       (lambda (result &optional (input nil i-p))
@@ -251,7 +252,8 @@ transduction.
 (transduce (intersperse 0) #'cons '(1 2 3))
 
 (defun enumerate (reducer)
-  "Index every value passed through the transduction into a cons pair. Starts at 0."
+  "Transducer: Index every value passed through the transduction into a cons pair.
+Starts at 0."
   (let ((n 0))
     (lambda (result &optional (input nil i-p))
       (if i-p (let ((input (cl:cons n input)))
@@ -263,9 +265,9 @@ transduction.
 (transduce #'enumerate #'cons '("a" "b" "c"))
 
 (defun log (logger)
-  "Call some LOGGER function for each step of the transduction. The LOGGER must
-accept the running results and the current element as input. The original
-results of the transduction are passed through as-is."
+  "Transducer: Call some LOGGER function for each step of the transduction. The
+LOGGER must accept the running results and the current element as input. The
+original results of the transduction are passed through as-is."
   (lambda (reducer)
     (lambda (result &optional (input nil i-p))
       (cond (i-p
@@ -278,9 +280,9 @@ results of the transduction are passed through as-is."
 
 (declaim (ftype (function (fixnum) *) window))
 (defun window (n)
-  "Yield N-length windows of overlapping values. This is different from `segment' which
-yields non-overlapping windows. If there were fewer items in the input than N,
-then this yields nothing."
+  "Transducer: Yield N-length windows of overlapping values. This is different from
+`segment' which yields non-overlapping windows. If there were fewer items in the
+input than N, then this yields nothing."
   (unless (> n 0)
     (error "The arguments to window must be a positive integer."))
   (lambda (reducer)
@@ -300,7 +302,7 @@ then this yields nothing."
 (transduce (window 3) #'cons '(1 2 3 4 5))
 
 (defun unique (reducer)
-  "Only allow values to pass through the transduction once each.
+  "Transducer: Only allow values to pass through the transduction once each.
 Stateful; this uses a set internally so could get quite heavy if you're not
 careful."
   (let ((set (s:empty-set)))
@@ -315,7 +317,7 @@ careful."
 (transduce #'unique #'cons '(1 2 1 3 2 1 2 "abc"))
 
 (defun dedup (reducer)
-  "Remove adjacent duplicates from the transduction."
+  "Transducer: Remove adjacent duplicates from the transduction."
   (let ((prev 'nothing))
     (lambda (result &optional (input nil i-p))
       (if i-p (if (equal prev input)
@@ -329,8 +331,8 @@ careful."
 
 (declaim (ftype (function (fixnum) *) step))
 (defun step (n)
-  "Only yield every Nth element of the transduction. The first element of the
-transduction is always included. Therefore:
+  "Transducer: Only yield every Nth element of the transduction. The first element
+of the transduction is always included. Therefore:
 
 (transduce (step 2) #'cons '(1 2 3 4 5 6 7 8 9))
 => (1 3 5 7 9)
@@ -352,8 +354,8 @@ transduction is always included. Therefore:
 
 (declaim (ftype (function ((function (t t) *) t) *) scan))
 (defun scan (f seed)
-  "Build up successsive values from the results of previous applications of a given
-function F.
+  "Transducer: Build up successsive values from the results of previous
+applications of a given function F.
 
 (transduce (scan #'+ 0) #'cons '(1 2 3 4))
 => (0 1 3 6 10)"
@@ -376,7 +378,7 @@ function F.
 (transduce (comp (scan #'+ 0) (take 2)) #'cons '(1 2 3 4))
 
 (defun once (item)
-  "Inject some ITEM into the front of the transduction."
+  "Transducer: Inject some ITEM into the front of the transduction."
   (lambda (reducer)
     (let ((item item))
       (lambda (result &optional (input nil i-p))
@@ -398,9 +400,9 @@ function F.
 ;; --- Higher Order Transducers --- ;;
 
 (defun branch (pred ta tb)
-  "If a PRED yields non-NIL on a value, proceed with transducer chain TA.
-Otherwise, follow chain TB. This produces a kind of diamond pattern of data flow
-within the transduction:
+  "Transducer: If a PRED yields non-NIL on a value, proceed with transducer chain
+TA. Otherwise, follow chain TB. This produces a kind of diamond pattern of data
+flow within the transduction:
 
      /4a-5a-6a\\
 1-2-3          7-8-9
@@ -442,10 +444,10 @@ sides!
            #'cons (ints 1))
 
 (defun split (ta ra)
-  "Split off a new transducer chain, feeding it each input as well. It reduces on
-its own given RA reducer. The final result is a cons-cell where the first value
-is the result of the original transduction, and the second is that of the
-branch."
+  "Transducer: Split off a new transducer chain, feeding it each input as well. It
+reduces on its own given RA reducer. The final result is a cons-cell where the
+first value is the result of the original transduction, and the second is that
+of the branch."
   (lambda (reducer)
     (let ((fa (funcall ta ra))
           (other-res (funcall ra)))
@@ -465,7 +467,7 @@ branch."
            #'cons (ints 1))
 
 (defun inject (f)
-  "For each value in the transduction that actually affects the final
+  "Transducer: For each value in the transduction that actually affects the final
 result (tested with `EQ'), inject an extra transduction step into the chain
 immediately after this point. Accumulates, such that each new injection appears
 before the previous one."
@@ -490,9 +492,9 @@ before the previous one."
 (transduce (map #'length) #'+ #p"transducers.lisp")
 
 (defun par (f ta tb)
-  "Traverse two transducer paths at the same time, combining the results of each
-path with a given function F before moving on. This is similar to the `zip'
-concept from other languages.
+  "Transducer: Traverse two transducer paths at the same time, combining the
+results of each path with a given function F before moving on. This is similar
+to the `zip' concept from other languages.
 
 Given the following transducer chain:
 

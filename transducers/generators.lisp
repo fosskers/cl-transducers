@@ -38,7 +38,7 @@
 
 (declaim (ftype (function (t) generator) repeat))
 (defun repeat (item)
-  "Endlessly yield a given ITEM."
+  "Source: Endlessly yield a given ITEM."
   (make-generator :func (constantly item)))
 
 #+nil
@@ -46,9 +46,9 @@
 
 (declaim (ftype (function (integer &key (:step fixnum)) generator) ints))
 (defun ints (start &key (step 1))
-  "Yield all integers, beginning with START and advancing by an optional STEP value
-which can be positive or negative. If you only want a specific range within the
-transduction, then use `take-while' within your transducer chain."
+  "Source: Yield all integers, beginning with START and advancing by an optional
+STEP value which can be positive or negative. If you only want a specific range
+within the transduction, then use `take-while' within your transducer chain."
   (let* ((curr start)
          (func (lambda ()
                  (let ((old curr))
@@ -61,7 +61,7 @@ transduction, then use `take-while' within your transducer chain."
 
 (declaim (ftype (function ((or single-float double-float integer)) generator) random))
 (defun random (limit)
-  "Yield an endless stream of random numbers."
+  "Source: Yield an endless stream of random numbers."
   (make-generator :func (lambda () (cl:random limit))))
 
 #+nil
@@ -69,8 +69,8 @@ transduction, then use `take-while' within your transducer chain."
 
 (declaim (ftype (function (cl:vector) generator) shuffle))
 (defun shuffle (vec)
-  "Endlessly yield random elements from a given vector. Recall also that strings
-are vectors too, so:
+  "Source: Endlessly yield random elements from a given vector. Recall also that
+strings are vectors too, so:
 
 (transduce (take 5) #'string (shuffle \"Númenor\"))
 => \"mNNrú\"
@@ -83,7 +83,7 @@ are vectors too, so:
 (transduce (take 5) #'cons (shuffle #("Colin" "Tamayo" "Natsume")))
 
 (defgeneric cycle (seq)
-  (:documentation "Yield the values of a given SEQ endlessly."))
+  (:documentation "Reducer: Yield the values of a given SEQ endlessly."))
 
 (defmethod cycle ((seq list))
   (if (null seq)
