@@ -23,7 +23,8 @@
            #:count #:average
            #:any #:all
            #:first #:last
-           #:fold #:max #:min #:find)
+           #:fold #:max #:min #:find
+           #:for-each)
   ;; --- Generators --- ;;
   (:export #:ints #:cycle #:repeat #:random #:shuffle)
   ;; --- Utilities --- ;;

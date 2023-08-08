@@ -153,3 +153,12 @@ Yields `nil' if no such element were found."
 
 #+nil
 (transduce #'pass (find #'evenp) '(1 3 5 6 9))
+
+(defun for-each (&rest vargs)
+  "Reducer: Run through every item in a transduction for their side effects.
+Throws away all results and yields nil."
+  (declare (ignore vargs))
+  nil)
+
+#+nil
+(transduce (map (lambda (n) (format t "~a~%" n))) #'for-each #(1 2 3 4))
