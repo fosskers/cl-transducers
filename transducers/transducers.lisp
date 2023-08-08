@@ -14,7 +14,8 @@
            #:concatenate #:flatten
            #:segment #:window #:group-by
            #:intersperse #:enumerate #:step #:scan
-           #:log)
+           #:log
+           #:once)
   ;; --- Higher Order Transducers --- ;;
   (:export #:branch #:inject #:split)
   ;; --- Reducers -- ;;
@@ -373,6 +374,26 @@ function F.
 (transduce (scan #'+ 0) #'cons '(1 2 3 4))
 #+nil
 (transduce (comp (scan #'+ 0) (take 2)) #'cons '(1 2 3 4))
+
+(defun once (item)
+  "Inject some ITEM into the front of the transduction."
+  (lambda (reducer)
+    (let ((item item))
+      (lambda (result &optional (input nil i-p))
+        (if i-p (if item
+                    (let ((res (funcall reducer result item)))
+                      (if (reduced-p res)
+                          res
+                        (progn (setq item nil)
+                               (funcall reducer res input))))
+                  (funcall reducer result input))
+          (funcall reducer result))))))
+
+#+nil
+(transduce (comp (filter (lambda (n) (> n 10)))
+                 (once 'hi)
+                 (take 3))
+           #'cons (ints 1))
 
 ;; --- Higher Order Transducers --- ;;
 

@@ -94,7 +94,12 @@
       (t:transduce (t:scan #'+ 0) #'t:cons '(1 2 3 4)))
   (is equal '(0 1)
       (t:transduce (t:comp (t:scan #'+ 0) (t:take 2))
-                   #'t:cons '(1 2 3 4))))
+                   #'t:cons '(1 2 3 4)))
+  (is equal '(hi 11 12)
+      (t:transduce (t:comp (t:filter (lambda (n) (> n 10)))
+                           (t:once 'hi)
+                           (t:take 3))
+                   #'t:cons (t:ints 1))))
 
 (define-test "Composition"
   :parent transduction
