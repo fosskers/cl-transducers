@@ -15,7 +15,7 @@
 
 (declaim (ftype (function ((or pathname stream string)) json) read))
 (defun read (source)
-  "Mark a data SOURCE as being some store of csv data."
+  "Mark a data SOURCE as being some store of JSON data."
   (make-json :source source))
 
 (defmethod t:transduce (xform f (source json))
