@@ -2,7 +2,7 @@
   (:use :cl)
   (:local-nicknames (#:q #:sycamore))
   (:shadow #:map #:concatenate #:log #:step #:split
-           #:cons #:count #:first #:last #:max #:min #:find #:string #:vector
+           #:cons #:count #:first #:last #:max #:min #:find #:string #:vector #:hash-table
            #:random)
   ;; --- Entry Points --- ;;
   (:export #:transduce)
