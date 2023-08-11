@@ -89,8 +89,12 @@
          (result (hash-table-reduce xf init coll)))
     (funcall xf result)))
 
-;; FIXME It may be more correct to pass both the key and value together via
-;; `values'.
+;; FIXME
+;;
+;; It may be more correct to pass both the key and value together via `values'.
+;;
+;; Fri Aug 11 21:25:02 2023
+;; Here we are entirely ignoring the key.
 (defun hash-table-reduce (f identity ht)
   (with-hash-table-iterator (iter ht)
     (labels ((recurse (acc)

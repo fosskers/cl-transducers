@@ -19,13 +19,24 @@
 
 (declaim (ftype (function (&optional list t) *) vector))
 (defun vector (&optional (acc nil a-p) (input nil i-p))
-  "Reducer: Collect a stream of values into to a vector."
+  "Reducer: Collect a stream of values into a vector."
   (cond ((and a-p i-p) (cl:cons input acc))
         ((and a-p (not i-p)) (cl:concatenate 'cl:vector (reverse acc)))
         (t '())))
 
 #+nil
 (vector-transduce (map #'1+) #'vector #(1 2 3))
+
+(defun hash-table (&optional (acc nil a-p) (input nil i-p))
+  "Reducer: Collect a stream of key-value cons pairs into a hash table."
+  (cond ((and a-p i-p) (destructuring-bind (key . val) input
+                         (setf (gethash key acc) val)
+                         acc))
+        ((and a-p (not i-p)) acc)
+        (t (make-hash-table :test #'equal))))
+
+#+nil
+(transduce #'enumerate #'hash-table '("a" "b" "c"))
 
 (declaim (ftype (function (&optional fixnum t) fixnum) count))
 (defun count (&optional (acc 0 a-p) (input nil i-p))

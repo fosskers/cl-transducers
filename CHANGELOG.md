@@ -1,5 +1,13 @@
 # Transducers
 
+### Unreleased
+
+#### Added
+
+- A `hash-table` reducer for reducing into a Hash Table. Requires the
+  transduction items to be cons cells, with `car` being the key and `cdr` being
+  the value.
+
 ### 0.1.1 (2023-08-11)
 
 #### Added
