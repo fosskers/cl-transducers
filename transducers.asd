@@ -1,5 +1,5 @@
 (defsystem "transducers"
-  :version "0.1.0"
+  :version "0.1.1"
   :author "Colin Woodbury <colin@fosskers.ca>"
   :license "GPL-3.0-only"
   :depends-on (:sycamore)
