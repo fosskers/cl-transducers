@@ -139,8 +139,8 @@ were no input left in the transduction.
 
 The normal CL functions =+= and =*= are automatically valid reducers, because they
 yield sane values even when given 0 or 1 arguments. Other functions like =max=
-cannot be used as-is as reducers since they require at least 2 arguments. For
-functions like this, =fold= is appropriate.
+cannot be used as-is as reducers since they can't be called without arguments.
+For functions like this, =fold= is appropriate.
 
 #+begin_src lisp
 ;; The length of the longest word in this README.

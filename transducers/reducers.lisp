@@ -140,8 +140,8 @@ the transduction.
 
 Functions like `+' and `*' are automatically valid reducers, because they yield
 sane values even when given 0 or 1 arguments. Other functions like `max' cannot
-be used as-is as reducers since they require at least 2 arguments. For functions
-like this, `fold' is appropriate."
+be used as-is as reducers since they can't be called without arguments. For
+functions like this, `fold' is appropriate."
   (lambda (&optional (acc nil a-p) (input nil i-p))
     (cond ((and a-p i-p) (funcall f acc input))
           ((and a-p (not i-p)) acc)
