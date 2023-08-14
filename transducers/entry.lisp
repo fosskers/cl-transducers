@@ -13,7 +13,7 @@
 (defmethod transduce (xform f (source cl:vector))
   (vector-transduce xform f source))
 
-(defmethod transduce (xform f (source hash-table))
+(defmethod transduce (xform f (source cl:hash-table))
   (hash-table-transduce xform f source))
 
 (defmethod transduce (xform f (source pathname))
@@ -81,7 +81,7 @@
 #+nil
 (string-transduce (map #'char-upcase) #'cons "hello")
 
-(declaim (ftype (function (t t hash-table) *) hash-table-transduce))
+(declaim (ftype (function (t t cl:hash-table) *) hash-table-transduce))
 (defun hash-table-transduce (xform f coll)
   "Transduce over the contents of a given Hash Table."
   (let* ((init   (funcall f))
