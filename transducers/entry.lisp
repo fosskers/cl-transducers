@@ -99,10 +99,9 @@
   (with-hash-table-iterator (iter ht)
     (labels ((recurse (acc)
                (multiple-value-bind (entry-p key value) (iter)
-                 (declare (ignore key))
                  (if (not entry-p)
                      acc
-                     (let ((acc (funcall f acc value)))
+                     (let ((acc (funcall f acc (cl:cons key value))))
                        (if (reduced-p acc)
                            (reduced-val acc)
                            (recurse acc)))))))

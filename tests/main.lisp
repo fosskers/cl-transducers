@@ -82,6 +82,16 @@
   (is equal '((2 4 6) (7 9 1) (2 4 6) (3))
       (t:transduce (t:group-by #'evenp) #'t:cons '(2 4 6 7 9 1 2 4 6 3))))
 
+(define-test "Hash Tables"
+  :parent transduction
+  :depends-on (reduction)
+  (let ((table (make-hash-table :test #'equal)))
+    (setf (gethash :a table) 1)
+    (setf (gethash :b table) 2)
+    (setf (gethash :c table) 3)
+    (is equal '(1 2 3) (t:transduce (t:map #'cdr) #'t:cons table))
+    (is equal '(:a :b :c) (t:transduce (t:map #'car) #'t:cons table))))
+
 (define-test "Other"
   :parent transduction
   :depends-on (reduction)
@@ -159,3 +169,5 @@
 
 #+nil
 (test 'transducers/tests)
+#+nil
+(test 'transducers/tests :report 'interactive)

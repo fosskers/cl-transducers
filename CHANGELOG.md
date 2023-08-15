@@ -8,6 +8,11 @@
   transduction items to be cons cells, with `car` being the key and `cdr` being
   the value.
 
+#### Changed
+
+- Transducing over a `hash-table` now yields the key-value pair as a cons cell,
+  instead of just the value. The former behaviour is considered a bug.
+
 ### 0.1.1 (2023-08-11)
 
 #### Added
