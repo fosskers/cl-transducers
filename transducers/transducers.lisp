@@ -28,7 +28,8 @@
   (:export #:ints #:cycle #:repeat #:random #:shuffle)
   ;; --- Utilities --- ;;
   (:export #:comp #:const
-           #:make-reduced #:reduced-p #:reduced-val)
+           #:make-reduced #:reduced-p #:reduced-val
+           #:empty-transduction)
   (:documentation "Ergonomic, efficient data processing."))
 
 (in-package :transducers)

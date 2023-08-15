@@ -7,11 +7,16 @@
 - A `hash-table` reducer for reducing into a Hash Table. Requires the
   transduction items to be cons cells, with `car` being the key and `cdr` being
   the value.
+- The `empty-transduction` condition (see below).
 
 #### Changed
 
 - Transducing over a `hash-table` now yields the key-value pair as a cons cell,
   instead of just the value. The former behaviour is considered a bug.
+- The `seed` argument of the `fold` reducer is now `&optional`. When missing,
+  the first value that makes it through the transduction will be used as the
+  seed. If the transduction turns out to be empty, then the condition
+  `empty-transduction` will be raised.
 
 ### 0.1.1 (2023-08-11)
 

@@ -131,25 +131,50 @@ wasn't one."
 #+nil
 (transduce #'pass (last 0) '(2 4 6 7 10))
 
-(declaim (ftype (function ((function (t t) *) t) *) fold))
-(defun fold (f seed)
+(declaim (ftype (function ((function (t t) *) &optional t) *) fold))
+(defun fold (f &optional (seed nil seed-p))
   "Reducer: The fundamental reducer. `fold' creates an ad-hoc reducer based on
-a given 2-argument function. A SEED is also required as the initial accumulator
-value, which also becomes the return value in case there were no input left in
-the transduction.
+a given 2-argument function. An optional SEED value can also be given as the
+initial accumulator value, which also becomes the return value in case there
+were no input left in the transduction.
 
 Functions like `+' and `*' are automatically valid reducers, because they yield
 sane values even when given 0 or 1 arguments. Other functions like `max' cannot
 be used as-is as reducers since they can't be called without arguments. For
-functions like this, `fold' is appropriate."
-  (lambda (&optional (acc nil a-p) (input nil i-p))
-    (cond ((and a-p i-p) (funcall f acc input))
-          ((and a-p (not i-p)) acc)
-          (t seed))))
+functions like this, `fold' is appropriate.
+
+If no SEED is given and the transduction is empty, the condition
+`empty-transduction' will be raised."
+  (if seed-p
+      (lambda (&optional (acc nil a-p) (input nil i-p))
+        (cond ((and a-p i-p) (funcall f acc input))
+              ((and a-p (not i-p)) acc)
+              (t seed)))
+      (lambda (&optional (acc nil a-p) (input nil i-p))
+          (cond ((and a-p i-p)
+                 (if (eq acc 'transducers-none)
+                     input
+                     (funcall f acc input)))
+                ((and a-p (not i-p))
+                 (if (eq acc 'transducers-none)
+                     (restart-case (error 'empty-transduction :msg "fold was called without a seed, but the transduction was also empty.")
+                       (supply-default (value)
+                         :report "Supply a default value and end the transduction."
+                         :interactive (lambda () (prompt-new-value "Default value: "))
+                         value))
+                     acc))
+                (t 'transducers-none)))))
 
 #+nil
+(transduce #'pass (fold #'cl:max) '())
+#+nil
 (transduce #'pass (fold #'cl:max 0) '(1 2 3 4 1000 5 6))
+#+nil
+(transduce #'pass (fold #'cl:max) '(1 2 3 4 1000 5 6))
 
+;; FIXME Tue Aug 15 22:14:46 2023
+;;
+;; Make this `default' optional as well?
 (defun max (default)
   "Reducer: Yield the maximum value of the transduction, or the DEFAULT if there
 wasn't one."
