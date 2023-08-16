@@ -89,8 +89,8 @@
     (setf (gethash :a table) 1)
     (setf (gethash :b table) 2)
     (setf (gethash :c table) 3)
-    (is equal '(1 2 3) (t:transduce (t:map #'cdr) #'t:cons table))
-    (is equal '(:a :b :c) (t:transduce (t:map #'car) #'t:cons table))))
+    (is equal '(1 2 3)    (sort (t:transduce (t:map #'cdr) #'t:cons table) #'<))
+    (is equal '(:a :b :c) (sort (t:transduce (t:map #'car) #'t:cons table) #'string<))))
 
 (define-test "Other"
   :parent transduction
@@ -98,7 +98,7 @@
   (is equal '(1 3 5 7 9)
       (t:transduce (t:step 2) #'t:cons '(1 2 3 4 5 6 7 8 9)))
   (is equal '(1 0 2 0 3) (t:transduce (t:intersperse 0) #'t:cons '(1 2 3)))
-  (is equal '((0 . "a") (1 . "b") (2 . "c"))
+  (is equal (list (cons 0 "a") (cons 1 "b") (cons 2 "c"))
       (t:transduce #'t:enumerate #'t:cons '("a" "b" "c")))
   (is equal '(0 1 3 6 10)
       (t:transduce (t:scan #'+ 0) #'t:cons '(1 2 3 4)))
@@ -152,7 +152,7 @@
                                      (t:map (t:const "Odd!")))
                            (t:map #'length))
                    #'t:cons (t:ints 1)))
-  (is equal '((1 2 3 4 5 6 7 8 9) . 12)
+  (is equal (cons '(1 2 3 4 5 6 7 8 9) 12)
       (t:transduce (t:comp (t:take 9)
                            (t:map #'1+)
                            (t:split (t:comp (t:filter #'evenp) (t:take 3)) #'+)
