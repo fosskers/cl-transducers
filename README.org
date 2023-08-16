@@ -17,6 +17,7 @@ Transducers...
 - allow the chaining of operations like =map= and =filter= without allocating memory between each step.
 - aren't tied to any specific data type; they need only be implemented once.
 - vastly simplify "data transformation code".
+- have nothing to do with "lazy evaluation".
 - are a joy to use!
 
 Example: /While skipping every second line of a file, sum the lengths of only
@@ -31,6 +32,8 @@ evenly-lengthed lines./
   ;; What's our original data source?
   #p"giant-file.txt")
 #+end_src
+
+_This library has been tested with SBCL, CCL, ECL, ABCL, and Clasp._
 
 * History and Motivation
 
