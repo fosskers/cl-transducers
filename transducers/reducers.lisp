@@ -4,29 +4,39 @@
 (defun cons (&optional (acc nil a-p) (input nil i-p))
   "Reducer: Collect all results as a list."
   (cond ((and a-p i-p) (cl:cons input acc))
-        ((and a-p (not i-p)) (reverse acc))
+        ((and a-p (not i-p)) (nreverse acc))
         (t '())))
 
-(declaim (ftype (function (&optional list character) *) string))
+(declaim (ftype (function (&optional list t) list) snoc))
+(defun snoc (&optional (acc nil a-p) (input nil i-p))
+  "Reducer: Collect all results as a list, but results are reversed.
+In theory, slightly more performant than `cons' since it performs no final
+reversal."
+  (cond ((and a-p i-p) (cl:cons input acc))
+        ((and a-p (not i-p)) acc)
+        (t '())))
+
+(declaim (ftype (function (&optional list character) cl:string) string))
 (defun string (&optional (acc nil a-p) (input #\z i-p))
   "Reducer: Collect a stream of characters into to a single string."
   (cond ((and a-p i-p) (cl:cons input acc))
-        ((and a-p (not i-p)) (cl:concatenate 'cl:string (reverse acc)))
+        ((and a-p (not i-p)) (cl:concatenate 'cl:string (nreverse acc)))
         (t '())))
 
 #+nil
 (string-transduce (map #'char-upcase) #'string "hello")
 
-(declaim (ftype (function (&optional list t) *) vector))
+(declaim (ftype (function (&optional list t) cl:vector) vector))
 (defun vector (&optional (acc nil a-p) (input nil i-p))
   "Reducer: Collect a stream of values into a vector."
   (cond ((and a-p i-p) (cl:cons input acc))
-        ((and a-p (not i-p)) (cl:concatenate 'cl:vector (reverse acc)))
+        ((and a-p (not i-p)) (cl:concatenate 'cl:vector (nreverse acc)))
         (t '())))
 
 #+nil
 (vector-transduce (map #'1+) #'vector #(1 2 3))
 
+(declaim (ftype (function (&optional (or cl:hash-table null) t) cl:hash-table) hash-table))
 (defun hash-table (&optional (acc nil a-p) (input nil i-p))
   "Reducer: Collect a stream of key-value cons pairs into a hash table."
   (cond ((and a-p i-p) (destructuring-bind (key . val) input

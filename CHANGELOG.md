@@ -4,6 +4,7 @@
 
 #### Added
 
+- A `snoc` reducer for reducing into a list without performing a final reverse.
 - A `hash-table` reducer for reducing into a Hash Table. Requires the
   transduction items to be cons cells, with `car` being the key and `cdr` being
   the value.

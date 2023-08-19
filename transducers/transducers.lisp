@@ -18,7 +18,7 @@
   ;; --- Higher Order Transducers --- ;;
   (:export #:branch #:inject #:split)
   ;; --- Reducers -- ;;
-  (:export #:cons #:vector #:string #:hash-table
+  (:export #:cons #:snoc #:vector #:string #:hash-table
            #:count #:average
            #:anyp #:allp #:any #:all
            #:first #:last
