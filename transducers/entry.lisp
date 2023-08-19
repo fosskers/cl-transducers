@@ -47,12 +47,14 @@
 
 (declaim (ftype (function ((function (&optional t t) *) t list) *) list-reduce))
 (defun list-reduce (f identity lst)
-  (if (null lst)
-      identity
-      (let ((v (funcall f identity (car lst))))
-        (if (reduced-p v)
-            (reduced-val v)
-            (list-reduce f v (cdr lst))))))
+  (labels ((recurse (acc items)
+             (if (null items)
+                 acc
+                 (let ((v (funcall f acc (car items))))
+                   (if (reduced-p v)
+                       (reduced-val v)
+                       (recurse v (cdr items)))))))
+    (recurse identity lst)))
 
 (declaim (ftype (function (t t cl:vector) *) vector-transduce))
 (defun vector-transduce (xform f coll)

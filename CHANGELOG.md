@@ -19,6 +19,12 @@
   seed. If the transduction turns out to be empty, then the condition
   `empty-transduction` will be raised.
 
+#### Fixed
+
+- List transduction fixed on Clasp. Clasp doesn't (seem to) support tail-call
+  optimization, but it does support `labels`-based TCO. This is also critical
+  for the `jzon` support.
+
 ### 0.1.1 (2023-08-11)
 
 #### Added

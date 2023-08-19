@@ -159,6 +159,14 @@
                            (t:map #'1-))
            #'t:cons (t:ints 1))))
 
+(define-test "labels-based recursion"
+  (is = 1000000
+      (labels ((recurse (acc)
+                 (if (= acc 1000000)
+                     acc
+                     (recurse (1+ acc)))))
+        (recurse 1))))
+
 (define-test "Tail-recursion"
   :depends-on (reduction transduction)
   (let ((huge (t:transduce (t:take 1000000) #'t:cons (t:ints 1))))
