@@ -159,18 +159,18 @@
                            (t:map #'1-))
            #'t:cons (t:ints 1))))
 
-(define-test "labels-based recursion"
-  (is = 1000000
-      (labels ((recurse (acc)
-                 (if (= acc 1000000)
-                     acc
-                     (recurse (1+ acc)))))
-        (recurse 1))))
+(define-test "labels-based recursion")
 
 (define-test "Tail-recursion"
   :depends-on (reduction transduction)
   (let ((huge (t:transduce (t:take 1000000) #'t:cons (t:ints 1))))
-    (is = 1000000 (t:transduce #'t:pass #'t:count huge))))
+    (is = 1000000 (t:transduce #'t:pass #'t:count huge)))
+  (is = 1000000
+         (labels ((recurse (acc)
+                    (if (= acc 1000000)
+                        acc
+                        (recurse (1+ acc)))))
+           (recurse 1))))
 
 (define-test json)
 

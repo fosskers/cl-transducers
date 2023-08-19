@@ -33,7 +33,11 @@ evenly-lengthed lines./
   #p"giant-file.txt")
 #+end_src
 
-_This library has been tested with SBCL, CCL, ECL, ABCL, and Clasp._
+_This library has been confirmed to work with SBCL, CCL, ECL, and Clasp._
+
+#+begin_quote
+⚠ ABCL cannot be used due to lack of support for tail-call elimination and tail-recursive ~labels~.
+#+end_quote
 
 * History and Motivation
 
