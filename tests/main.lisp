@@ -159,6 +159,11 @@
                            (t:map #'1-))
            #'t:cons (t:ints 1))))
 
+(define-test "Tail-recursion"
+  :depends-on (reduction transduction)
+  (let ((huge (t:transduce (t:take 1000000) #'t:cons (t:ints 1))))
+    (is = 1000000 (t:transduce #'t:pass #'t:count huge))))
+
 (define-test json)
 
 (define-test "Reading and Writing"

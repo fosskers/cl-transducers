@@ -45,6 +45,7 @@
          (result (list-reduce xf init coll)))
     (funcall xf result)))
 
+(declaim (ftype (function ((function (&optional t t) *) t list) *) list-reduce))
 (defun list-reduce (f identity lst)
   (if (null lst)
       identity

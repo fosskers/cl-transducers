@@ -16,7 +16,6 @@ reversal."
         ((and a-p (not i-p)) acc)
         (t '())))
 
-(declaim (ftype (function (&optional list character) cl:string) string))
 (defun string (&optional (acc nil a-p) (input #\z i-p))
   "Reducer: Collect a stream of characters into to a single string."
   (cond ((and a-p i-p) (cl:cons input acc))
@@ -26,7 +25,6 @@ reversal."
 #+nil
 (string-transduce (map #'char-upcase) #'string "hello")
 
-(declaim (ftype (function (&optional list t) cl:vector) vector))
 (defun vector (&optional (acc nil a-p) (input nil i-p))
   "Reducer: Collect a stream of values into a vector."
   (cond ((and a-p i-p) (cl:cons input acc))
