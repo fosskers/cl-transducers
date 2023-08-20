@@ -68,3 +68,11 @@ try to continue the transducing process."
       (if (reduced-p result)
           (make-reduced :val result)
           result))))
+
+(defun zipmap (keys vals)
+  "Form a hashmap with the KEYS mapped to the corresponding VALS.
+
+Borrowed from Clojure, thanks guys."
+  (let ((table (make-hash-table :test #'equal)))
+    (mapc (lambda (k v) (setf (gethash k table) v)) keys vals)
+    table))

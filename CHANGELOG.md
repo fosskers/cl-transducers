@@ -4,6 +4,7 @@
 
 #### Added
 
+- A `csv` transducer to interpret a string stream as CSV data, splitting the values into a list.
 - A `snoc` reducer for reducing into a list without performing a final reverse.
 - A `hash-table` reducer for reducing into a Hash Table. Requires the
   transduction items to be cons cells, with `car` being the key and `cdr` being

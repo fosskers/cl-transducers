@@ -14,7 +14,8 @@
            #:segment #:window #:group-by
            #:intersperse #:enumerate #:step #:scan
            #:log
-           #:once)
+           #:once
+           #:csv)
   ;; --- Higher Order Transducers --- ;;
   (:export #:branch #:inject #:split)
   ;; --- Reducers -- ;;
@@ -397,6 +398,40 @@ applications of a given function F.
                  (once 'hi)
                  (take 3))
            #'cons (ints 1))
+
+(defun csv (reducer)
+  "Transducer: Interpret the data stream as CSV data.
+
+The first item found is assumed to be the header list, and it
+will be used to construct useable hashmaps for all subsequent
+items.
+
+Note: This function makes no attempt to convert types from the
+original parsed strings. If you want numbers, you will need to
+further parse them yourself.
+
+This function is expected to be passed \"bare\" to `transduce', so there is no
+need for the caller to manually pass a REDUCER."
+  (let ((headers nil))
+    (lambda (result &optional (input nil i-p))
+      (if i-p (let ((items (split-csv-line input)))
+                (if headers (funcall reducer result (zipmap headers items))
+                  (progn (setf headers items)
+                         result)))
+        (funcall reducer result)))))
+
+#+nil
+(transduce (comp (once "Name,Age")
+                 #'csv
+                 (map (lambda (hm) (gethash "Name" hm))))
+           #'cons '("Alice,35" "Bob,26"))
+
+(defun split-csv-line (line)
+  "Split a LINE of CSV data in a sane way.
+
+This removes any extra whitespace that might be hanging around between elements."
+  (mapcar (lambda (s) (string-trim " " s))
+          (uiop:split-string line :separator ",")))
 
 ;; --- Higher Order Transducers --- ;;
 
