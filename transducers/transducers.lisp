@@ -177,28 +177,32 @@ nesting."
 (defun segment (n)
   "Transducer: Partition the input into lists of N items. If the input stops, flush
 any accumulated state, which may be shorter than N."
-  (unless (> n 0)
-    (error "The arguments to segment must be a positive integer."))
-  (lambda (reducer)
-    (let ((i 0)
-          (collect '()))
-      (lambda (result &optional (input nil i-p))
-        (cond (i-p
-               (setf collect (cl:cons input collect))
-               (setf i (1+ i))
-               (if (< i n)
-                   result
-                   (let ((next-input (reverse collect)))
-                     (setf i 0)
-                     (setf collect '())
-                     (funcall reducer result next-input))))
-              (t (let ((result (if (zerop i)
-                                   result
-                                   (funcall reducer result (reverse collect)))))
-                   (setf i 0)
-                   (if (reduced-p result)
-                       (funcall reducer (reduced-val result))
-                       (funcall reducer result)))))))))
+  (if (< n 1)
+      (restart-case (error "Non-positive integer passed to `segment'.")
+        (use-value (value)
+          :report "Supply a new value and reattempt the transduction."
+          :interactive (lambda () (prompt-new-value "Positive Integer: "))
+          (segment value)))
+      (lambda (reducer)
+        (let ((i 0)
+              (collect '()))
+          (lambda (result &optional (input nil i-p))
+            (cond (i-p
+                   (setf collect (cl:cons input collect))
+                   (setf i (1+ i))
+                   (if (< i n)
+                       result
+                       (let ((next-input (reverse collect)))
+                         (setf i 0)
+                         (setf collect '())
+                         (funcall reducer result next-input))))
+                  (t (let ((result (if (zerop i)
+                                       result
+                                       (funcall reducer result (reverse collect)))))
+                       (setf i 0)
+                       (if (reduced-p result)
+                           (funcall reducer (reduced-val result))
+                           (funcall reducer result))))))))))
 
 #+nil
 (transduce (segment 3) #'cons '(1 2 3 4 5))
@@ -285,20 +289,24 @@ original results of the transduction are passed through as-is."
   "Transducer: Yield N-length windows of overlapping values. This is different from
 `segment' which yields non-overlapping windows. If there were fewer items in the
 input than N, then this yields nothing."
-  (unless (> n 0)
-    (error "The arguments to window must be a positive integer."))
-  (lambda (reducer)
-    (let ((i 0)
-          (q (q:make-amortized-queue)))
-      (lambda (result &optional (input nil i-p))
-        (cond (i-p
-               (setf q (q:amortized-enqueue q input))
-               (setf i (1+ i))
-               (cond ((< i n) result)
-                     ((= i n) (funcall reducer result (q:amortized-queue-list q)))
-                     (t (setf q (q:amortized-dequeue q))
-                        (funcall reducer result (q:amortized-queue-list q)))))
-              (t (funcall reducer result)))))))
+  (if (< n 1)
+      (restart-case (error "Non-positive integer passed to `window'.")
+         (use-value (value)
+           :report "Supply a new value and reattempt the transduction."
+           :interactive (lambda () (prompt-new-value "Positive Integer: "))
+           (window value)))
+      (lambda (reducer)
+        (let ((i 0)
+              (q (q:make-amortized-queue)))
+          (lambda (result &optional (input nil i-p))
+            (cond (i-p
+                   (setf q (q:amortized-enqueue q input))
+                   (setf i (1+ i))
+                   (cond ((< i n) result)
+                         ((= i n) (funcall reducer result (q:amortized-queue-list q)))
+                         (t (setf q (q:amortized-dequeue q))
+                            (funcall reducer result (q:amortized-queue-list q)))))
+                  (t (funcall reducer result))))))))
 
 #+nil
 (transduce (window 3) #'cons '(1 2 3 4 5))
@@ -339,17 +347,21 @@ of the transduction is always included. Therefore:
 (transduce (step 2) #'cons '(1 2 3 4 5 6 7 8 9))
 => (1 3 5 7 9)
 "
-  (when (< n 1)
-    (error "The argument to skip must be greater than 0."))
-  (lambda (reducer)
-    (let ((curr 1))
-      (lambda (result &optional (input nil i-p))
-        (if i-p (if (= 1 curr)
-                    (progn (setf curr n)
-                           (funcall reducer result input))
-                    (progn (setf curr (1- curr))
-                           result))
-            (funcall reducer result))))))
+  (if (< n 1)
+      (restart-case (error "Non-positive integer passed to `step'.")
+        (use-value (value)
+          :report "Supply a new value and reattempt the transduction."
+          :interactive (lambda () (prompt-new-value "Positive Integer: "))
+          (step value)))
+      (lambda (reducer)
+        (let ((curr 1))
+          (lambda (result &optional (input nil i-p))
+            (if i-p (if (= 1 curr)
+                        (progn (setf curr n)
+                               (funcall reducer result input))
+                        (progn (setf curr (1- curr))
+                               result))
+                (funcall reducer result)))))))
 
 #+nil
 (transduce (step 2) #'cons '(1 2 3 4 5 6 7 8 9))

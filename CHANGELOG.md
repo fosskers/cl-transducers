@@ -24,6 +24,8 @@
   `empty-transduction` will be raised.
 - The `cons` reducer nows uses `nreverse` internally. You better not have been
   saving the intermediate results anywhere!
+- `segment`, `window`, and `step` now offer restarts when a bad initial value is
+  passed.
 
 #### Fixed
 
