@@ -159,8 +159,6 @@
                            (t:map #'1-))
            #'t:cons (t:ints 1))))
 
-(define-test "labels-based recursion")
-
 (define-test "Tail-recursion"
   :depends-on (reduction transduction)
   (let ((huge (t:transduce (t:take 1000000) #'t:cons (t:ints 1))))
@@ -174,11 +172,19 @@
 
 (define-test json)
 
-(define-test "Reading and Writing"
+(define-test "JSON: Reading and Writing"
   :parent json
   (is equal "[{\"name\":\"A\"},{\"name\":\"B\"}]"
       (with-output-to-string (stream)
        (t:transduce #'t:pass (j:write stream) (j:read "[{\"name\": \"A\"}, {\"name\": \"B\"}]")))))
+
+(define-test csv)
+
+(define-test "CSV: Reading and Writing"
+  :parent csv
+  (is equal '("Name,Age" "Colin,35" "Tamayo,26")
+      (t:transduce (t:comp #'t:from-csv (t:into-csv '("Name" "Age")))
+                   #'t:cons '("Name,Age,Hair" "Colin,35,Blond" "Tamayo,26,Black"))))
 
 #+nil
 (test 'transducers/tests)

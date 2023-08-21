@@ -15,7 +15,7 @@
            #:intersperse #:enumerate #:step #:scan
            #:log
            #:once
-           #:csv)
+           #:from-csv #:into-csv)
   ;; --- Higher Order Transducers --- ;;
   (:export #:branch #:inject #:split)
   ;; --- Reducers -- ;;
@@ -399,12 +399,11 @@ applications of a given function F.
                  (take 3))
            #'cons (ints 1))
 
-(defun csv (reducer)
+(defun from-csv (reducer)
   "Transducer: Interpret the data stream as CSV data.
 
-The first item found is assumed to be the header list, and it
-will be used to construct useable hashmaps for all subsequent
-items.
+The first item found is assumed to be the header list, and it will be used to
+construct useable hashtables for all subsequent items.
 
 Note: This function makes no attempt to convert types from the
 original parsed strings. If you want numbers, you will need to
@@ -432,6 +431,43 @@ need for the caller to manually pass a REDUCER."
 This removes any extra whitespace that might be hanging around between elements."
   (mapcar (lambda (s) (string-trim " " s))
           (uiop:split-string line :separator ",")))
+
+(defun into-csv (headers)
+  "Transducer: Given a sequence of HEADERS, rerender each item in the data stream
+into a CSV string. It's assumed that each item in the transduction is a hash
+table whose keys are strings that match the values found in HEADERS."
+  (if (uiop:emptyp headers)
+      (restart-case (error "Empty sequence passed to `headers'.")
+        (use-value (value)
+          :report "Supply a default value and reattempt the transduction."
+          :interactive (lambda () (prompt-new-value "Headers (must be a list): "))
+          (into-csv value)))
+      (lambda (reducer)
+        (let ((unsent t))
+          (lambda (result &optional (input nil i-p))
+            (if i-p (if unsent
+                        (let ((res (funcall reducer result (recsv headers))))
+                          (if (reduced-p res)
+                              res
+                              (progn (setf unsent nil)
+                                     (funcall reducer res (table-vals->csv headers input)))))
+                        (funcall reducer result (table-vals->csv headers input)))
+                (funcall reducer result)))))))
+
+#+nil
+(transduce (comp #'from-csv (into-csv '("Name" "Age")))
+           #'cons '("Name,Age,Hair" "Colin,35,Blond" "Tamayo,26,Black"))
+
+(defun table-vals->csv (headers table)
+  "Given some HEADERS to compare to, convert a hash TABLE to a rendered CSV string
+of its values."
+  (recsv (transduce (filter-map (lambda (k) (gethash k table)))
+                    #'cons headers)))
+
+(declaim (ftype (function (list) cl:string) recsv))
+(defun recsv (items)
+  "Reconvert some ITEMS into a comma-separated string."
+  (format nil "~{~a~^,~}" items))
 
 ;; --- Higher Order Transducers --- ;;
 

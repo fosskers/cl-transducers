@@ -166,7 +166,7 @@ If no SEED is given and the transduction is empty, the condition
                 ((and a-p (not i-p))
                  (if (eq acc 'transducers-none)
                      (restart-case (error 'empty-transduction :msg "fold was called without a seed, but the transduction was also empty.")
-                       (supply-default (value)
+                       (use-value (value)
                          :report "Supply a default value and end the transduction."
                          :interactive (lambda () (prompt-new-value "Default value: "))
                          value))

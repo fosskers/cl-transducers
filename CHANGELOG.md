@@ -4,7 +4,10 @@
 
 #### Added
 
-- A `csv` transducer to interpret a string stream as CSV data, splitting the values into a list.
+- A `from-csv` transducer to interpret a string stream as CSV data, splitting
+  the values into a hash table.
+- A `into-csv` transducer that, given some `headers`, reverses the stream of
+  hash tables back into strings of CSV.
 - A `snoc` reducer for reducing into a list without performing a final reverse.
 - A `hash-table` reducer for reducing into a Hash Table. Requires the
   transduction items to be cons cells, with `car` being the key and `cdr` being
@@ -19,6 +22,8 @@
   the first value that makes it through the transduction will be used as the
   seed. If the transduction turns out to be empty, then the condition
   `empty-transduction` will be raised.
+- The `cons` reducer nows uses `nreverse` internally. You better not have been
+  saving the intermediate results anywhere!
 
 #### Fixed
 
