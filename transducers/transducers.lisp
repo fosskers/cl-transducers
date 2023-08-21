@@ -400,7 +400,7 @@ applications of a given function F.
                     (let ((res (funcall reducer result item)))
                       (if (reduced-p res)
                           res
-                        (progn (setq item nil)
+                        (progn (setf item nil)
                                (funcall reducer res input))))
                   (funcall reducer result input))
           (funcall reducer result))))))
