@@ -286,15 +286,17 @@ languages?
 ;; => 977
 #+end_src
 
-** Sieve of Eratosthenes
+** Reducing into a Property List
 
-An ancient method of calculating Prime Numbers.
+There is no special reducer function for plists, because none is needed. If you
+have a stream of cons cells, you can break it up with ~uncons~ and then collect
+with ~cons~ as usual:
 
 #+begin_src lisp
-(let ((xf (t:comp (t:inject (lambda (prime) (t:filter (lambda (n) (/= 0 (mod n prime))))))
-                  (t:take 10))))
-  (cons 2 (t:transduce xf #'t:cons (t:ints 3 :step 2))))
-;; => (2 3 5 7 11 13 17 19 23 29 31)
+(t:transduce (t:comp (t:map (lambda (pair) (cons (car pair) (1+ (cdr pair)))))
+                     #'t:uncons)
+           #'t:cons (t:plist '(:a 1 :b 2 :c 3)))
+;; => (:a 2 :b 3 :c 4)
 #+end_src
 
 ** JSON: Calculating average age
@@ -307,6 +309,17 @@ retrieve fields we want.
              (t:average :none)
              (j:read "[{\"age\": 34}, {\"age\": 25}]"))
 ;; => 59/2 (29.5)
+#+end_src
+
+** Sieve of Eratosthenes
+
+An ancient method of calculating Prime Numbers.
+
+#+begin_src lisp
+(let ((xf (t:comp (t:inject (lambda (prime) (t:filter (lambda (n) (/= 0 (mod n prime))))))
+                  (t:take 10))))
+  (cons 2 (t:transduce xf #'t:cons (t:ints 3 :step 2))))
+;; => (2 3 5 7 11 13 17 19 23 29 31)
 #+end_src
 
 * Limitations

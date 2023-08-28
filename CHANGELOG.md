@@ -4,9 +4,10 @@
 
 #### Added
 
+- An `uncons` transducer for splitting up a stream of cons cells.
 - A `from-csv` transducer to interpret a string stream as CSV data, splitting
   the values into a hash table.
-- A `into-csv` transducer that, given some `headers`, reverses the stream of
+- An `into-csv` transducer that, given some `headers`, reverses the stream of
   hash tables back into strings of CSV.
 - A `snoc` reducer for reducing into a list without performing a final reverse.
 - A `hash-table` reducer for reducing into a Hash Table. Requires the

@@ -10,7 +10,7 @@
   (:export #:pass #:map
            #:filter #:filter-map #:unique #:dedup
            #:drop #:drop-while #:take #:take-while
-           #:concatenate #:flatten
+           #:uncons #:concatenate #:flatten
            #:segment #:window #:group-by
            #:intersperse #:enumerate #:step #:scan
            #:log
@@ -153,6 +153,22 @@ transduction as soon as any element fails the test."
 
 #+nil
 (transduce (take-while #'evenp) #'cons '(2 4 6 8 9 2))
+
+(defun uncons (reducer)
+  "Transducer: Split up a transduction of cons cells."
+  (lambda (result &optional (input nil i-p))
+    (if i-p (let ((res (funcall reducer result (car input))))
+              (if (reduced-p res)
+                  res
+                  (funcall reducer res (cdr input))))
+        (funcall reducer result))))
+
+#+nil
+(transduce #'uncons #'cons (plist '(:a 1 :b 2 :c 3)))
+#+nil
+(transduce (comp (map (lambda (pair) (cl:cons (car pair) (1+ (cdr pair)))))
+                 #'uncons)
+           #'cons (plist '(:a 1 :b 2 :c 3)))
 
 (defun concatenate (reducer)
   "Transducer: Concatenate all the sublists in the transduction."
