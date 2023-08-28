@@ -286,7 +286,7 @@ languages?
 ;; => 977
 #+end_src
 
-** Reducing into a Property List
+** Reducing into Property Lists and Assocation Lists
 
 There is no special reducer function for plists, because none is needed. If you
 have a stream of cons cells, you can break it up with ~uncons~ and then collect
@@ -295,8 +295,16 @@ with ~cons~ as usual:
 #+begin_src lisp
 (t:transduce (t:comp (t:map (lambda (pair) (cons (car pair) (1+ (cdr pair)))))
                      #'t:uncons)
-           #'t:cons (t:plist '(:a 1 :b 2 :c 3)))
+             #'t:cons (t:plist '(:a 1 :b 2 :c 3)))
 ;; => (:a 2 :b 3 :c 4)
+#+end_src
+
+Likewise, Association Lists are already lists-of-cons-cells, so no special
+treatment is needed:
+
+#+begin_src lisp
+(t:transduce #'t:pass #'t:cons '((:a . 1) (:b . 2) (:c . 3)))
+;; => ((:a . 1) (:b . 2) (:c . 3)))
 #+end_src
 
 ** JSON: Calculating average age

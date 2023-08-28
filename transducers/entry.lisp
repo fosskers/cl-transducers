@@ -204,3 +204,5 @@ responsiblity of the caller!"
 (transduce (map #'car) #'cons (plist `(:a 1 :b 2 :c 3)))
 #+nil
 (transduce (map #'cdr) #'+ (plist `(:a 1 :b 2 :c)))  ;; Imbalanced plist for testing.
+#+nil
+(transduce #'pass #'cons '((:a . 1) (:b . 2) (:c . 3)))

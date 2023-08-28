@@ -9,6 +9,7 @@
                  (:file "reducers")
                  (:file "sources")
                  (:file "entry")
+                 (:file "conditions")
                  (:file "utils"))))
   :description "Ergonomic, efficient data processing."
   :in-order-to ((test-op (test-op :transducers/tests))))

@@ -9,7 +9,7 @@
 
 (in-package :transducers-jzon)
 
-(defstruct json
+(defstruct (json (:copier nil) (:predicate nil))
   "The source of some JSON data."
   (source nil :read-only t :type (or pathname stream string)))
 

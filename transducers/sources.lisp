@@ -1,17 +1,17 @@
 (in-package :transducers)
 
-(defstruct generator
+(defstruct (generator (:copier nil) (:predicate nil))
   "A wrapper around a function that can potentially yield endless values."
   (func nil :read-only t :type (function () *)))
 
 (defvar *done* 'done
   "A value to signal the end of an unfolding process.")
 
-(defstruct plist
+(defstruct (plist (:copier nil) (:predicate nil))
   (list nil :read-only t :type list))
 
 (defun plist (plist)
-  "Source: Yield key-value pairs from a property list, usually known as a 'plist'."
+  "Source: Yield key-value pairs from a Property List, usually known as a 'plist'."
   (make-plist :list plist))
 
 ;; FIXME type signature, expecting `values' to be called within the given
