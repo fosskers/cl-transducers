@@ -1,5 +1,12 @@
 (in-package :transducers)
 
+(define-condition imbalanced-plist (error)
+  ((key :initarg :key
+        :accessor imbalanced-plist-key))
+  (:documentation "A given `plist' source had an uneven number of keys.")
+  (:report (lambda (condition stream)
+             (format stream "The final key ~a had no value." (imbalanced-plist-key condition)))))
+
 (define-condition empty-transduction (error)
   ((msg :initarg :msg
         :accessor empty-transduction-msg))

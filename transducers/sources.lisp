@@ -4,8 +4,15 @@
   "A wrapper around a function that can potentially yield endless values."
   (func nil :read-only t :type (function () *)))
 
-(defparameter *done* 'done
+(defvar *done* 'done
   "A value to signal the end of an unfolding process.")
+
+(defstruct plist
+  (list nil :read-only t :type list))
+
+(defun plist (plist)
+  "Source: Yield key-value pairs from a property list, usually known as a 'plist'."
+  (make-plist :list plist))
 
 ;; FIXME type signature, expecting `values' to be called within the given
 ;; function.
@@ -83,7 +90,7 @@ strings are vectors too, so:
 (transduce (take 5) #'cons (shuffle #("Colin" "Tamayo" "Natsume")))
 
 (defgeneric cycle (seq)
-  (:documentation "Reducer: Yield the values of a given SEQ endlessly."))
+  (:documentation "Source: Yield the values of a given SEQ endlessly."))
 
 (defmethod cycle ((seq list))
   (if (null seq)

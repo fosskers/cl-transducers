@@ -312,16 +312,13 @@ retrieve fields we want.
 * Limitations
 
 1. This library is generally portable, but assumes your CL implementation
-   supports tail-recursion.
+   supports tail-recursive usage of ~labels~.
 2. A way to model the common =zip= function has not yet been found.
 
 * Further Work
 
 - [ ] Notes on performance.
 - [ ] More higher-order transducers.
-- [ ] =transducers-csv=
-  - [ ] Decoding numbers.
-  - [ ] Encoding from classes.
 
 * Resources
 

@@ -25,6 +25,9 @@
 (defmethod transduce (xform f (source stream))
   (stream-transduce xform f source))
 
+(defmethod transduce (xform f (source plist))
+  (plist-transduce xform f source))
+
 #+nil
 (transduce (map #'char-upcase) #'string "hello")
 #+nil
@@ -129,7 +132,7 @@
     (stream-reduce f identity stream)))
 
 #+nil
-(file-transduce #'pass #'count "/home/colin/history.txt")
+(file-transduce #'pass #'count #p"/home/colin/history.txt")
 
 (defun stream-transduce (xform f stream)
   "Transduce over the lines of a given STREAM. Note: Closing the stream is the
@@ -150,6 +153,10 @@ responsiblity of the caller!"
                         (recurse acc)))))))
    (recurse identity)))
 
+#+nil
+(with-open-file (stream #p"/home/colin/history.txt")
+  (transduce #'pass #'count stream))
+
 (defun generator-transduce (xform f gen)
   "Transduce over a potentially endless stream of values from a generator GEN."
   (let* ((init   (funcall f))
@@ -166,3 +173,34 @@ responsiblity of the caller!"
                               (reduced-val acc)
                               (recurse acc))))))))
     (recurse identity)))
+
+(declaim (ftype (function (t t plist) *) plist-transduce))
+(defun plist-transduce (xform f coll)
+  (let* ((init   (funcall f))
+         (xf     (funcall xform f))
+         (result (plist-reduce xf init coll)))
+    (funcall xf result)))
+
+(declaim (ftype (function ((function (&optional t t) *) t plist) *) plist-reduce))
+(defun plist-reduce (f identity lst)
+  (labels ((recurse (acc items)
+             (cond ((null items) acc)
+                   ((null (cdr items))
+                    (let ((key (car items)))
+                      (restart-case (error 'imbalanced-plist :key key)
+                        (use-value (value)
+                          :report "Supply a value for the final key."
+                          :interactive (lambda () (prompt-new-value (format nil "Value for key ~a: " key)))
+                          (recurse acc (list key value))))))
+                   (t (let ((v (funcall f acc (cl:cons (car items) (second items)))))
+                       (if (reduced-p v)
+                           (reduced-val v)
+                           (recurse v (cdr (cdr items)))))))))
+    (recurse identity (plist-list lst))))
+
+#+nil
+(transduce #'pass #'cons (plist `(:a 1 :b 2 :c 3)))
+#+nil
+(transduce (map #'car) #'cons (plist `(:a 1 :b 2 :c 3)))
+#+nil
+(transduce (map #'cdr) #'+ (plist `(:a 1 :b 2 :c)))  ;; Imbalanced plist for testing.

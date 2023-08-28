@@ -7,7 +7,7 @@
                 :components
                 ((:file "transducers")
                  (:file "reducers")
-                 (:file "generators")
+                 (:file "sources")
                  (:file "entry")
                  (:file "utils"))))
   :description "Ergonomic, efficient data processing."

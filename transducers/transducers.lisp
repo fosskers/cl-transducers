@@ -25,12 +25,15 @@
            #:first #:last
            #:fold #:max #:min #:find
            #:for-each)
-  ;; --- Generators --- ;;
-  (:export #:ints #:cycle #:repeat #:random #:shuffle)
+  ;; --- Sources --- ;;
+  (:export #:ints #:cycle #:repeat #:random #:shuffle
+           #:plist)
+  ;; --- Conditions --- ;;
+  (:export #:empty-transduction
+           #:imbalanced-plist)
   ;; --- Utilities --- ;;
   (:export #:comp #:const
-           #:make-reduced #:reduced-p #:reduced-val
-           #:empty-transduction)
+           #:make-reduced #:reduced-p #:reduced-val)
   (:documentation "Ergonomic, efficient data processing."))
 
 (in-package :transducers)

@@ -12,7 +12,9 @@
 - A `hash-table` reducer for reducing into a Hash Table. Requires the
   transduction items to be cons cells, with `car` being the key and `cdr` being
   the value.
+- A `plist` source for iterating over key-value pairs in a Property List.
 - The `empty-transduction` condition (see below).
+- The `imbalanced-plist` condition.
 
 #### Changed
 
@@ -22,7 +24,7 @@
   the first value that makes it through the transduction will be used as the
   seed. If the transduction turns out to be empty, then the condition
   `empty-transduction` will be raised.
-- The `cons` reducer nows uses `nreverse` internally. You better not have been
+- The `cons` reducer now uses `nreverse` internally. You better not have been
   saving the intermediate results anywhere!
 - `segment`, `window`, and `step` now offer restarts when a bad initial value is
   passed.

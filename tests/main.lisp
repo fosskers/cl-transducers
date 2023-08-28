@@ -132,7 +132,7 @@
 #+nil
 (funcall (t:comp #'1+ (lambda (n) (* 2 n))) 7)
 
-(define-test "Generators"
+(define-test "Sources"
   :depends-on (reduction transduction)
   (is equal '() (t:transduce (t:take 0) #'t:cons (t:ints 0)))
   (is equal '(0 1 2 3) (t:transduce (t:take 4) #'t:cons (t:ints 0)))
@@ -140,7 +140,9 @@
   (is equal '(1 2 3 1 2 3 1) (t:transduce (t:take 7) #'t:cons (t:cycle '(1 2 3))))
   (is equal '(1 2 3 1 2 3 1) (t:transduce (t:take 7) #'t:cons (t:cycle #(1 2 3))))
   (is equal "hellohe" (t:transduce (t:take 7) #'t:string (t:cycle "hello")))
-  (is equal '() (t:transduce (t:take 7) #'t:cons (t:cycle '()))))
+  (is equal '() (t:transduce (t:take 7) #'t:cons (t:cycle '())))
+  (is equal (list (cons :a 1) (cons :b 2) (cons :c 3))
+      (t:transduce #'t:pass #'t:cons (t:plist '(:a 1 :b 2 :c 3)))))
 
 (define-test "Higher Order Transducers"
   :depends-on (reduction transduction)
