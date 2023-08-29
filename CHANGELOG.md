@@ -32,6 +32,19 @@
   saving the intermediate results anywhere!
 - `segment`, `window`, and `step` now offer restarts when a bad initial value is
   passed.
+- **BREAKING:** `average` no longer accepts a fallback value. Instead, a
+  condition is raised when the transduction was empty. This means that calls
+  that used to look like:
+
+```common-lisp
+(t:transduce #'t:pass (t:average 'whatever) '(1 2 3 4 5))
+```
+
+should now look like:
+
+```common-lisp
+(t:transduce #'t:pass #'t:average '(1 2 3 4 5))
+```
 
 #### Fixed
 

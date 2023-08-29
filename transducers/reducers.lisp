@@ -57,19 +57,22 @@ reversal."
 #+nil
 (transduce #'pass #'count '(1 2 3 4 5))
 
-(defun average (fallback)
-  "Reducer: Calculate the average value of all numeric elements in a transduction.
-A FALLBACK must be provided in case no elements made it through the
-transduction (thus protecting from division-by-zero)."
-  (let ((items 0))
-    (lambda (&optional (acc 0 a-p) (input 0 i-p))
-      (cond ((and a-p i-p)
-             (incf items)
-             (+ acc input))
-            ((and a-p (not i-p))
-             (if (= 0 items) fallback
-                 (/ acc items)))
-            (t 0)))))
+(defun average (&optional (acc nil a-p) (input nil i-p))
+  "Reducer: Calculate the average value of all numeric elements in a transduction."
+  (cond ((and a-p i-p)
+         (destructuring-bind (count . total) acc
+           (cl:cons (1+ count) (+ total input))))
+        ((and a-p (not i-p))
+         (destructuring-bind (count . total) acc
+           (if (= 0 count)
+               (error 'empty-transduction :msg "`average' called on an empty transduction.")
+               (/ total count))))
+        (t (cl:cons 0 0))))
+
+#+nil
+(transduce #'pass #'average '(1 2 3 4 5 6))
+#+nil
+(transduce (filter #'evenp) #'average '(1 3 5))
 
 (defmacro any (pred)
   "Deprecated: Use `anyp'."

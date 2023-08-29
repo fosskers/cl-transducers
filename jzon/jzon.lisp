@@ -82,5 +82,5 @@ output that JSON into the given STREAM."
 
 #+nil
 (t:transduce (t:filter-map (lambda (ht) (gethash "age" ht)))
-             (t:average :none)
+             #'t:average
              (read "[{\"age\": 34}, {\"age\": 25}]"))

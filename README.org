@@ -316,7 +316,7 @@ retrieve fields we want.
 
 #+begin_src lisp
 (t:transduce (t:filter-map (lambda (ht) (gethash "age" ht)))
-             (t:average :none)
+             #'t:average
              (j:read "[{\"age\": 34}, {\"age\": 25}]"))
 ;; => 59/2 (29.5)
 #+end_src
