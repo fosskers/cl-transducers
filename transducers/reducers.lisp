@@ -151,8 +151,10 @@ sane values even when given 0 or 1 arguments. Other functions like `max' cannot
 be used as-is as reducers since they can't be called without arguments. For
 functions like this, `fold' is appropriate.
 
-If no SEED is given and the transduction is empty, the condition
-`empty-transduction' will be raised."
+# Conditions
+
+- `empty-transduction': if no SEED is given and the transduction is empty.
+"
   (if seed-p
       (lambda (&optional (acc nil a-p) (input nil i-p))
         (cond ((and a-p i-p) (funcall f acc input))

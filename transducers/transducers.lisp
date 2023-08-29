@@ -195,9 +195,14 @@ nesting."
 (declaim (ftype (function (fixnum) *) segment))
 (defun segment (n)
   "Transducer: Partition the input into lists of N items. If the input stops, flush
-any accumulated state, which may be shorter than N."
+any accumulated state, which may be shorter than N.
+
+# Conditions
+
+- `non-positive-integer': when a non-positive integer N is given.
+"
   (if (< n 1)
-      (restart-case (error "Non-positive integer passed to `segment'.")
+      (restart-case (error 'non-positive-integer :fn "segment" :n n)
         (use-value (value)
           :report "Supply a new value and reattempt the transduction."
           :interactive (lambda () (prompt-new-value "Positive Integer: "))
@@ -225,6 +230,8 @@ any accumulated state, which may be shorter than N."
 
 #+nil
 (transduce (segment 3) #'cons '(1 2 3 4 5))
+#+nil
+(transduce (segment -1) #'cons '(1 2 3 4 5))
 
 (declaim (ftype (function ((function (t) *)) *) group-by))
 (defun group-by (f)
@@ -307,9 +314,14 @@ original results of the transduction are passed through as-is."
 (defun window (n)
   "Transducer: Yield N-length windows of overlapping values. This is different from
 `segment' which yields non-overlapping windows. If there were fewer items in the
-input than N, then this yields nothing."
+input than N, then this yields nothing.
+
+# Conditions
+
+- `non-positive-integer': when a non-positive integer N is given.
+"
   (if (< n 1)
-      (restart-case (error "Non-positive integer passed to `window'.")
+      (restart-case (error 'non-positive-integer :fn "window" :n n)
          (use-value (value)
            :report "Supply a new value and reattempt the transduction."
            :interactive (lambda () (prompt-new-value "Positive Integer: "))
@@ -329,6 +341,8 @@ input than N, then this yields nothing."
 
 #+nil
 (transduce (window 3) #'cons '(1 2 3 4 5))
+#+nil
+(transduce (window -1) #'cons '(1 2 3 4 5))
 
 (defun unique (reducer)
   "Transducer: Only allow values to pass through the transduction once each.
@@ -361,13 +375,19 @@ not careful."
 (declaim (ftype (function (fixnum) *) step))
 (defun step (n)
   "Transducer: Only yield every Nth element of the transduction. The first element
-of the transduction is always included. Therefore:
+of the transduction is always included.
+
+# Conditions
+
+- `non-positive-integer': when a non-positive integer N is given.
+
+# Examples
 
 (transduce (step 2) #'cons '(1 2 3 4 5 6 7 8 9))
 => (1 3 5 7 9)
 "
   (if (< n 1)
-      (restart-case (error "Non-positive integer passed to `step'.")
+      (restart-case (error 'non-positive-integer :fn "step" :n n)
         (use-value (value)
           :report "Supply a new value and reattempt the transduction."
           :interactive (lambda () (prompt-new-value "Positive Integer: "))
@@ -466,9 +486,14 @@ This removes any extra whitespace that might be hanging around between elements.
 (defun into-csv (headers)
   "Transducer: Given a sequence of HEADERS, rerender each item in the data stream
 into a CSV string. It's assumed that each item in the transduction is a hash
-table whose keys are strings that match the values found in HEADERS."
+table whose keys are strings that match the values found in HEADERS.
+
+# Conditions
+
+- `empty-argument': when an empty HEADERS sequence is given.
+"
   (if (uiop:emptyp headers)
-      (restart-case (error "Empty sequence passed to `headers'.")
+      (restart-case (error 'empty-argument :fn "headers")
         (use-value (value)
           :report "Supply a default value and reattempt the transduction."
           :interactive (lambda () (prompt-new-value "Headers (must be a list): "))
@@ -487,6 +512,9 @@ table whose keys are strings that match the values found in HEADERS."
 
 #+nil
 (transduce (comp #'from-csv (into-csv '("Name" "Age")))
+           #'cons '("Name,Age,Hair" "Colin,35,Blond" "Tamayo,26,Black"))
+#+nil
+(transduce (comp #'from-csv (into-csv '()))
            #'cons '("Name,Age,Hair" "Colin,35,Blond" "Tamayo,26,Black"))
 
 (defun table-vals->csv (headers table)

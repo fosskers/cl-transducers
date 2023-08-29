@@ -8,12 +8,15 @@
   (string-transduce xform f source))
 
 (defmethod transduce (xform f (source list))
+  "Transducing over an alist works automatically via this method, and the pairs are
+streamed as-is as cons cells."
   (list-transduce xform f source))
 
 (defmethod transduce (xform f (source cl:vector))
   (vector-transduce xform f source))
 
 (defmethod transduce (xform f (source cl:hash-table))
+  "Yields key-value pairs as cons cells."
   (hash-table-transduce xform f source))
 
 (defmethod transduce (xform f (source pathname))
@@ -26,6 +29,11 @@
   (stream-transduce xform f source))
 
 (defmethod transduce (xform f (source plist))
+  "Yields key-value pairs as cons cells.
+
+# Conditions
+
+- `imbalanced-pist': if the number of keys and values do not match."
   (plist-transduce xform f source))
 
 #+nil

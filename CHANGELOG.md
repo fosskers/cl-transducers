@@ -13,9 +13,12 @@
 - A `hash-table` reducer for reducing into a Hash Table. Requires the
   transduction items to be cons cells, with `car` being the key and `cdr` being
   the value.
-- A `plist` source for iterating over key-value pairs in a Property List.
-- The `empty-transduction` condition (see below).
-- The `imbalanced-plist` condition.
+- A `plist` source for transducing over key-value pairs in a Property List.
+- New conditions:
+  - `empty-argument`
+  - `empty-transduction` (see below)
+  - `imbalanced-plist`
+  - `non-positive-integer`
 
 #### Changed
 

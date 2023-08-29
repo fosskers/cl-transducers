@@ -213,6 +213,7 @@ extensions to what is normally available in Clojure.
 | =take-while=    | ✓              | =while= etc.         | ✓             | ✓            | ✓            | ✓        |
 | =replace=       |                |                    | ✓             | ✓            |              |          |
 | Flat Map      |                |                    | =mapcat=        | =tappend-map=  | =flat_map=     | ~>>=~      |
+| =uncons=        | ✓              |                    | =cat=           |              |              |          |
 | =concatenate=   | ✓              |                    | =cat=           | ✓            | =flatten=      | =join=     |
 | =flatten=       | ✓              |                    |               | ✓            |              |          |
 | =segment=       | ✓              |                    | =partition-all= | ✓            |              |          |
@@ -238,23 +239,24 @@ Transducers which can alter the transduction chain itself during runtime.
 
 ** Reducers
 
-|             | CL =transducers= | =loop= macro  | Clojure | Scheme | Rust | Haskell |
-|-------------+----------------+-------------+---------+--------+------+---------|
-| Into List   | ✓              | =collect=     | =conj=    | ✓      | ✓    | ✓       |
-| Into Vector | ✓              | =vconcat=     | =conj=    |        | ✓    | ✓       |
-| Into String | ✓              | =concat=      | =str=     |        | ✓    | ✓       |
-| Into Map    |                |             | =conj=    |        | ✓    | ✓       |
-| Into Set    |                |             | =conj=    |        |      |         |
-| =count=       | ✓              | ✓           |         | ✓      | ✓    | ✓       |
-| =average=     | ✓              |             |         |        |      |         |
-| =any=         | ✓              |             |         | ✓      | ✓    | ✓       |
-| =all=         | ✓              |             |         | ✓      | ✓    | ✓       |
-| =first=       | ✓              | ~return~ etc. |         |        | ✓    | ✓       |
-| =last=        | ✓              |             |         |        | ✓    | ✓       |
-| =fold=        | ✓              |             |         |        | ✓    | ✓       |
-| =max=         | ✓              | =maximize=    |         |        | ✓    | ✓       |
-| =min=         | ✓              | =minimize=    |         |        | ✓    | ✓       |
-| =find=        | ✓              | ~return~ etc. |         |        | ✓    |         |
+|             | CL =transducers= | =loop= macro  | Clojure    | Scheme | Rust | Haskell |
+|-------------+----------------+-------------+------------+--------+------+---------|
+| Into List   | ✓              | =collect=     | =conj=       | ✓      | ✓    | ✓       |
+| Into Vector | ✓              | =vconcat=     | =conj=       |        | ✓    | ✓       |
+| Into String | ✓              | =concat=      | =str=        |        | ✓    | ✓       |
+| Into Map    | ✓              |             | =conj=       |        | ✓    | ✓       |
+| Into Set    |                |             | =conj=       |        |      |         |
+| =count=       | ✓              | ✓           |            | ✓      | ✓    | ✓       |
+| =average=     | ✓              |             |            |        |      |         |
+| =anyp=        | ✓              |             |            | ✓      | ✓    | ✓       |
+| =allp=        | ✓              |             |            | ✓      | ✓    | ✓       |
+| =first=       | ✓              | ~return~ etc. |            |        | ✓    | ✓       |
+| =last=        | ✓              |             |            |        | ✓    | ✓       |
+| =fold=        | ✓              |             | =completing= |        | ✓    | ✓       |
+| =max=         | ✓              | =maximize=    |            |        | ✓    | ✓       |
+| =min=         | ✓              | =minimize=    |            |        | ✓    | ✓       |
+| =find=        | ✓              | ~return~ etc. |            |        | ✓    |         |
+| =for-each=    | ✓              | ~do~          |            |        | ✓    | ~mapM_~   |
 
 Why oh why is it so difficult to find an implementation of =average= in many
 languages?
@@ -273,8 +275,8 @@ languages?
 
 |             | CL =transducers= | =loop= macro | Clojure | Scheme | Rust | Haskell |
 |-------------+----------------+------------+---------+--------+------+---------|
-| File Lines  | ✓              |            |         | ✓      | ✓    | ✓       |
-| JSON Stream | ✓              |            |         |        | ✓    | ✓       |
+| File Lines  | ✓              |            | ✓       | ✓      | ✓    | ✓       |
+| JSON Stream | ✓              |            | ✓       |        | ✓    | ✓       |
 
 * Example Gallery
 
