@@ -52,6 +52,18 @@ should now look like:
   optimization, but it does support `labels`-based TCO. This is also critical
   for the `jzon` support.
 
+#### Deprecated
+
+- `max` and `min` have been deprecated in favour of calling `fold`. The seed
+  value for `fold` is optional now, so:
+
+```common-lisp
+(t:transduce #'t:pass (t:fold #'max)    '(1 2 3)) ;; => 3
+(t:transduce #'t:pass (t:fold #'max 10) '(1 2 3)) ;; => 10
+(t:transduce #'t:pass (t:fold #'max 10) '())      ;; => 10
+(t:transduce #'t:pass (t:fold #'max)    '())      ;; => Condition!
+```
+
 ### 0.1.1 (2023-08-11)
 
 #### Added
@@ -61,7 +73,7 @@ should now look like:
 - A `for-each` reducer to ignore all results and just consume the stream for its
   side effects.
 
-#### Changed
+#### Deprecated
 
 - `all` and `any` should now be called as `allp` and `anyp`. The old names have
   been marked deprecated and you will be warned at compile time.

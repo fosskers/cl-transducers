@@ -185,17 +185,14 @@ functions like this, `fold' is appropriate.
 #+nil
 (transduce #'pass (fold #'cl:max) '(1 2 3 4 1000 5 6))
 
-;; FIXME Tue Aug 15 22:14:46 2023
-;;
-;; Make this `default' optional as well?
 (defun max (default)
-  "Reducer: Yield the maximum value of the transduction, or the DEFAULT if there
-wasn't one."
+  "Deprecated: Use `fold' and pass it `cl:max' instead."
+  (warn "`max' is deprecated; use `fold' instead.")
   (fold #'cl:max default))
 
 (defun min (default)
-  "Reducer: Yield the minimum value of the transduction, or the DEFAULT if there
-wasn't one."
+  "Deprecated: Use `fold' and pass it `cl:min' instead."
+  (warn "`min' is deprecated; use `fold' instead.")
   (fold #'cl:min default))
 
 (declaim (ftype (function ((function (t) *)) *) find))
