@@ -120,27 +120,52 @@ Short-circuits with NIL if any element fails the test."
 #+nil
 (transduce #'pass (all #'oddp) '(1 3 5 7 9 2))
 
-(defun first (default)
-  "Reducer: Yield the first value of the transduction, or the DEFAULT if there
-wasn't one."
-  (lambda (&optional (acc nil a-p) (input nil i-p))
-    (cond ((and a-p i-p) (make-reduced :val input))
-          ((and a-p (not i-p)) acc)
-          (t default))))
+(defun first (&optional (acc 'transducers-none a-p) (input nil i-p))
+  "Reducer: Yield the first value of the transduction. As soon as this first value
+is yielded, the entire transduction stops.
+
+# Conditions
+
+- `empty-transduction': when no values made it through the transduction.
+"
+  (cond ((and a-p i-p) (make-reduced :val input))
+        ((and a-p (not i-p))
+         (if (eq 'transducers-none acc)
+             (restart-case (error 'empty-transduction :msg "first: the transduction was empty.")
+               (use-value (value)
+                 :report "Supply a fallback value and end the transduction."
+                 :interactive (lambda () (prompt-new-value "Fallback: "))
+                 value))
+             acc))
+        (t 'transducers-none)))
 
 #+nil
-(transduce (filter #'oddp) (first 0) '(2 4 6 7 10))
+(transduce (filter #'oddp) #'first '(2 4 6 7 10))
+#+nil
+(transduce (filter #'oddp) #'first '(2 4 6 10))
 
-(defun last (default)
-  "Reducer: Yield the final value of the transduction, or the DEFAULT if there
-wasn't one."
-  (lambda (&optional (acc nil a-p) (input nil i-p))
-    (cond ((and a-p i-p) input)
-          ((and a-p (not i-p) acc))
-          (t default))))
+(defun last (&optional (acc 'transducers-none a-p) (input nil i-p))
+  "Reducer: Yield the last value of the transduction.
+
+# Conditions
+
+- `empty-transduction': when no values made it through the transduction.
+"
+  (cond ((and a-p i-p) input)
+        ((and a-p (not i-p))
+         (if (eq 'transducers-none acc)
+             (restart-case (error 'empty-transduction :msg "last: the transduction was empty.")
+               (use-value (value)
+                 :report "Supply a fallback value and end the transduction."
+                 :interactive (lambda () (prompt-new-value "Fallback: "))
+                 value))
+             acc))
+        (t 'transducers-none)))
 
 #+nil
-(transduce #'pass (last 0) '(2 4 6 7 10))
+(transduce #'pass #'last '(2 4 6 7 10))
+#+nil
+(transduce #'pass #'last '())
 
 (declaim (ftype (function ((function (t t) *) &optional t) *) fold))
 (defun fold (f &optional (seed nil seed-p))

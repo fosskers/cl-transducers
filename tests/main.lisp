@@ -29,8 +29,8 @@
 
 (define-test "First and Last"
   :parent reduction
-  (is = 7  (t:transduce (t:filter #'oddp) (t:first 0) '(2 4 6 7 10)))
-  (is = 10 (t:transduce #'t:pass (t:last 0) '(2 4 6 7 10))))
+  (is = 7  (t:transduce (t:filter #'oddp) #'t:first '(2 4 6 7 10)))
+  (is = 10 (t:transduce #'t:pass #'t:last '(2 4 6 7 10))))
 
 (define-test "Folding and Finding"
   :parent reduction
