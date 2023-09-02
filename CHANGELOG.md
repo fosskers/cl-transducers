@@ -22,6 +22,7 @@
 
 #### Changed
 
+- The library is now distributed under the terms of the LGPL.
 - Transducing over a `hash-table` now yields the key-value pair as a cons cell,
   instead of just the value. The former behaviour is considered a bug.
 - The `seed` argument of the `fold` reducer is now `&optional`. When missing,
