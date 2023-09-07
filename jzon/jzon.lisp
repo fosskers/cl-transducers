@@ -53,9 +53,7 @@
 #+nil
 (t:transduce #'t:pass #'t:cons (read "[{\"name\": \"A\"}, {\"name\": \"B\"}]"))
 
-;; FIXME Thu Mar  2 21:02:05 2023
-;;
-;; I suspect I'm missing some `unwind-protect' business here!
+;; FIXME 2023-05-02 I suspect I'm missing some `unwind-protect' business here!
 (declaim (ftype (function (stream &key (:pretty t)) *) write))
 (defun write (stream &key (pretty nil))
   "Serialize every value that passes through the transduction into JSON, and

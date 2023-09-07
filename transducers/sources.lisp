@@ -26,23 +26,6 @@
                             next))))))
     (make-generator :func func)))
 
-;; TODO I don't know if I want this in the library.
-;; (declaim (ftype (function ((function (t) *) t) generator) iterate))
-;; (defun iterate (f seed)
-;;   "Yield repeated applications of a function F to some SEED value.
-
-;; (transduce (take 5) #'cons (iterate #'not t))
-;; => (T NIL T NIL T)"
-;;   (let* ((curr seed)
-;;          (func (lambda ()
-;;                  (let ((old curr))
-;;                    (setf curr (funcall f curr))
-;;                    old))))
-;;     (make-generator :func func)))
-
-#+nil
-(transduce (take 5) #'cons (iterate #'not t))
-
 (declaim (ftype (function (t) generator) repeat))
 (defun repeat (item)
   "Source: Endlessly yield a given ITEM."

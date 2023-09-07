@@ -1,8 +1,55 @@
 (in-package :transducers)
 
-;; TODO docs and examples.
 (defgeneric transduce (xform f source)
-  (:documentation "The entry-point for processing some data source via transductions."))
+  (:documentation "The entry-point for processing some data source via transductions.
+
+This requires three things:
+
+- A transducer function, or a composed chain of them
+- A reducing function
+- A source
+
+Note: `comp' can be used to chain transducers together.
+
+When ran, `transduce' will pull values from the source, transform them via the
+transducers, and reduce into some single value (likely some collection but not
+necessarily). `transduce' will only pull as many values from the source as are
+actually needed, and does so one at a time. This ensures that large
+sources (like files) don't consume too much memory.
+
+# Examples
+
+Assuming that you've required this library with a local nickname of `t', here's
+how we can filter an infinite source and reduce into a single sum:
+
+(t:transduce (t:comp (t:filter #'oddp)
+                     (t:take 1000)
+                     (t:map (lambda (n) (* n n))))
+             #'+ (t:ints 1))
+;; => 1333333000 (31 bits, #x4F790C08)
+
+Note that due to how transducer and reducer functions are composed internally,
+the order provided to `comp' gets applied from top to bottom. In the above
+example, this means that `filter' is applied first, and `map' last.
+
+There are a variety of functions to instead reduce into a collection:
+
+(t:transduce (t:map #'1+) #'t:vector '(1 2 3))
+;; => #(2 3 4)
+
+Many standard collections can be easily \"sourced\", including those that aren't
+normally so conveniently traversed like Hash Tables, Property Lists, and lines
+of a file.
+
+;; Read key-value pairs from a plist and recollect into a Hash Table.
+(t:transduce #'t:pass #'t:hash-table (t:plist `(:a 1 :b 2 :c 3)))
+
+# Custom Sources
+
+Since `transduce' is generic, you can use `defmethod' to define your own custom
+sources. See `sources.lisp' and `entry.lisp' for examples of how to do this.
+
+"))
 
 (defmethod transduce (xform f (source cl:string))
   (string-transduce xform f source))
@@ -103,12 +150,6 @@ streamed as-is as cons cells."
          (result (hash-table-reduce xf init coll)))
     (funcall xf result)))
 
-;; FIXME
-;;
-;; It may be more correct to pass both the key and value together via `values'.
-;;
-;; Fri Aug 11 21:25:02 2023
-;; Here we are entirely ignoring the key.
 (defun hash-table-reduce (f identity ht)
   (with-hash-table-iterator (iter ht)
     (labels ((recurse (acc)
