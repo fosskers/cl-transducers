@@ -102,7 +102,7 @@ the source, feed them through the transducer chain, and wrap everything together
 via the reducer.
 
 - Typical transducers are =map=, =filter=, and =take=.
-- Typical reducers are =+=, =count=, and =fold=.
+- Typical reducers are =+=, =count=, =t:cons=, and =fold=.
 - Typical sources are lists, vectors, strings, hash tables, and files.
 
 /Generators/ are a special kind of source that yield infinite data. Typical

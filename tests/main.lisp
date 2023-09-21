@@ -30,12 +30,18 @@
 (define-test "First and Last"
   :parent reduction
   (is = 7  (t:transduce (t:filter #'oddp) #'t:first '(2 4 6 7 10)))
-  (is = 10 (t:transduce #'t:pass #'t:last '(2 4 6 7 10))))
+  (fail    (t:transduce (t:filter #'oddp) #'t:first '(2 4 6 10)))
+  (is = 10 (t:transduce #'t:pass #'t:last '(2 4 6 7 10)))
+  (fail    (t:transduce #'t:pass #'t:last '())))
 
 (define-test "Folding and Finding"
   :parent reduction
+  (fail      (t:transduce #'t:pass (t:fold #'cl:max) '()))
   (is = 1000 (t:transduce #'t:pass (t:fold #'cl:max 0) '(1 2 3 4 1000 5 6)))
-  (is = 6 (t:transduce #'t:pass (t:find #'evenp) '(1 3 5 6 9))))
+  (is = 1000 (t:transduce #'t:pass (t:fold #'cl:max) '(1 2 3 4 1000 5 6)))
+  (is = 6    (t:transduce #'t:pass (t:find #'evenp) '(1 3 5 6 9)))
+  (is = 7/2  (t:transduce #'t:pass #'t:average '(1 2 3 4 5 6)))
+  (fail      (t:transduce (t:filter #'evenp) #'t:average '(1 3 5))))
 
 (define-test transduction)
 
@@ -71,7 +77,13 @@
   (is equal '(1 2 3 4 5 6 7 8 9)
       (t:transduce #'t:concatenate #'t:cons '((1 2 3) (4 5 6) (7 8 9))))
   (is equal '(1 2 3 0 4 5 6 0 7 8 9 0)
-      (t:transduce #'t:flatten #'t:cons '((1 2 3) 0 (4 (5) 6) 0 (7 8 9) 0))))
+      (t:transduce #'t:flatten #'t:cons '((1 2 3) 0 (4 (5) 6) 0 (7 8 9) 0)))
+  (is equal '(:a 1 :b 2 :c 3)
+      (t:transduce #'t:uncons #'t:cons (t:plist '(:a 1 :b 2 :c 3))))
+  (is equal '(:a 2 :b 3 :c 4)
+      (t:transduce (t:comp (t:map (lambda (pair) (cons (car pair) (1+ (cdr pair)))))
+                           #'t:uncons)
+                   #'t:cons (t:plist '(:a 1 :b 2 :c 3)))))
 
 (define-test "Pairing"
   :parent transduction
