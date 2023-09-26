@@ -125,11 +125,11 @@ streamed as-is as cons cells."
   (let ((len (length vec)))
     (labels ((recurse (acc i)
                (if (= i len)
-                  acc
-                  (let ((acc (funcall f acc (aref vec i))))
-                    (if (reduced-p acc)
-                        (reduced-val acc)
-                        (recurse acc (1+ i)))))))
+                   acc
+                   (let ((acc (funcall f acc (aref vec i))))
+                     (if (reduced-p acc)
+                         (reduced-val acc)
+                         (recurse acc (1+ i)))))))
       (recurse identity 0))))
 
 #+nil
@@ -193,14 +193,14 @@ responsiblity of the caller!"
 
 (defun stream-reduce (f identity stream)
   (labels ((recurse (acc)
-            (let ((line (read-line stream nil)))
-              (if (not line)
-                  acc
-                  (let ((acc (funcall f acc line)))
-                    (if (reduced-p acc)
-                        (reduced-val acc)
-                        (recurse acc)))))))
-   (recurse identity)))
+             (let ((line (read-line stream nil)))
+               (if (not line)
+                   acc
+                   (let ((acc (funcall f acc line)))
+                     (if (reduced-p acc)
+                         (reduced-val acc)
+                         (recurse acc)))))))
+    (recurse identity)))
 
 #+nil
 (with-open-file (stream #p"/home/colin/history.txt")
@@ -242,9 +242,9 @@ responsiblity of the caller!"
                           :interactive (lambda () (prompt-new-value (format nil "Value for key ~a: " key)))
                           (recurse acc (list key value))))))
                    (t (let ((v (funcall f acc (cl:cons (car items) (second items)))))
-                       (if (reduced-p v)
-                           (reduced-val v)
-                           (recurse v (cdr (cdr items)))))))))
+                        (if (reduced-p v)
+                            (reduced-val v)
+                            (recurse v (cdr (cdr items)))))))))
     (recurse identity (plist-list lst))))
 
 #+nil

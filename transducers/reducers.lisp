@@ -189,19 +189,19 @@ functions like this, `fold' is appropriate.
               ((and a-p (not i-p)) acc)
               (t seed)))
       (lambda (&optional (acc nil a-p) (input nil i-p))
-          (cond ((and a-p i-p)
-                 (if (eq acc 'transducers-none)
-                     input
-                     (funcall f acc input)))
-                ((and a-p (not i-p))
-                 (if (eq acc 'transducers-none)
-                     (restart-case (error 'empty-transduction :msg "fold was called without a seed, but the transduction was also empty.")
-                       (use-value (value)
-                         :report "Supply a default value and end the transduction."
-                         :interactive (lambda () (prompt-new-value "Default value: "))
-                         value))
-                     acc))
-                (t 'transducers-none)))))
+        (cond ((and a-p i-p)
+               (if (eq acc 'transducers-none)
+                   input
+                   (funcall f acc input)))
+              ((and a-p (not i-p))
+               (if (eq acc 'transducers-none)
+                   (restart-case (error 'empty-transduction :msg "fold was called without a seed, but the transduction was also empty.")
+                     (use-value (value)
+                       :report "Supply a default value and end the transduction."
+                       :interactive (lambda () (prompt-new-value "Default value: "))
+                       value))
+                   acc))
+              (t 'transducers-none)))))
 
 #+nil
 (transduce #'pass (fold #'cl:max) '())

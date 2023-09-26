@@ -322,10 +322,10 @@ input than N, then this yields nothing.
 "
   (if (< n 1)
       (restart-case (error 'non-positive-integer :fn "window" :n n)
-         (use-value (value)
-           :report "Supply a new value and reattempt the transduction."
-           :interactive (lambda () (prompt-new-value "Positive Integer: "))
-           (window value)))
+        (use-value (value)
+          :report "Supply a new value and reattempt the transduction."
+          :interactive (lambda () (prompt-new-value "Positive Integer: "))
+          (window value)))
       (lambda (reducer)
         (let ((i 0)
               (q (q:make-amortized-queue)))
@@ -439,10 +439,10 @@ applications of a given function F.
                     (let ((res (funcall reducer result item)))
                       (if (reduced-p res)
                           res
-                        (progn (setf item nil)
-                               (funcall reducer res input))))
-                  (funcall reducer result input))
-          (funcall reducer result))))))
+                          (progn (setf item nil)
+                                 (funcall reducer res input))))
+                    (funcall reducer result input))
+            (funcall reducer result))))))
 
 #+nil
 (transduce (comp (filter (lambda (n) (> n 10)))
@@ -466,9 +466,9 @@ need for the caller to manually pass a REDUCER."
     (lambda (result &optional (input nil i-p))
       (if i-p (let ((items (split-csv-line input)))
                 (if headers (funcall reducer result (zipmap headers items))
-                  (progn (setf headers items)
-                         result)))
-        (funcall reducer result)))))
+                    (progn (setf headers items)
+                           result)))
+          (funcall reducer result)))))
 
 #+nil
 (transduce (comp (once "Name,Age")
@@ -569,8 +569,8 @@ sides!
 (transduce (comp (take 5)
                  (map #'1+)
                  (branch #'evenp
-                       (map (comp #'write-to-string #'1+))
-                       (map (const "Odd!")))
+                         (map (comp #'write-to-string #'1+))
+                         (map (const "Odd!")))
                  (map #'length))
            #'cons (ints 1))
 

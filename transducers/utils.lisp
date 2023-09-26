@@ -46,7 +46,7 @@
       x))
 
 (defun preserving-reduced (reducer)
- "A helper function that wraps a reduced value twice since reducing
+  "A helper function that wraps a reduced value twice since reducing
 functions (like list-reduce) unwraps them. tconcatenate is a good example: it
 re-uses its reducer on its input using list-reduce. If that reduction finishes
 early and returns a reduced value, list-reduce would 'unreduce' that value and
