@@ -159,6 +159,8 @@ For functions like this, =fold= is appropriate.
 ;; => 14
 #+end_src
 
+In Clojure this function is called =completing=.
+
 ** Processing JSON Data
 
 The system =transducers-jzon= provides automatic JSON streaming support via the
