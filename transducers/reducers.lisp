@@ -237,9 +237,9 @@ Yields `nil' if no such element were found."
 
 (defun for-each (&rest vargs)
   "Reducer: Run through every item in a transduction for their side effects.
-Throws away all results and yields nil."
+Throws away all results and yields t."
   (declare (ignore vargs))
-  nil)
+  t)
 
 #+nil
 (transduce (map (lambda (n) (format t "~a~%" n))) #'for-each #(1 2 3 4))
