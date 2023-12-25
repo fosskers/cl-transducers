@@ -52,8 +52,8 @@ while adding many other convenient operations commonly found in other languages.
 
 * Installation
 
-This library is available on [[https://ultralisp.org/projects/fosskers/cl-transducers][Ultralisp]]. With [[https://ultralisp.org/][Ultralisp installed as a
-distribution]], you can simply run the following to download the main system:
+This library is available on [[https://quickdocs.org/cl-transducers][Quicklisp]] and [[https://ultralisp.org/projects/fosskers/cl-transducers][Ultralisp]]. To download the main
+system:
 
 #+begin_src lisp
 (ql:quickload :transducers)
@@ -340,14 +340,14 @@ An ancient method of calculating Prime Numbers.
    supports tail-recursive usage of ~labels~.
 2. A way to model the common =zip= function has not yet been found.
 
-* Further Work
+* Issue Tracker and Mailing List
 
-- [ ] Notes on performance.
-- [ ] More higher-order transducers.
+- [[https://todo.sr.ht/~fosskers/transducers][Issue Tracker]]
+- [[https://lists.sr.ht/~fosskers/transducers][Mailing List]]
 
 * Resources
 
 - [[https://clojure.org/reference/transducers][Clojure: Transducers]]
 - [[https://clojure.org/guides/faq#transducers_vs_seqs][Clojure: What are good uses cases for transducers?]]
-- [[https://github.com/cgrand/xforms][Clojure: xforms]]  (extension library)
-- [[https://package.elm-lang.org/packages/avh4-experimental/elm-transducers/1.0.0/][Elm: Transducers]]
+- [[https://www.youtube.com/watch?v=4KqUvG8HPYo][Youtube: Inside Transducers]] (Rich Hickey)
+- [[https://git.sr.ht/~fosskers/transducers.el][Emacs Lisp: Transducers]]
