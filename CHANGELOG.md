@@ -1,5 +1,14 @@
 # Transducers
 
+### 1.0.1 (2023-12-25)
+
+Merry Christmas! I am jetlagged and writing this at 3:30 in the morning.
+
+#### Fixed
+
+- `for-each` now yields `t` instead of `nil`, since `nil` can interact poorly
+  with various control structures.
+
 ### 1.0.0 (2023-09-07)
 
 #### Added
