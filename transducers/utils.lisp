@@ -27,10 +27,6 @@
     (declare (ignore x))
     item))
 
-(defstruct reduced
-  "A wrapper that signals that reduction has completed."
-  val)
-
 (declaim (ftype (function ((or t reduced)) reduced) ensure-reduced))
 (defun ensure-reduced (x)
   "Ensure that X is reduced."

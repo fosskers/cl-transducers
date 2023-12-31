@@ -38,6 +38,10 @@
 
 (in-package :transducers)
 
+(defstruct reduced
+  "A wrapper that signals that reduction has completed."
+  val)
+
 (defun pass (reducer)
   "Transducer: Just pass along each value of the transduction. Same in intent with
 applying `map' to `identity', but this should be slightly more efficient. It is
@@ -647,8 +651,8 @@ too will the other branch. If this is undesirable, see the higher-order
 transducer `tri' for an alternative.
 "
   (lambda (reducer)
-    (let ((fa (funcall ta (last *done*)))
-          (fb (funcall tb (last *done*))))
+    (let ((fa (funcall ta #'last))
+          (fb (funcall tb #'last)))
       (lambda (result &optional (input nil i-p))
         (if i-p (let ((ra (funcall fa result input))
                       (rb (funcall fb result input)))
