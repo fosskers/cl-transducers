@@ -39,6 +39,8 @@ _This library has been confirmed to work with SBCL, CCL, ECL, Clasp and LispWork
 ⚠ ABCL cannot be used due to lack of support for tail-call elimination and tail-recursive ~labels~.
 #+end_quote
 
+Looking for Transducers in other Lisps? Check out the [[https://codeberg.org/fosskers/transducers.el][Emacs Lisp]] and [[https://git.sr.ht/~fosskers/transducers.fnl][Fennel]] implementations!
+
 * History and Motivation
 
 Originally invented in Clojure and adapted to Scheme as SRFI-171, Transducers
@@ -350,4 +352,4 @@ An ancient method of calculating Prime Numbers.
 - [[https://clojure.org/reference/transducers][Clojure: Transducers]]
 - [[https://clojure.org/guides/faq#transducers_vs_seqs][Clojure: What are good uses cases for transducers?]]
 - [[https://www.youtube.com/watch?v=4KqUvG8HPYo][Youtube: Inside Transducers]] (Rich Hickey)
-- [[https://git.sr.ht/~fosskers/transducers.el][Emacs Lisp: Transducers]]
+- [[https://codeberg.org/fosskers/transducers.el][Emacs Lisp: Transducers]]
