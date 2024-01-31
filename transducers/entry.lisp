@@ -83,6 +83,14 @@ streamed as-is as cons cells."
 - `imbalanced-pist': if the number of keys and values do not match."
   (plist-transduce xform f source))
 
+(defmethod transduce (xform f fallback)
+  "Fallback for types which don't implement this. Always errors.
+
+# Conditions
+
+- `no-transduce-implementation': an unsupported type was transduced over."
+  (error 'no-transduce-implementation :type (type-of fallback)))
+
 #+nil
 (transduce (map #'char-upcase) #'string "hello")
 #+nil
@@ -95,6 +103,8 @@ streamed as-is as cons cells."
   (setf (gethash 'b hm) 2)
   (setf (gethash 'c hm) 3)
   (transduce (filter #'evenp) (max 0) hm))
+#+nil
+(transduce (map #'1+) #'+ 1)  ;; Expected to fail.
 
 (declaim (ftype (function (t t list) *) list-transduce))
 (defun list-transduce (xform f coll)

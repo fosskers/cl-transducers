@@ -131,11 +131,11 @@
                "Other")
   (is equal '(12 20 30)
       (t:transduce (t:comp
-                     #'t:enumerate
-                     (t:map (lambda (pair) (* (car pair) (cdr pair))))
-                     (t:filter #'evenp)
-                     (t:drop 3)
-                     (t:take 3))
+                    #'t:enumerate
+                    (t:map (lambda (pair) (* (car pair) (cdr pair))))
+                    (t:filter #'evenp)
+                    (t:drop 3)
+                    (t:take 3))
                    #'t:cons
                    '(1 2 3 4 5 6 7 8 9 10))))
 
@@ -154,7 +154,8 @@
   (is equal "hellohe" (t:transduce (t:take 7) #'t:string (t:cycle "hello")))
   (is equal '() (t:transduce (t:take 7) #'t:cons (t:cycle '())))
   (is equal (list (cons :a 1) (cons :b 2) (cons :c 3))
-      (t:transduce #'t:pass #'t:cons (t:plist '(:a 1 :b 2 :c 3)))))
+      (t:transduce #'t:pass #'t:cons (t:plist '(:a 1 :b 2 :c 3))))
+  (fail (t:transduce #'t:pass #'t:cons 1)))
 
 (define-test "Higher Order Transducers"
   :depends-on (reduction transduction)
@@ -171,18 +172,18 @@
                            (t:map #'1+)
                            (t:split (t:comp (t:filter #'evenp) (t:take 3)) #'+)
                            (t:map #'1-))
-           #'t:cons (t:ints 1))))
+                   #'t:cons (t:ints 1))))
 
 (define-test "Tail-recursion"
   :depends-on (reduction transduction)
   (let ((huge (t:transduce (t:take 1000000) #'t:cons (t:ints 1))))
     (is = 1000000 (t:transduce #'t:pass #'t:count huge)))
   (is = 1000000
-         (labels ((recurse (acc)
-                    (if (= acc 1000000)
-                        acc
-                        (recurse (1+ acc)))))
-           (recurse 1))))
+      (labels ((recurse (acc)
+                 (if (= acc 1000000)
+                     acc
+                     (recurse (1+ acc)))))
+        (recurse 1))))
 
 (define-test json)
 
@@ -190,7 +191,7 @@
   :parent json
   (is equal "[{\"name\":\"A\"},{\"name\":\"B\"}]"
       (with-output-to-string (stream)
-       (t:transduce #'t:pass (j:write stream) (j:read "[{\"name\": \"A\"}, {\"name\": \"B\"}]")))))
+        (t:transduce #'t:pass (j:write stream) (j:read "[{\"name\": \"A\"}, {\"name\": \"B\"}]")))))
 
 (define-test csv)
 

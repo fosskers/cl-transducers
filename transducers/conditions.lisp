@@ -29,6 +29,13 @@
              (format stream "Empty sequence passed to `~a'."
                      (empty-argument-fn condition)))))
 
+(define-condition no-transduce-implementation (error)
+  ((type :initarg :type :reader no-transduce-implementation-type))
+  (:documentation "The user attempted to call `transduce' on an unsupported type.")
+  (:report (lambda (condition stream)
+             (format stream "The type ~a cannot be transduced over. Did you mean to pass a list?"
+                     (no-transduce-implementation-type condition)))))
+
 (defun prompt-new-value (prompt)
   (format *query-io* prompt)
   (force-output *query-io*)

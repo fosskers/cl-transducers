@@ -1,5 +1,16 @@
 # Transducers
 
+### Unreleased
+
+#### Added
+
+- New condition: `no-transduce-implementation`
+
+#### Changed
+
+- If `transduce` is called on a type which has no `defmethod` for it, a custom
+  condition is thrown with a more helpful error message.
+
 ### 1.0.1 (2023-12-25)
 
 Merry Christmas! I am jetlagged and writing this at 3:30 in the morning.
