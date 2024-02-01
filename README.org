@@ -342,11 +342,6 @@ An ancient method of calculating Prime Numbers.
    supports tail-recursive usage of ~labels~.
 2. A way to model the common =zip= function has not yet been found.
 
-* Issue Tracker and Mailing List
-
-- [[https://todo.sr.ht/~fosskers/transducers][Issue Tracker]]
-- [[https://lists.sr.ht/~fosskers/transducers][Mailing List]]
-
 * Resources
 
 - [[https://clojure.org/reference/transducers][Clojure: Transducers]]
