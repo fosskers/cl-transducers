@@ -64,7 +64,7 @@ system:
 For the JSON extensions:
 
 #+begin_src lisp
-(ql:quickload :transducers-jzon)
+(ql:quickload :transducers/jzon)
 #+end_src
 
 * Usage
@@ -165,12 +165,12 @@ In Clojure this function is called =completing=.
 
 ** Processing JSON Data
 
-The system =transducers-jzon= provides automatic JSON streaming support via the
+The system =transducers/jzon= provides automatic JSON streaming support via the
 [[https://github.com/Zulu-Inuoe/jzon][jzon]] library. Like =transducers= itself, it is expected that you import this
 system with a nickname:
 
 #+begin_src lisp
-(:local-nicknames (#:j #:transducers-jzon))
+(:local-nicknames (#:j #:transducers/jzon))
 #+end_src
 
 Only two functions are exposed: =read= and =write=.

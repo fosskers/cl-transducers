@@ -1,4 +1,4 @@
-(defpackage transducers-jzon
+(defpackage transducers/jzon
   (:use :cl)
   (:shadow #:read #:write)
   (:import-from #:trivia #:match)
@@ -7,7 +7,7 @@
   (:export #:read #:write)
   (:documentation "JSON extensions for Transducers."))
 
-(in-package :transducers-jzon)
+(in-package :transducers/jzon)
 
 (defstruct (json (:copier nil) (:predicate nil))
   "The source of some JSON data."

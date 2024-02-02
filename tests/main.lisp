@@ -1,7 +1,7 @@
 (defpackage transducers/tests
   (:use :cl :parachute)
   (:local-nicknames (#:t #:transducers)
-                    (#:j #:transducers-jzon)))
+                    (#:j #:transducers/jzon)))
 
 (in-package :transducers/tests)
 

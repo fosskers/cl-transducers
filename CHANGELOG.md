@@ -10,6 +10,8 @@
 
 - If `transduce` is called on a type which has no `defmethod` for it, a custom
   condition is thrown with a more helpful error message.
+- The JSON support system/package is now named `transducers/jzon` to avoid
+  compiler warnings.
 
 ### 1.0.1 (2023-12-25)
 

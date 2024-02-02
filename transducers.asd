@@ -17,15 +17,15 @@
 (defsystem "transducers/tests"
   :author "Colin Woodbury <colin@fosskers.ca>"
   :license "LGPL-3.0-only"
-  :depends-on (:transducers :transducers-jzon :parachute)
+  :depends-on (:transducers :transducers/jzon :parachute)
   :components ((:module "tests"
                 :components
                 ((:file "main"))))
   :description "Test system for transducers"
   :perform (test-op (op c) (symbol-call :parachute :test :transducers/tests)))
 
-(defsystem "transducers-jzon"
-  :version "0.1.0"
+(defsystem "transducers/jzon"
+  :version "0.2.0"
   :author "Colin Woodbury <colin@fosskers.ca>"
   :license "LGPL-3.0-only"
   :depends-on (:transducers :com.inuoe.jzon :trivia)
