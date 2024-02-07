@@ -14,7 +14,7 @@ but also potentially large files or generators of infinite data.
 
 Transducers...
 
-- allow the chaining of operations like [[*pass, map][map]] and [[*filter, filter-map, unique, dedup][filter]] without allocating memory between each step.
+- allow the chaining of operations like ~map~ and ~filter~ without allocating memory between each step.
 - aren't tied to any specific data type; they need only be implemented once.
 - vastly simplify "data transformation code".
 - have nothing to do with "lazy evaluation".
@@ -178,9 +178,9 @@ overlap with ~:cl~.
 ** Transducers
 
 Transducers describe how to alter the items of some stream of values. Some
-transducers, like [[*drop, drop-while, take, take-while][take]], can short-circuit.
+transducers, like ~take~, can short-circuit.
 
-Multiple transducer functions can be chained together with [[*comp, const][comp]].
+Multiple transducer functions can be chained together with ~comp~.
 
 *** pass, map
 
@@ -335,7 +335,7 @@ accumulated state, which may be shorter than N.
 #+RESULTS:
 : ((1 2 3) (4 5))
 
-Yield N-length windows of overlapping values. This is different from [[*segment, window, group-by][segment]]
+Yield N-length windows of overlapping values. This is different from ~segment~
 which yields non-overlapping windows. If there were fewer items in the input
 than N, then this yields nothing.
 
@@ -437,7 +437,7 @@ of the transduction are passed through as-is.
 : Got: 5
 
 These are STDOUT results. The actual return value is the result of the reducer,
-in this case [[*cons, snoc, vector, string, hash-table][cons]], thus a list.
+in this case ~cons~, thus a list.
 
 *** from-csv, into-csv
 
@@ -478,7 +478,7 @@ keys are strings that match the values found in HEADERS.
 Reducers describe how to fold the stream of items down into a single result, be
 it either a new collection or a scalar.
 
-Some reducers, like [[*first, last, find][first]], can also force the entire transduction to
+Some reducers, like ~first~, can also force the entire transduction to
 short-circuit.
 
 *** cons, snoc, vector, string, hash-table
@@ -494,7 +494,7 @@ Collect all results as a list.
 : (1 2 3)
 
 Collect all results as a list, but results are reversed. In theory, slightly
-more performant than [[*cons, snoc, vector, string, hash-table][cons]] since it performs no final reversal.
+more performant than ~cons~ since it performs no final reversal.
 
 #+begin_src lisp :results verbatim :exports both
 (in-package :transducers)
@@ -669,7 +669,7 @@ pull from files and endless number generators.
 
 Yield all integers, beginning with START and advancing by an optional STEP value
 which can be positive or negative. If you only want a specific range within the
-transduction, then use [[*drop, drop-while, take, take-while][take-while]] within your transducer chain.
+transduction, then use ~take-while~ within your transducer chain.
 
 #+begin_src lisp :results verbatim :exports both
 (in-package :transducers)
@@ -752,7 +752,7 @@ pairs are passed as a cons cell.
 #+RESULTS:
 : 6
 
-See also the [[*uncons, concatenate, flatten][uncons]] transducer for another way to handle incoming cons cells.
+See also the ~uncons~ transducer for another way to handle incoming cons cells.
 
 ** Utilities
 
@@ -773,7 +773,7 @@ For transducer functions specifically, they are /composed/ from right to left, b
 their effects are /applied/ from left to right. This is due to how the reducer
 function is chained through them all internally via ~transduce~.
 
-Notice here how [[*drop, drop-while, take, take-while][drop]] is clearly applied first:
+Notice here how ~drop~ is clearly applied first:
 
 #+begin_src lisp :results verbatim :exports both
 (in-package :transducers)
@@ -798,7 +798,7 @@ Return a function that ignores its argument and returns ITEM instead.
 When writing your own transducers and reducers, these functions allow you to
 short-circuit the entire operation.
 
-Here is a simplified definition of [[*first, last, find][first]]:
+Here is a simplified definition of ~first~:
 
 #+begin_src lisp :exports code
 (in-package :transducers)
@@ -837,8 +837,8 @@ Counting words:
 ** Reducing into Property Lists and Assocation Lists
 
 There is no special reducer function for plists, because none is needed. If you
-have a stream of cons cells, you can break it up with [[*uncons, concatenate, flatten][uncons]] and then collect
-with [[*cons, snoc, vector, string, hash-table][cons]] as usual:
+have a stream of cons cells, you can break it up with ~uncons~ and then collect
+with ~cons~ as usual:
 
 #+begin_src lisp :results verbatim :exports both
 (in-package :transducers)
