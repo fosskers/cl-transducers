@@ -168,6 +168,8 @@ transduction as soon as any element fails the test."
         (funcall reducer result))))
 
 #+nil
+(transduce #'uncons #'cons '((:a . 1) (:b . 2) (:c . 3)))
+#+nil
 (transduce #'uncons #'cons (plist '(:a 1 :b 2 :c 3)))
 #+nil
 (transduce (comp (map (lambda (pair) (cl:cons (car pair) (1+ (cdr pair)))))
@@ -303,7 +305,7 @@ Starts at 0."
 (defun log (logger)
   "Transducer: Call some LOGGER function for each step of the transduction. The
 LOGGER must accept the running results and the current element as input. The
-original results of the transduction are passed through as-is."
+original items of the transduction are passed through as-is."
   (lambda (reducer)
     (lambda (result &optional (input nil i-p))
       (cond (i-p
@@ -435,7 +437,7 @@ applications of a given function F.
 (transduce (comp (scan #'+ 0) (take 2)) #'cons '(1 2 3 4))
 
 (defun once (item)
-  "Transducer: Inject some ITEM into the front of the transduction."
+  "Transducer: Inject some ITEM onto the front of the transduction."
   (lambda (reducer)
     (let ((item item))
       (lambda (result &optional (input nil i-p))
@@ -476,7 +478,7 @@ need for the caller to manually pass a REDUCER."
 
 #+nil
 (transduce (comp (once "Name,Age")
-                 #'csv
+                 #'from-csv
                  (map (lambda (hm) (gethash "Name" hm))))
            #'cons '("Alice,35" "Bob,26"))
 

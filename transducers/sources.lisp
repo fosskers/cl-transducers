@@ -11,7 +11,8 @@
   (list nil :read-only t :type list))
 
 (defun plist (plist)
-  "Source: Yield key-value pairs from a Property List, usually known as a 'plist'."
+  "Source: Yield key-value pairs from a Property List, usually known as a 'plist'.
+The pairs are passed as a cons cell."
   (make-plist :list plist))
 
 ;; FIXME type signature, expecting `values' to be called within the given
@@ -51,7 +52,7 @@ within the transduction, then use `take-while' within your transducer chain."
 
 (declaim (ftype (function ((or single-float double-float integer)) generator) random))
 (defun random (limit)
-  "Source: Yield an endless stream of random numbers."
+  "Source: Yield an endless stream of random numbers, based on a given LIMIT."
   (make-generator :func (lambda () (cl:random limit))))
 
 #+nil
