@@ -23,15 +23,20 @@ Transducers...
 Example: /While skipping every second line of a file, sum the lengths of only
 evenly-lengthed lines./
 
-#+begin_src lisp
+#+begin_src lisp :exports both
+(in-package :transducers)
+
 (transduce
   ;; How do we want to process each element?
   (comp (step 2) (map #'length) (filter #'evenp))
   ;; How do we want to combine all the elements together?
   #'+
   ;; What's our original data source?
-  #p"giant-file.txt")
+  #p"README.org")
 #+end_src
+
+#+RESULTS:
+: 7026
 
 _This library has been confirmed to work with SBCL, CCL, ECL, Clasp and LispWorks 8._
 
@@ -87,11 +92,14 @@ You can then make relatively clean calls like:
 ;; => #(2 3 4)
 #+end_src
 
+However, many of the examples below use ~(in-package :transducers)~ for brevity in
+the actual function calls. You should still use a nickname in your own code.
+
 ** Transducers, Reducers, and Sources
 
 #+begin_src lisp
 ;; The fundamental pattern.
-(t:transduce <transducer-chain> <reducer> <source>)
+(transduce <transducer-chain> <reducer> <source>)
 #+end_src
 
 Data processing largely has three concerns:
@@ -114,15 +122,19 @@ generators are =repeat=, =cycle=, and =ints=.
 
 Let's sum the squares of the first 1000 odd integers:
 
-#+begin_src lisp
-(t:transduce
- (t:comp (t:filter #'oddp)             ;; (2) Keep only odd numbers.
-         (t:take 1000)                 ;; (3) Keep the first 1000 filtered odds.
-         (t:map (lambda (n) (* n n)))) ;; (4) Square those 1000.
- #'+         ;; (5) Reducer: Add up all the squares.
- (t:ints 1)) ;; (1) Source: Generate all positive integers.
-;; => 1333333000 (31 bits, #x4F790C08)
+#+begin_src lisp :exports both
+(in-package :transducers)
+
+(transduce
+ (comp (filter #'oddp)             ;; (2) Keep only odd numbers.
+       (take 1000)                 ;; (3) Keep the first 1000 filtered odds.
+       (map (lambda (n) (* n n)))) ;; (4) Square those 1000.
+ #'+       ;; (5) Reducer: Add up all the squares.
+ (ints 1)) ;; (1) Source: Generate all positive integers.
 #+end_src
+
+#+RESULTS:
+: 1333333000
 
 Two things of note here:
 
@@ -157,11 +169,17 @@ Only two functions are exposed: =read= and =write=.
 Here is a simple example of reading some JSON data from a string, doing nothing
 to it, and outputting it again to a new string:
 
-#+begin_src lisp
+#+begin_src lisp :exports both
+(in-package :transducers)
+
 (with-output-to-string (stream)
-  (t:transduce #'t:pass (j:write stream) (j:read "[{\"name\": \"A\"}, {\"name\": \"B\"}]")))
-;; => "[{\"name\":\"A\"},{\"name\":\"B\"}]"
+  (transduce #'pass
+             (transducers/jzon:write stream)
+             (transducers/jzon:read "[{\"name\": \"A\"}, {\"name\": \"B\"}]")))
 #+end_src
+
+#+RESULTS:
+: [{"name":"A"},{"name":"B"}]
 
 Note that the JSON data _must_ be a JSON array. There is otherwise no size limit;
 the library can handle any amount of JSON input.
