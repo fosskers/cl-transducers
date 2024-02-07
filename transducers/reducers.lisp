@@ -81,13 +81,13 @@ reversal."
 
 (declaim (ftype (function ((function (t) *)) *) anyp))
 (defun anyp (pred)
-  "Reducer: Yield non-NIL if any element in the transduction satisfies PRED.
+  "Reducer: Yield t if any element in the transduction satisfies PRED.
 Short-circuits the transduction as soon as the condition is met."
   (lambda (&optional (acc nil a-p) (input nil i-p))
     (cond ((and a-p i-p)
            (let ((test (funcall pred input)))
              (if test
-                 (make-reduced :val test)
+                 (make-reduced :val t)
                  nil)))
           ((and a-p (not i-p)) acc)
           (t nil))))
@@ -104,13 +104,13 @@ Short-circuits the transduction as soon as the condition is met."
 
 (declaim (ftype (function ((function (t) *)) *) allp))
 (defun allp (pred)
-  "Reducer: Yield non-NIL if all elements of the transduction satisfy PRED.
+  "Reducer: Yield t if all elements of the transduction satisfy PRED.
 Short-circuits with NIL if any element fails the test."
   (lambda (&optional (acc nil a-p) (input nil i-p))
     (cond ((and a-p i-p)
            (let ((test (funcall pred input)))
              (if (and acc test)
-                 test
+                 t
                  (make-reduced :val nil))))
           ((and a-p (not i-p)) acc)
           (t t))))
