@@ -1,5 +1,11 @@
 # Transducers
 
+### Unreleased 
+
+#### Fixed
+
+- `allp` and `anyp` now yield `t` in the case of success, and not just "non-nil".
+
 ### 1.1.0 (2024-02-02)
 
 #### Added
