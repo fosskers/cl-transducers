@@ -581,7 +581,7 @@ transduction as soon as the condition is met.
 
 #+begin_src lisp :results verbatim :exports both
 (in-package :transducers)
-(transduce #'pass (any #'evenp) '(1 3 5 7 9 2))
+(transduce #'pass (anyp #'evenp) '(1 3 5 7 9 2))
 #+end_src
 
 #+RESULTS:
@@ -592,7 +592,7 @@ NIL if any element fails the test.
 
 #+begin_src lisp :results verbatim :exports both
 (in-package :transducers)
-(transduce #'pass (all #'oddp) '(1 3 5 7 9))
+(transduce #'pass (allp #'oddp) '(1 3 5 7 9))
 #+end_src
 
 #+RESULTS:
