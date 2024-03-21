@@ -10,6 +10,7 @@
 (defstruct (plist (:copier nil) (:predicate nil))
   (list nil :read-only t :type list))
 
+(declaim (ftype (function (list) plist) plist))
 (defun plist (plist)
   "Source: Yield key-value pairs from a Property List, usually known as a 'plist'.
 The pairs are passed as a cons cell."

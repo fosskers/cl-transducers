@@ -191,7 +191,10 @@
   :parent json
   (is equal "[{\"name\":\"A\"},{\"name\":\"B\"}]"
       (with-output-to-string (stream)
-        (t:transduce #'t:pass (j:write stream) (j:read "[{\"name\": \"A\"}, {\"name\": \"B\"}]")))))
+        (t:transduce #'t:pass (j:write stream) (j:read "[{\"name\": \"A\"}, {\"name\": \"B\"}]"))))
+  (is equal "[{\"name\":\"Colin\",\"age\":35},{\"name\":\"Jack\",\"age\":10}]"
+      (with-output-to-string (stream)
+        (t:transduce #'t:pass (j:write stream) '((:name "Colin" :age 35) (:name "Jack" :age 10))))))
 
 (define-test csv)
 

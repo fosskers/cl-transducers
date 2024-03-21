@@ -61,11 +61,19 @@ output that JSON into the given STREAM."
   (let ((writer (j:make-writer :stream stream :pretty pretty)))
     (lambda (&optional (acc nil a-p) (input nil i-p))
       (declare (ignore acc))
-      (cond ((and a-p i-p) (j:write-value writer input))
+      (cond ((and a-p i-p)
+             (j:write-value writer (if (and (listp input)
+                                            (keywordp (car input)))
+                                       (t:plist input)
+                                       input)))
             ((and a-p (not i-p))
              (j:end-array writer)
              (j:close-writer writer))
             (t (j:begin-array writer))))))
+
+#+nil
+(with-output-to-string (stream)
+  (t:transduce #'t:pass (write stream) '((:name "Colin" :age 35) (:name "Jack" :age 10))))
 
 #+nil
 (with-output-to-string (stream)
@@ -82,3 +90,11 @@ output that JSON into the given STREAM."
 (t:transduce (t:filter-map (lambda (ht) (gethash "age" ht)))
              #'t:average
              (read "[{\"age\": 34}, {\"age\": 25}]"))
+
+(defmethod j:write-value ((writer j:writer) (value t:plist))
+  (j:with-object writer
+    (t:transduce (t:map (lambda (pair)
+                          (j:write-key writer (car pair))
+                          (j:write-value writer (cdr pair))))
+                 #'t:for-each
+                 value)))
