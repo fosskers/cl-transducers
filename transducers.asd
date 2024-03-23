@@ -25,7 +25,7 @@
   :perform (test-op (op c) (symbol-call :parachute :test :transducers/tests)))
 
 (defsystem "transducers/jzon"
-  :version "0.2.0"
+  :version "0.2.1"
   :author "Colin Woodbury <colin@fosskers.ca>"
   :license "LGPL-3.0-only"
   :depends-on (:transducers :com.inuoe.jzon :trivia)
