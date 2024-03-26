@@ -180,23 +180,34 @@ transduction as soon as any element fails the test."
   "Transducer: Concatenate all the sublists in the transduction."
   (let ((preserving-reducer (preserving-reduced reducer)))
     (lambda (result &optional (input nil i-p))
-      (if i-p (list-reduce preserving-reducer result input)
+      (if i-p (etypecase input
+                (cl:list   (list-reduce preserving-reducer result input))
+                (cl:vector (vector-reduce preserving-reducer result input))
+                ;; TODO 2024-03-27 Proper condition.
+                (t (error "Oh no!!!")))
           (funcall reducer result)))))
 
 #+nil
 (transduce #'concatenate #'cons '((1 2 3) (4 5 6) (7 8 9)))
+#+nil
+(transduce #'concatenate
+           #'cons (list (cl:vector 1 2 3) (cl:list 4 5 6) (cl:vector 7 8 9)))
+#+nil
+(transduce (comp #'concatenate (intersperse #\!))
+           #'string '("hello" "there"))
 
 (defun flatten (reducer)
   "Transducer: Entirely flatten all lists in the transduction, regardless of
 nesting."
   (lambda (result &optional (input nil i-p))
-    (if i-p (if (listp input)
-                (list-reduce (preserving-reduced (flatten reducer)) result input)
-                (funcall reducer result input))
+    (if i-p (etypecase input
+              (cl:list (list-reduce (preserving-reduced (flatten reducer)) result input))
+              (cl:vector (vector-reduce (preserving-reduced (flatten reducer)) result input))
+              (t (funcall reducer result input)))
         (funcall reducer result))))
 
 #+nil
-(transduce #'flatten #'cons '((1 2 3) 0 (4 (5) 6) 0 (7 8 9) 0))
+(transduce #'flatten #'cons '((1 2 3) 0 (4 (5) 6 "hi") 0 (7 #(8) 9) 0))
 
 (declaim (ftype (function (fixnum) *) segment))
 (defun segment (n)
