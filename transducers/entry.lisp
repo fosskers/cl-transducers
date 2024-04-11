@@ -51,6 +51,35 @@ sources. See `sources.lisp' and `entry.lisp' for examples of how to do this.
 
 "))
 
+(defmacro pipe* (fn source &rest transducers-and-reducer)
+  (let ((transducers (butlast transducers-and-reducer))
+        (reducer (car (cl:last transducers-and-reducer))))
+    (if (cdr transducers)
+        `(,fn (comp ,@transducers) ,reducer ,source)
+        `(,fn ,(car transducers) ,reducer ,source))))
+
+(defmacro pipe (source &rest transducers-and-reducer)
+  "Structure `transduce' as a pipeline.
+
+The second up to (but not including) the last argument is used as the
+transducers, and the last argument is used as the reducer. If there are more
+than one transducer, they are wrapped in `comp'.
+
+(macroexpand-1 '(pipe source t1 reducer))
+;; => (TRANSDUCE T1 REDUCER SOURCE), T
+
+(macroexpand-1 '(pipe source t1 t2 reducer))
+;; => (TRANSDUCE (COMP T1 T2) REDUCER SOURCE), T
+"
+  (assert (>= (length transducers-and-reducer) 2) nil
+          "Missing transducer or reducer.")
+  `(pipe* transduce ,source ,@transducers-and-reducer))
+
+#+nil
+(pipe '(1 2 3) (take 1) #'*)
+#+nil
+(pipe (cycle '(1 2 3)) (filter #'oddp) (map #'1+) (take 10) #'*)
+
 (defmethod transduce (xform f (source cl:string))
   (string-transduce xform f source))
 

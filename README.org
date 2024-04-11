@@ -149,6 +149,33 @@ Two things of note here:
 Explore the other transducers and reducers to see what's possible! You'll never
 write a =loop= again.
 
+*** Pipeline
+An alternative syntax to =transduce= is supported by the =pipe= macro. The
+argument order is different, and it automatically combines several transducers
+with =comp=. It constructs a call to =transduce=.
+
+The =pipe= form will lower into the =transduce= form below.
+
+#+begin_src lisp :exports code
+(in-package :transducers)
+
+(pipe (ints 1)
+  (filter #'oddp)
+  (take 1000)
+  (map (lambda (n) (* n n)))
+  #'+)
+
+(transduce
+ (comp (filter #'oddp)
+       (take 1000)
+       (map (lambda (n) (* n n))))
+ #'+
+ (ints 1))
+#+end_src
+
+#+RESULTS:
+: 1333333000
+
 ** Processing JSON Data
 
 The system =transducers/jzon= provides automatic JSON streaming support via the
