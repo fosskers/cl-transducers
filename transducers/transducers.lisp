@@ -219,7 +219,7 @@ any accumulated state, which may be shorter than N.
           (lambda (result &optional (input nil i-p))
             (cond (i-p
                    (setf collect (cl:cons input collect))
-                   (setf i (1+ i))
+                   (incf i)
                    (if (< i n)
                        result
                        (let ((next-input (reverse collect)))
@@ -295,7 +295,7 @@ Starts at 0."
   (let ((n 0))
     (lambda (result &optional (input nil i-p))
       (if i-p (let ((input (cl:cons n input)))
-                (setf n (1+ n))
+                (incf n)
                 (funcall reducer result input))
           (funcall reducer result)))))
 
@@ -338,7 +338,7 @@ input than N, then this yields nothing.
           (lambda (result &optional (input nil i-p))
             (cond (i-p
                    (setf q (q:amortized-enqueue q input))
-                   (setf i (1+ i))
+                   (incf i)
                    (cond ((< i n) result)
                          ((= i n) (funcall reducer result (q:amortized-queue-list q)))
                          (t (setf q (q:amortized-dequeue q))

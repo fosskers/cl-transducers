@@ -101,7 +101,7 @@ strings are vectors too, so:
                             (setf ix 1)
                             (aref seq 0))
                            (t (let ((next (aref seq ix)))
-                                (setf ix (1+ ix))
+                                (incf ix)
                                 next))))))
         (make-generator :func func))))
 
