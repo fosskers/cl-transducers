@@ -372,7 +372,7 @@ not careful."
   "Transducer: Remove adjacent duplicates from the transduction."
   (let ((prev 'nothing))
     (lambda (result &optional (input nil i-p))
-      (if i-p (if (equal prev input)
+      (if i-p (if (eq prev input)
                   result
                   (progn (setf prev input)
                          (funcall reducer result input)))
