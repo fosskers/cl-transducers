@@ -5,7 +5,8 @@
            #:cons #:count #:first #:last #:max #:min #:find #:string #:vector #:hash-table
            #:random)
   ;; --- Entry Points --- ;;
-  (:export #:transduce)
+  (:export #:transduce
+           #:pipe)
   ;; --- Transducers -- ;;
   (:export #:pass #:map
            #:filter #:filter-map #:unique #:dedup

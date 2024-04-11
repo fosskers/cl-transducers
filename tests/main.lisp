@@ -144,6 +144,21 @@
 #+nil
 (funcall (t:comp #'1+ (lambda (n) (* 2 n))) 7)
 
+(define-test "Pipeline composition"
+  :parent transduction
+  :depends-on (reduction
+               "Taking and Dropping"
+               "Filtering"
+               "Other")
+  (is equal '(12 20 30)
+      (t:pipe '(1 2 3 4 5 6 7 8 9 10)
+        #'t:enumerate
+        (t:map (lambda (pair) (* (car pair) (cdr pair))))
+        (t:filter #'evenp)
+        (t:drop 3)
+        (t:take 3)
+        #'t:cons)))
+
 (define-test "Sources"
   :depends-on (reduction transduction)
   (is equal '() (t:transduce (t:take 0) #'t:cons (t:ints 0)))
