@@ -103,7 +103,7 @@ keep results that are non-nil.
     (let ((new-n (1+ n)))
       (lambda (result &optional (input nil i-p))
         (cond (i-p
-               (setf new-n (1- new-n))
+               (decf new-n)
                (if (> new-n 0)
                    result
                    (funcall reducer result input)))
@@ -136,7 +136,7 @@ keep results that are non-nil.
         (if i-p (let ((result (if (> new-n 0)
                                   (funcall reducer result input)
                                   result)))
-                  (setf new-n (1- new-n))
+                  (decf new-n)
                   (if (<= new-n 0)
                       (ensure-reduced result)
                       result))
@@ -407,7 +407,7 @@ of the transduction is always included.
             (if i-p (if (= 1 curr)
                         (progn (setf curr n)
                                (funcall reducer result input))
-                        (progn (setf curr (1- curr))
+                        (progn (decf curr)
                                result))
                 (funcall reducer result)))))))
 
