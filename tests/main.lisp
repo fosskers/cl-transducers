@@ -159,6 +159,33 @@
         (t:take 3)
         #'t:cons)))
 
+(define-test "for"
+  :parent transduction
+  :depends-on (reduction
+               "Taking and Dropping"
+               "Filtering"
+               "Other")
+  (is equal '(2 1)
+      (let ((result '()))
+        (t:for (x '(1 2))
+          (push x result))
+        result))
+  (is equal '((:b . 2) (:a . 1))
+      (let ((result '()))
+        (t:for ((x y) '((:a 1) (:b 2)))
+          (push (cons x y) result))
+        result))
+  (is equal '(12 20 30)
+      (let ((result '()))
+        (t:for (x '(1 2 3 4 5 6 7 8 9 10)
+                  #'t:enumerate
+                  (t:map (lambda (pair) (* (car pair) (cdr pair))))
+                  (t:filter #'evenp)
+                  (t:drop 3)
+                  (t:take 3))
+          (push x result))
+        (reverse result))))
+
 (define-test "Sources"
   :depends-on (reduction transduction)
   (is equal '() (t:transduce (t:take 0) #'t:cons (t:ints 0)))

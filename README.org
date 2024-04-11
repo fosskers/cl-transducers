@@ -176,6 +176,42 @@ The =pipe= form will lower into the =transduce= form below.
 #+RESULTS:
 : 1333333000
 
+*** Imperative iteration
+Imperative iteration is supported by the =for= macro.
+
+You can pass just a source, in which case it behaves much like =dolist= and
+similar looping constructs.
+#+begin_src lisp :exports code
+(in-package :transducers)
+(for (x '(1 2))
+  (print x))
+#+end_src
+
+#+RESULTS:
+: T
+
+Additional arguments are treated as reducers.
+#+begin_src lisp :exports code
+(in-package :transducers)
+(for (x '(1 2 3) (map #'1+) (take 2))
+  (print x))
+#+end_src
+
+#+RESULTS:
+: T
+
+If the result of the source and/or transducer chain is a list, the value is
+bound using =destructuring-bind=
+#+begin_src lisp :exports code
+(in-package :transducers)
+(for ((k v) '((:a 1) (:b 2)))
+  (princ k)
+  (princ v))
+#+end_src
+
+#+RESULTS:
+: T
+
 ** Processing JSON Data
 
 The system =transducers/jzon= provides automatic JSON streaming support via the

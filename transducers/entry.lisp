@@ -76,6 +76,55 @@ than one transducer, they are wrapped in `comp'.
 #+nil
 (pipe (cycle '(1 2 3)) (filter #'oddp) (map #'1+) (take 10) #'*)
 
+(defmacro for ((bindings &rest source-and-transducers) &body body)
+  "Execute BODY for each value in the SOURCE-AND-TRANSDUCERS pipeline.
+
+Returns T.
+
+The first value of SOURCE-AND-TRANSDUCERS is treated as the source, and the rest
+as a list of transducers. An additional transducer is appended which executes
+BODY for each produced value. `for-each' is used as the reducer.
+
+BINDINGS is bound before each execution of BODY. If BINDINGS is a symbol, it is
+it is bound by `let', if it's a list, it's bound by `destructuring-bind'.
+
+# Examples
+
+(for (x '(1 2))
+  (format t \" ~a\" x))
+;; =>  1 2
+
+(for (x '(1 2) (map #'1+))
+  (format t \" ~a\" x))
+;; =>  1 2
+
+(for ((k v) '((:a 1) (:b 2)))
+  (format t \" ~a=~a\" k v))
+;; =>  A=1 B=2
+"
+  (let* ((source (car source-and-transducers))
+         (transducers (cdr source-and-transducers))
+         (value (gensym "FOR-VALUE-")))
+    `(pipe ,source
+       ,@transducers
+       (map (lambda (,value)
+              ,(if (consp bindings)
+                   `(destructuring-bind ,bindings ,value
+                      ,@body)
+                   `(let ((,bindings ,value))
+                      ,@body))))
+       #'for-each)))
+
+#+nil
+(for (x '(1 2))
+  (format t "~a~%" x))
+#+nil
+(for (x (ints 0) (filter #'oddp) (take 2))
+  (format t "~a~%" x))
+#+nil
+(for ((k v) '((:a 1) (:b 2)))
+  (format t "~a=~a~%" k v))
+
 (defmethod transduce (xform f (source cl:string))
   (string-transduce xform f source))
 
