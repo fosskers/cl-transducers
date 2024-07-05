@@ -171,7 +171,10 @@
         (t:transduce (t:comp (t:take 4) (t:map (lambda (item) (if (= 1 item) (error "無念") item)))) #'t:cons (t:ints 0))))
   (is equal '(0 2 3)
       (handler-bind ((error #'(lambda (c) (declare (ignore c)) (invoke-restart 't:next-item))))
-        (t:transduce (t:map (lambda (pair) (if (= 1 (cdr pair)) (error "無念") (cdr pair)))) #'t:cons (t:plist '(:a 0 :b 1 :c 2 :d 3))))))
+        (t:transduce (t:map (lambda (pair) (if (= 1 (cdr pair)) (error "無念") (cdr pair)))) #'t:cons (t:plist '(:a 0 :b 1 :c 2 :d 3)))))
+  (is equal '(0 2 3)
+      (handler-bind ((error #'(lambda (c) (declare (ignore c)) (invoke-restart 't:next-item))))
+        (t:transduce (t:map (lambda (item) (if (= 1 item) (error "無念") item))) #'t:cons (j:read "[0,1,2,3]")))))
 
 (define-test "Sources"
   :depends-on (reduction transduction)

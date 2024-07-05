@@ -44,7 +44,10 @@
                                                      :eof-error-p nil
                                                      :eof-value :done)
                    (:done acc)
-                   (json (let ((acc (funcall f acc json)))
+                   (json (let ((acc (restart-case (funcall f acc json)
+                                      (t:next-item ()
+                                        :report "Skip the current item and continue the transduction."
+                                        acc))))
                            (if (t:reduced-p acc)
                                (t:reduced-val acc)
                                (recurse acc)))))))
