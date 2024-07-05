@@ -5,7 +5,8 @@
 #### Changed
 
 - Conditions signalled somewhere in the transduction chain can now be caught
-  per-item, with a restart available to skip that item and continue.
+  per-item, with various restarts available to rehandle or skip the problematic
+  item.
 
 ### 1.1.1 (2024-02-08)
 
