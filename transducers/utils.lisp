@@ -61,16 +61,3 @@ Borrowed from Clojure, thanks guys."
     (mapc (lambda (k v) (setf (gethash k table) v)) keys vals)
     table))
 
-;; FIXME 2024-07-05 It's my birthday. Should this be a macro?
-(defun safe-call (f acc item)
-  "Call a transduction chain with the given arguments, wrapping the possibilities
-in various restart cases."
-  (labels ((recurse (acc item)
-             (restart-case (funcall f acc item)
-               (next-item ()
-                 :report "Skip this item and continue the transduction."
-                 acc)
-               (retry-item ()
-                 :report "Put this item through the transduction chain once more."
-                 (recurse acc item)))))
-    (recurse acc item)))
