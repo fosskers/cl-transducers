@@ -17,7 +17,7 @@
 (defsystem "transducers/tests"
   :author "Colin Woodbury <colin@fosskers.ca>"
   :license "LGPL-3.0-only"
-  :depends-on (:transducers :transducers/jzon :parachute)
+  :depends-on (:transducers :transducers/jzon :parachute :str)
   :components ((:module "tests"
                 :components
                 ((:file "main"))))

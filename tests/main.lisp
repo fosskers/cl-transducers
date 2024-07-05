@@ -144,6 +144,35 @@
 #+nil
 (funcall (t:comp #'1+ (lambda (n) (* 2 n))) 7)
 
+(define-test "Conditions"
+  :parent transduction
+  :depends-on (reduction)
+  (is equal '(0 2 3)
+      (handler-bind ((error #'(lambda (c) (declare (ignore c)) (invoke-restart 't:next-item))))
+        (t:transduce (t:map (lambda (item) (if (= 1 item) (error "無念") item))) #'t:cons '(0 1 2 3))))
+  (is equal '(0 2 3)
+      (handler-bind ((error #'(lambda (c) (declare (ignore c)) (invoke-restart 't:next-item))))
+        (t:transduce (t:map (lambda (item) (if (= 1 item) (error "無念") item))) #'t:cons #(0 1 2 3))))
+  (is string-equal "Bithday"
+      (handler-bind ((error #'(lambda (c) (declare (ignore c)) (invoke-restart 't:next-item))))
+        (t:transduce (t:map (lambda (item) (if (eq #\r item) (error "無念") item))) #'t:string "Birthday")))
+  (let ((table (make-hash-table :test #'equal)))
+    (setf (gethash :a table) 1)
+    (setf (gethash :b table) 2)
+    (setf (gethash :c table) 3)
+    (is equal '(1 3)
+        (handler-bind ((error #'(lambda (c) (declare (ignore c)) (invoke-restart 't:next-item))))
+          (t:transduce (t:map (lambda (item) (if (= 2 (cdr item)) (error "無念") (cdr item)))) #'t:cons table))))
+  (is = 4
+      (handler-bind ((error #'(lambda (c) (declare (ignore c)) (invoke-restart 't:next-item))))
+        (t:transduce (t:map (lambda (line) (if (str:emptyp (str:trim line)) (error "Empty!") line))) #'t:count #p"tests/file.txt")))
+  (is equal '(0 2 3 4)
+      (handler-bind ((error #'(lambda (c) (declare (ignore c)) (invoke-restart 't:next-item))))
+        (t:transduce (t:comp (t:take 4) (t:map (lambda (item) (if (= 1 item) (error "無念") item)))) #'t:cons (t:ints 0))))
+  (is equal '(0 2 3)
+      (handler-bind ((error #'(lambda (c) (declare (ignore c)) (invoke-restart 't:next-item))))
+        (t:transduce (t:map (lambda (pair) (if (= 1 (cdr pair)) (error "無念") (cdr pair)))) #'t:cons (t:plist '(:a 0 :b 1 :c 2 :d 3))))))
+
 (define-test "Sources"
   :depends-on (reduction transduction)
   (is equal '() (t:transduce (t:take 0) #'t:cons (t:ints 0)))

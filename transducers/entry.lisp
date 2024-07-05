@@ -118,11 +118,18 @@ streamed as-is as cons cells."
   (labels ((recurse (acc items)
              (if (null items)
                  acc
-                 (let ((v (funcall f acc (car items))))
+                 (let ((v (restart-case (funcall f acc (car items))
+                            (next-item ()
+                              :report "Skip the current item and continue the transduction."
+                              acc))))
                    (if (reduced-p v)
                        (reduced-val v)
                        (recurse v (cdr items)))))))
     (recurse identity lst)))
+
+#+nil
+(transduce (map (lambda (item) (if (= item 1) (error "無念") item)))
+           #'cons '(0 1 2 3))
 
 (declaim (ftype (function (t t cl:vector) *) vector-transduce))
 (defun vector-transduce (xform f coll)
@@ -136,7 +143,10 @@ streamed as-is as cons cells."
     (labels ((recurse (acc i)
                (if (= i len)
                    acc
-                   (let ((acc (funcall f acc (aref vec i))))
+                   (let ((acc (restart-case (funcall f acc (aref vec i))
+                                (next-item ()
+                                  :report "Skip the current item and continue the transduction."
+                                  acc))))
                      (if (reduced-p acc)
                          (reduced-val acc)
                          (recurse acc (1+ i)))))))
@@ -166,7 +176,10 @@ streamed as-is as cons cells."
                (multiple-value-bind (entry-p key value) (iter)
                  (if (not entry-p)
                      acc
-                     (let ((acc (funcall f acc (cl:cons key value))))
+                     (let ((acc (restart-case (funcall f acc (cl:cons key value))
+                                  (next-item ()
+                                    :report "Skip the current item and continue the transduction."
+                                    acc))))
                        (if (reduced-p acc)
                            (reduced-val acc)
                            (recurse acc)))))))
@@ -206,7 +219,10 @@ responsiblity of the caller!"
              (let ((line (read-line stream nil)))
                (if (not line)
                    acc
-                   (let ((acc (funcall f acc line)))
+                   (let ((acc (restart-case (funcall f acc line)
+                                (next-item ()
+                                  :report "Skip the current line and continue the transduction."
+                                  acc))))
                      (if (reduced-p acc)
                          (reduced-val acc)
                          (recurse acc)))))))
@@ -227,7 +243,10 @@ responsiblity of the caller!"
   (labels ((recurse (acc)
              (let ((val (funcall (generator-func gen))))
                (cond ((eq *done* val) acc)
-                     (t (let ((acc (funcall f acc val)))
+                     (t (let ((acc (restart-case (funcall f acc val)
+                                     (next-item ()
+                                       :report "Skip the current item and continue the transduction."
+                                       acc))))
                           (if (reduced-p acc)
                               (reduced-val acc)
                               (recurse acc))))))))
@@ -251,7 +270,10 @@ responsiblity of the caller!"
                           :report "Supply a value for the final key."
                           :interactive (lambda () (prompt-new-value (format nil "Value for key ~a: " key)))
                           (recurse acc (list key value))))))
-                   (t (let ((v (funcall f acc (cl:cons (car items) (second items)))))
+                   (t (let ((v (restart-case (funcall f acc (cl:cons (car items) (second items)))
+                                 (next-item ()
+                                   :report "Skip the current pair and continue the transduction."
+                                   acc))))
                         (if (reduced-p v)
                             (reduced-val v)
                             (recurse v (cdr (cdr items)))))))))

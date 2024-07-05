@@ -31,6 +31,8 @@
   ;; --- Conditions --- ;;
   (:export #:empty-transduction
            #:imbalanced-plist)
+  ;; --- Restarts --- ;;
+  (:export #:next-item)
   ;; --- Utilities --- ;;
   (:export #:comp #:const
            #:make-reduced #:reduced-p #:reduced-val)
@@ -712,4 +714,3 @@ transducer `tri' for an alternative.
                  (map #'1+))
            #'cons
            (ints 1))
-
