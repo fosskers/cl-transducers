@@ -118,10 +118,7 @@ streamed as-is as cons cells."
   (labels ((recurse (acc items)
              (if (null items)
                  acc
-                 (let ((v (restart-case (funcall f acc (car items))
-                            (next-item ()
-                              :report "Skip the current item and continue the transduction."
-                              acc))))
+                 (let ((v (safe-call f acc (car items))))
                    (if (reduced-p v)
                        (reduced-val v)
                        (recurse v (cdr items)))))))
@@ -143,10 +140,7 @@ streamed as-is as cons cells."
     (labels ((recurse (acc i)
                (if (= i len)
                    acc
-                   (let ((acc (restart-case (funcall f acc (aref vec i))
-                                (next-item ()
-                                  :report "Skip the current item and continue the transduction."
-                                  acc))))
+                   (let ((acc (safe-call f acc (aref vec i))))
                      (if (reduced-p acc)
                          (reduced-val acc)
                          (recurse acc (1+ i)))))))
@@ -176,10 +170,7 @@ streamed as-is as cons cells."
                (multiple-value-bind (entry-p key value) (iter)
                  (if (not entry-p)
                      acc
-                     (let ((acc (restart-case (funcall f acc (cl:cons key value))
-                                  (next-item ()
-                                    :report "Skip the current item and continue the transduction."
-                                    acc))))
+                     (let ((acc (safe-call f acc (cl:cons key value))))
                        (if (reduced-p acc)
                            (reduced-val acc)
                            (recurse acc)))))))
@@ -190,7 +181,7 @@ streamed as-is as cons cells."
   (setf (gethash 'a hm) 1)
   (setf (gethash 'b hm) 2)
   (setf (gethash 'c hm) 3)
-  (hash-table-transduce (filter #'evenp) (max 0) hm))
+  (hash-table-transduce (comp (map #'cdr) (filter #'evenp)) (fold #'cl:max 0) hm))
 
 (defun file-transduce (xform f filename)
   "Transduce over the lines of the file named by a FILENAME."
@@ -219,17 +210,14 @@ responsiblity of the caller!"
              (let ((line (read-line stream nil)))
                (if (not line)
                    acc
-                   (let ((acc (restart-case (funcall f acc line)
-                                (next-item ()
-                                  :report "Skip the current line and continue the transduction."
-                                  acc))))
+                   (let ((acc (safe-call f acc line)))
                      (if (reduced-p acc)
                          (reduced-val acc)
                          (recurse acc)))))))
     (recurse identity)))
 
 #+nil
-(with-open-file (stream #p"/home/colin/history.txt")
+(with-open-file (stream #p"/home/colin/.sbclrc")
   (transduce #'pass #'count stream))
 
 (defun generator-transduce (xform f gen)
@@ -243,10 +231,7 @@ responsiblity of the caller!"
   (labels ((recurse (acc)
              (let ((val (funcall (generator-func gen))))
                (cond ((eq *done* val) acc)
-                     (t (let ((acc (restart-case (funcall f acc val)
-                                     (next-item ()
-                                       :report "Skip the current item and continue the transduction."
-                                       acc))))
+                     (t (let ((acc (safe-call f acc val)))
                           (if (reduced-p acc)
                               (reduced-val acc)
                               (recurse acc))))))))
@@ -270,10 +255,7 @@ responsiblity of the caller!"
                           :report "Supply a value for the final key."
                           :interactive (lambda () (prompt-new-value (format nil "Value for key ~a: " key)))
                           (recurse acc (list key value))))))
-                   (t (let ((v (restart-case (funcall f acc (cl:cons (car items) (second items)))
-                                 (next-item ()
-                                   :report "Skip the current pair and continue the transduction."
-                                   acc))))
+                   (t (let ((v (safe-call f acc (cl:cons (car items) (second items)))))
                         (if (reduced-p v)
                             (reduced-val v)
                             (recurse v (cdr (cdr items)))))))))

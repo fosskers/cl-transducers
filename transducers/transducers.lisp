@@ -32,7 +32,8 @@
   (:export #:empty-transduction
            #:imbalanced-plist)
   ;; --- Restarts --- ;;
-  (:export #:next-item)
+  (:export #:next-item
+           #:retry-item)
   ;; --- Utilities --- ;;
   (:export #:comp #:const
            #:make-reduced #:reduced-p #:reduced-val)
