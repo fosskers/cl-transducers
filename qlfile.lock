@@ -2,7 +2,7 @@
  (:class qlot/source/dist:source-dist
   :initargs (:distribution "https://beta.quicklisp.org/dist/quicklisp.txt" :%version :latest)
   :version "2023-10-21"))
-("sycamore" .
- (:class qlot/source/ql:source-ql
-  :initargs (:%version :latest)
-  :version "ql-2023-10-21"))
+("ultralisp" .
+ (:class qlot/source/dist:source-dist
+  :initargs (:distribution "https://dist.ultralisp.org" :%version :latest)
+  :version "20240704230500"))
