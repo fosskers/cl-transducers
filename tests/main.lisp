@@ -40,6 +40,7 @@
   (is = 1000 (t:transduce #'t:pass (t:fold #'cl:max 0) '(1 2 3 4 1000 5 6)))
   (is = 1000 (t:transduce #'t:pass (t:fold #'cl:max) '(1 2 3 4 1000 5 6)))
   (is = 6    (t:transduce #'t:pass (t:find #'evenp) '(1 3 5 6 9)))
+  (is = 1000 (t:transduce #'t:pass (t:find #'evenp :default 1000) '(1 3 5 9)))
   (is = 7/2  (t:transduce #'t:pass #'t:average '(1 2 3 4 5 6)))
   (fail      (t:transduce (t:filter #'evenp) #'t:average '(1 3 5))))
 

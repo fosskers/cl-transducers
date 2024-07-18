@@ -220,20 +220,22 @@ functions like this, `fold' is appropriate.
   (warn "`min' is deprecated; use `fold' instead.")
   (fold #'cl:min default))
 
-(declaim (ftype (function ((function (t) *)) *) find))
-(defun find (pred)
+(declaim (ftype (function ((function (t) *) &key (:default t)) *) find))
+(defun find (pred &key default)
   "Reducer: Find the first element in the transduction that satisfies a given PRED.
 Yields `nil' if no such element were found."
   (lambda (&optional (acc nil a-p) (input nil i-p))
     (cond ((and a-p i-p)
            (if (funcall pred input)
                (make-reduced :val input)
-               nil))
+               default))
           ((and a-p (not i-p)) acc)
-          (t nil))))
+          (t default))))
 
 #+nil
 (transduce #'pass (find #'evenp) '(1 3 5 6 9))
+#+nil
+(transduce #'pass (find #'evenp :default 1000) '(1 3 5 9))
 
 (defun for-each (&rest vargs)
   "Reducer: Run through every item in a transduction for their side effects.

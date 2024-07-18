@@ -2,6 +2,11 @@
 
 ### Unreleased
 
+#### Added
+
+- The `find` reducer now accepts an optional `:default` value for when nothing
+  could be found in the transduction that matched the predicate.
+
 #### Changed
 
 - Conditions signalled somewhere in the transduction chain can now be caught
