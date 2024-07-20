@@ -1,5 +1,5 @@
 (defsystem "transducers"
-  :version "1.1.0"
+  :version "1.2.0"
   :author "Colin Woodbury <colin@fosskers.ca>"
   :license "LGPL-3.0-only"
   :depends-on (:sycamore)
@@ -30,7 +30,7 @@
   :perform (test-op (op c) (symbol-call :parachute :test :transducers/tests)))
 
 (defsystem "transducers/jzon"
-  :version "0.2.1"
+  :version "1.2.0"
   :author "Colin Woodbury <colin@fosskers.ca>"
   :license "LGPL-3.0-only"
   :depends-on (:transducers :com.inuoe.jzon :trivia)
@@ -40,7 +40,7 @@
   :description "JSON extension for Transducers.")
 
 (defsystem "transducers/fset"
-  :version "0.1.0"
+  :version "1.2.0"
   :author "Colin Woodbury <colin@fosskers.ca>"
   :license "LGPL-3.0-only"
   :depends-on (:transducers :fset)

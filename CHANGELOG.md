@@ -1,17 +1,20 @@
 # Transducers
 
-### Unreleased
+### 1.2.0 (2024-07-20)
 
 #### Added
 
-- The `find` reducer now accepts an optional `:default` value for when nothing
-  could be found in the transduction that matched the predicate.
+- lib: The `find` reducer now accepts an optional `:default` value for when
+  nothing could be found in the transduction that matched the predicate.
+- fset: `transduce` implementations for `set`, `map`, `seq`, and `bag`.
+- fset: Reducers for `set`, `map`, `seq`, and `bag`.
 
 #### Changed
 
-- Conditions signalled somewhere in the transduction chain can now be caught
-  per-item, with various restarts available to rehandle or skip the problematic
-  item.
+- lib: Conditions signalled somewhere in the transduction chain can now be
+  caught per-item, with various restarts available to rehandle or skip the
+  problematic item.
+- jzon: plists now `write` as JS objects.
 
 ### 1.1.1 (2024-02-08)
 
