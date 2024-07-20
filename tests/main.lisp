@@ -1,7 +1,8 @@
 (defpackage transducers/tests
   (:use :cl :parachute)
   (:local-nicknames (#:t #:transducers)
-                    (#:j #:transducers/jzon)))
+                    (#:j #:transducers/jzon)
+                    (#:s #:transducers/fset)))
 
 (in-package :transducers/tests)
 
@@ -218,10 +219,7 @@
                      (recurse (1+ acc)))))
         (recurse 1))))
 
-(define-test json)
-
 (define-test "JSON: Reading and Writing"
-  :parent json
   (is equal "[{\"name\":\"A\"},{\"name\":\"B\"}]"
       (with-output-to-string (stream)
         (t:transduce #'t:pass (j:write stream) (j:read "[{\"name\": \"A\"}, {\"name\": \"B\"}]"))))
@@ -229,13 +227,20 @@
       (with-output-to-string (stream)
         (t:transduce #'t:pass (j:write stream) '((:name "Colin" :age 35) (:name "Jack" :age 10))))))
 
-(define-test csv)
-
 (define-test "CSV: Reading and Writing"
-  :parent csv
   (is equal '("Name,Age" "Colin,35" "Tamayo,26")
       (t:transduce (t:comp #'t:from-csv (t:into-csv '("Name" "Age")))
                    #'t:cons '("Name,Age,Hair" "Colin,35,Blond" "Tamayo,26,Black"))))
+
+(define-test "Fset: Immutable Collections"
+  (let ((set (fset:set 1 2 3 1)))
+    (is fset:equal? set (t:transduce #'t:pass #'s:set set)))
+  (let ((map (fset:map (:a 1) (:b 2) (:c 3))))
+    (is fset:equal? map (t:transduce #'t:pass #'s:map map)))
+  (let ((seq (fset:seq 1 2 3)))
+    (is fset:equal? seq (t:transduce #'t:pass #'s:seq seq)))
+  (let ((bag (fset:bag 1 2 3 1)))
+    (is fset:equal? bag (t:transduce #'t:pass #'s:bag bag))))
 
 #+nil
 (test 'transducers/tests)
