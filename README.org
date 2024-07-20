@@ -186,6 +186,26 @@ the library can handle any amount of JSON input.
 
 For more examples, see the Gallery below.
 
+** Fset: Immutable Collections
+
+The system =transducers/fset= provides support for the [[https://gitlab.common-lisp.net/fset/fset][Fset library]] of immutable
+collections. It's expected that you import this system with a nickname:
+
+#+begin_src lisp
+(:local-nicknames (#:s #:transducers/fset))
+#+end_src
+
+Reducers are provided for each of its main types: ~set~, ~map~, ~seq~, and ~bag~.
+
+#+begin_src lisp :exports both
+(in-package :transducers)
+
+(transduce (map #'1+) #'transducers/fset:set (fset:set 1 2 3 1))
+#+end_src
+
+#+RESULTS:
+: #{ 2 3 4 }
+
 * API
 
 The examples here use ~(in-package :transducers)~ for brevity in the actual
