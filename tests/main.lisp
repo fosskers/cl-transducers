@@ -164,7 +164,8 @@
     (setf (gethash :c table) 3)
     (is equal '(1 3)
         (handler-bind ((error #'(lambda (c) (declare (ignore c)) (invoke-restart 't:next-item))))
-          (t:transduce (t:map (lambda (item) (if (= 2 (cdr item)) (error "無念") (cdr item)))) #'t:cons table))))
+          (sort (t:transduce (t:map (lambda (item) (if (= 2 (cdr item)) (error "無念") (cdr item)))) #'t:cons table)
+                #'<))))
   (is = 4
       (handler-bind ((error #'(lambda (c) (declare (ignore c)) (invoke-restart 't:next-item))))
         (t:transduce (t:map (lambda (line) (if (str:emptyp (str:trim line)) (error "Empty!") line))) #'t:count #p"tests/file.txt")))
