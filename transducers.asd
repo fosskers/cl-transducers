@@ -2,7 +2,7 @@
   :version "1.2.0"
   :author "Colin Woodbury <colin@fosskers.ca>"
   :license "LGPL-3.0-only"
-  :depends-on (:sycamore)
+  :depends-on (:fset)
   :components ((:module "transducers"
                 :components
                 ((:file "transducers")

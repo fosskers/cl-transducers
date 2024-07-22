@@ -42,6 +42,8 @@ _This library has been confirmed to work with SBCL, CCL, ECL, Clasp and LispWork
 
 #+begin_quote
 ⚠ ABCL cannot be used due to lack of support for tail-call elimination within ~labels~.
+
+⚠ Allegro support is partial for the same reason; large sources blow the stack.
 #+end_quote
 
 Looking for Transducers in other Lisps? Check out the [[https://codeberg.org/fosskers/transducers.el][Emacs Lisp]] and [[https://git.sr.ht/~fosskers/transducers.fnl][Fennel]] implementations!
@@ -266,7 +268,7 @@ that are non-nil.
 : (2 5 8)
 
 Only allow values to pass through the transduction once each. Stateful; this
-uses a hash table internally so could get quite heavy if you're not careful.
+uses a set internally so could get quite heavy if you're not careful.
 
 #+begin_src lisp :results verbatim :exports both
 (in-package :transducers)

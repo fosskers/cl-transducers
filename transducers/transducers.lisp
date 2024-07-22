@@ -1,6 +1,5 @@
 (defpackage transducers
   (:use :cl)
-  (:local-nicknames (#:q #:sycamore))
   (:shadow #:map #:concatenate #:log #:step #:split
            #:cons #:count #:first #:last #:max #:min #:find #:string #:vector #:hash-table
            #:random)
@@ -337,15 +336,15 @@ input than N, then this yields nothing.
           (window value)))
       (lambda (reducer)
         (let ((i 0)
-              (q (q:make-amortized-queue)))
+              (q (fset:empty-seq)))
           (lambda (result &optional (input nil i-p))
             (cond (i-p
-                   (setf q (q:amortized-enqueue q input))
+                   (setf q (fset:with-last q input))
                    (setf i (1+ i))
                    (cond ((< i n) result)
-                         ((= i n) (funcall reducer result (q:amortized-queue-list q)))
-                         (t (setf q (q:amortized-dequeue q))
-                            (funcall reducer result (q:amortized-queue-list q)))))
+                         ((= i n) (funcall reducer result (fset:convert 'list q)))
+                         (t (setf q (fset:less-first q))
+                            (funcall reducer result (fset:convert 'list q)))))
                   (t (funcall reducer result))))))))
 
 #+nil
@@ -355,13 +354,13 @@ input than N, then this yields nothing.
 
 (defun unique (reducer)
   "Transducer: Only allow values to pass through the transduction once each.
-Stateful; this uses a hash table internally so could get quite heavy if you're
-not careful."
-  (let ((seen (make-hash-table :test #'equal)))
+Stateful; this uses a set internally so could get quite heavy if you're not
+careful."
+  (let ((seen (fset:empty-set)))
     (lambda (result &optional (input nil i-p))
-      (if i-p (if (gethash input seen)
+      (if i-p (if (fset:contains? seen input)
                   result
-                  (progn (setf (gethash input seen) t)
+                  (progn (setf seen (fset:with seen input))
                          (funcall reducer result input)))
           (funcall reducer result)))))
 
