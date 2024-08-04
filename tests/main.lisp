@@ -178,6 +178,21 @@
       (handler-bind ((error #'(lambda (c) (declare (ignore c)) (invoke-restart 't:next-item))))
         (t:transduce (t:map (lambda (item) (if (= 1 item) (error "無念") item))) #'t:cons (j:read "[0,1,2,3]")))))
 
+(define-test "Pipeline composition"
+  :parent transduction
+  :depends-on (reduction
+               "Taking and Dropping"
+               "Filtering"
+               "Other")
+  (is equal '(12 20 30)
+      (t:pipe '(1 2 3 4 5 6 7 8 9 10)
+        #'t:enumerate
+        (t:map (lambda (pair) (* (car pair) (cdr pair))))
+        (t:filter #'evenp)
+        (t:drop 3)
+        (t:take 3)
+        #'t:cons)))
+
 (define-test "Sources"
   :depends-on (reduction transduction)
   (is equal '() (t:transduce (t:take 0) #'t:cons (t:ints 0)))

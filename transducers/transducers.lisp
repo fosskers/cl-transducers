@@ -5,7 +5,9 @@
            #:cons #:count #:first #:last #:max #:min #:find #:string #:vector #:hash-table
            #:random)
   ;; --- Entry Points --- ;;
-  (:export #:transduce)
+  (:export #:transduce
+           #:pipe
+           #:iterator #:make-iterator #:with-iterator #:iter #:iter* #:next)
   ;; --- Transducers -- ;;
   (:export #:pass #:map
            #:filter #:filter-map #:unique #:dedup
@@ -103,7 +105,7 @@ keep results that are non-nil.
     (let ((new-n (1+ n)))
       (lambda (result &optional (input nil i-p))
         (cond (i-p
-               (setf new-n (1- new-n))
+               (decf new-n)
                (if (> new-n 0)
                    result
                    (funcall reducer result input)))
@@ -136,7 +138,7 @@ keep results that are non-nil.
         (if i-p (let ((result (if (> new-n 0)
                                   (funcall reducer result input)
                                   result)))
-                  (setf new-n (1- new-n))
+                  (decf new-n)
                   (if (<= new-n 0)
                       (ensure-reduced result)
                       result))
@@ -183,7 +185,7 @@ transduction as soon as any element fails the test."
   "Transducer: Concatenate all the sublists in the transduction."
   (let ((preserving-reducer (preserving-reduced reducer)))
     (lambda (result &optional (input nil i-p))
-      (if i-p (list-reduce preserving-reducer result input)
+      (if i-p (source-iter-reduce preserving-reducer result (source->source-iter input))
           (funcall reducer result)))))
 
 #+nil
@@ -194,7 +196,7 @@ transduction as soon as any element fails the test."
 nesting."
   (lambda (result &optional (input nil i-p))
     (if i-p (if (listp input)
-                (list-reduce (preserving-reduced (flatten reducer)) result input)
+                (source-iter-reduce (preserving-reduced (flatten reducer)) result (source->source-iter input))
                 (funcall reducer result input))
         (funcall reducer result))))
 
@@ -222,7 +224,7 @@ any accumulated state, which may be shorter than N.
           (lambda (result &optional (input nil i-p))
             (cond (i-p
                    (setf collect (cl:cons input collect))
-                   (setf i (1+ i))
+                   (incf i)
                    (if (< i n)
                        result
                        (let ((next-input (reverse collect)))
@@ -298,7 +300,7 @@ Starts at 0."
   (let ((n 0))
     (lambda (result &optional (input nil i-p))
       (if i-p (let ((input (cl:cons n input)))
-                (setf n (1+ n))
+                (incf n)
                 (funcall reducer result input))
           (funcall reducer result)))))
 
@@ -341,7 +343,7 @@ input than N, then this yields nothing.
           (lambda (result &optional (input nil i-p))
             (cond (i-p
                    (setf q (q:amortized-enqueue q input))
-                   (setf i (1+ i))
+                   (incf i)
                    (cond ((< i n) result)
                          ((= i n) (funcall reducer result (q:amortized-queue-list q)))
                          (t (setf q (q:amortized-dequeue q))
@@ -372,7 +374,7 @@ not careful."
   "Transducer: Remove adjacent duplicates from the transduction."
   (let ((prev 'nothing))
     (lambda (result &optional (input nil i-p))
-      (if i-p (if (equal prev input)
+      (if i-p (if (eq prev input)
                   result
                   (progn (setf prev input)
                          (funcall reducer result input)))
@@ -407,7 +409,7 @@ of the transduction is always included.
             (if i-p (if (= 1 curr)
                         (progn (setf curr n)
                                (funcall reducer result input))
-                        (progn (setf curr (1- curr))
+                        (progn (decf curr)
                                result))
                 (funcall reducer result)))))))
 

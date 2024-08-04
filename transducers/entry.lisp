@@ -51,29 +51,65 @@ sources. See `sources.lisp' and `entry.lisp' for examples of how to do this.
 
 "))
 
-(defmethod transduce (xform f (source cl:string))
-  (string-transduce xform f source))
+(defmacro pipe* (fn source &rest transducers-and-reducer)
+  (let ((transducers (butlast transducers-and-reducer))
+        (reducer (car (cl:last transducers-and-reducer))))
+    (if (cdr transducers)
+        `(,fn (comp ,@transducers) ,reducer ,source)
+        `(,fn ,(car transducers) ,reducer ,source))))
+
+(defmacro pipe (source &rest transducers-and-reducer)
+  "Structure `transduce' as a pipeline.
+
+The second up to (but not including) the last argument is used as the
+transducers, and the last argument is used as the reducer. If there are more
+than one transducer, they are wrapped in `comp'.
+
+(macroexpand-1 '(pipe source t1 reducer))
+;; => (TRANSDUCE T1 REDUCER SOURCE), T
+
+(macroexpand-1 '(pipe source t1 t2 reducer))
+;; => (TRANSDUCE (COMP T1 T2) REDUCER SOURCE), T
+"
+  (assert (>= (length transducers-and-reducer) 2) nil
+          "Missing transducer or reducer.")
+  `(pipe* transduce ,source ,@transducers-and-reducer))
+
+#+nil
+(pipe '(1 2 3) (take 1) #'*)
+#+nil
+(pipe (cycle '(1 2 3)) (filter #'oddp) (map #'1+) (take 10) #'*)
+
+(defun make-transducer (xform f)
+  (lambda (source)
+    (source-iter-transduce xform f (ensure-source-iter source))))
+
+(defmethod transduce (xform f (source source-iter))
+  (funcall (make-transducer xform f) source))
 
 (defmethod transduce (xform f (source list))
   "Transducing over an alist works automatically via this method, and the pairs are
 streamed as-is as cons cells."
-  (list-transduce xform f source))
+  (funcall (make-transducer xform f) (list-iter source)))
+
+(defmethod transduce (xform f (source cl:string))
+  (funcall (make-transducer xform f) (string-iter source)))
 
 (defmethod transduce (xform f (source cl:vector))
-  (vector-transduce xform f source))
+  (funcall (make-transducer xform f) (vector-iter source)))
+
+(defmethod transduce (xform f (source pathname))
+  "Transduce over the lines of the file named by a FILENAME."
+  (funcall (make-transducer xform f) (file-line-iter source)))
+
+(defmethod transduce (xform f (source stream))
+  "Transduce over the lines of a given STREAM. Note: Closing the stream is the
+responsiblity of the caller!"
+  (funcall (make-transducer xform f) (stream-line-iter source)))
 
 (defmethod transduce (xform f (source cl:hash-table))
   "Yields key-value pairs as cons cells."
   (hash-table-transduce xform f source))
-
-(defmethod transduce (xform f (source pathname))
-  (file-transduce xform f source))
-
-(defmethod transduce (xform f (source generator))
-  (generator-transduce xform f source))
-
-(defmethod transduce (xform f (source stream))
-  (stream-transduce xform f source))
 
 (defmethod transduce (xform f (source plist))
   "Yields key-value pairs as cons cells.
@@ -81,80 +117,15 @@ streamed as-is as cons cells."
 # Conditions
 
 - `imbalanced-pist': if the number of keys and values do not match."
-  (plist-transduce xform f source))
+  (funcall (make-transducer xform f) (plist-iter (plist-list source))))
 
-(defmethod transduce (xform f fallback)
+(defmethod transduce (xform f source)
   "Fallback for types which don't implement this. Always errors.
 
 # Conditions
 
 - `no-transduce-implementation': an unsupported type was transduced over."
-  (error 'no-transduce-implementation :type (type-of fallback)))
-
-#+nil
-(transduce (map #'char-upcase) #'string "hello")
-#+nil
-(transduce (map #'1+) #'vector '(1 2 3 4))
-#+nil
-(transduce (map #'1+) #'+ #(1 2 3 4))
-#+nil
-(let ((hm (make-hash-table :test #'equal)))
-  (setf (gethash 'a hm) 1)
-  (setf (gethash 'b hm) 2)
-  (setf (gethash 'c hm) 3)
-  (transduce (filter #'evenp) (max 0) hm))
-#+nil
-(transduce (map #'1+) #'+ 1)  ;; Expected to fail.
-
-(declaim (ftype (function (t t list) *) list-transduce))
-(defun list-transduce (xform f coll)
-  (let* ((init   (funcall f))
-         (xf     (funcall xform f))
-         (result (list-reduce xf init coll)))
-    (funcall xf result)))
-
-(declaim (ftype (function ((function (&optional t t) *) t list) *) list-reduce))
-(defun list-reduce (f identity lst)
-  (labels ((recurse (acc items)
-             (if (null items)
-                 acc
-                 (let ((v (safe-call f acc (car items))))
-                   (if (reduced-p v)
-                       (reduced-val v)
-                       (recurse v (cdr items)))))))
-    (recurse identity lst)))
-
-#+nil
-(transduce (map (lambda (item) (if (= item 1) (error "無念") item)))
-           #'cons '(0 1 2 3))
-
-(declaim (ftype (function (t t cl:vector) *) vector-transduce))
-(defun vector-transduce (xform f coll)
-  (let* ((init   (funcall f))
-         (xf     (funcall xform f))
-         (result (vector-reduce xf init coll)))
-    (funcall xf result)))
-
-(defun vector-reduce (f identity vec)
-  (let ((len (length vec)))
-    (labels ((recurse (acc i)
-               (if (= i len)
-                   acc
-                   (let ((acc (safe-call f acc (aref vec i))))
-                     (if (reduced-p acc)
-                         (reduced-val acc)
-                         (recurse acc (1+ i)))))))
-      (recurse identity 0))))
-
-#+nil
-(vector-transduce (map #'1+) #'cons #(1 2 3 4 5))
-
-(declaim (ftype (function (t t cl:string) *) string-transduce))
-(defun string-transduce (xform f coll)
-  (vector-transduce xform f coll))
-
-#+nil
-(string-transduce (map #'char-upcase) #'cons "hello")
+  (funcall (make-transducer xform f) (source->source-iter source)))
 
 (declaim (ftype (function (t t cl:hash-table) *) hash-table-transduce))
 (defun hash-table-transduce (xform f coll)
@@ -177,89 +148,7 @@ streamed as-is as cons cells."
       (recurse identity))))
 
 #+nil
-(let ((hm (make-hash-table :test #'equal)))
-  (setf (gethash 'a hm) 1)
-  (setf (gethash 'b hm) 2)
-  (setf (gethash 'c hm) 3)
-  (hash-table-transduce (comp (map #'cdr) (filter #'evenp)) (fold #'cl:max 0) hm))
-
-(defun file-transduce (xform f filename)
-  "Transduce over the lines of the file named by a FILENAME."
-  (let* ((init   (funcall f))
-         (xf     (funcall xform f))
-         (result (file-reduce xf init filename)))
-    (funcall xf result)))
-
-(defun file-reduce (f identity filename)
-  (with-open-file (stream filename)
-    (stream-reduce f identity stream)))
-
-#+nil
-(file-transduce #'pass #'count #p"/home/colin/history.txt")
-
-(defun stream-transduce (xform f stream)
-  "Transduce over the lines of a given STREAM. Note: Closing the stream is the
-responsiblity of the caller!"
-  (let* ((init   (funcall f))
-         (xf     (funcall xform f))
-         (result (stream-reduce xf init stream)))
-    (funcall xf result)))
-
-(defun stream-reduce (f identity stream)
-  (labels ((recurse (acc)
-             (let ((line (read-line stream nil)))
-               (if (not line)
-                   acc
-                   (let ((acc (safe-call f acc line)))
-                     (if (reduced-p acc)
-                         (reduced-val acc)
-                         (recurse acc)))))))
-    (recurse identity)))
-
-#+nil
-(with-open-file (stream #p"/home/colin/.sbclrc")
-  (transduce #'pass #'count stream))
-
-(defun generator-transduce (xform f gen)
-  "Transduce over a potentially endless stream of values from a generator GEN."
-  (let* ((init   (funcall f))
-         (xf     (funcall xform f))
-         (result (generator-reduce xf init gen)))
-    (funcall xf result)))
-
-(defun generator-reduce (f identity gen)
-  (labels ((recurse (acc)
-             (let ((val (funcall (generator-func gen))))
-               (cond ((eq *done* val) acc)
-                     (t (let ((acc (safe-call f acc val)))
-                          (if (reduced-p acc)
-                              (reduced-val acc)
-                              (recurse acc))))))))
-    (recurse identity)))
-
-(declaim (ftype (function (t t plist) *) plist-transduce))
-(defun plist-transduce (xform f coll)
-  (let* ((init   (funcall f))
-         (xf     (funcall xform f))
-         (result (plist-reduce xf init coll)))
-    (funcall xf result)))
-
-(declaim (ftype (function ((function (&optional t t) *) t plist) *) plist-reduce))
-(defun plist-reduce (f identity lst)
-  (labels ((recurse (acc items)
-             (cond ((null items) acc)
-                   ((null (cdr items))
-                    (let ((key (car items)))
-                      (restart-case (error 'imbalanced-plist :key key)
-                        (use-value (value)
-                          :report "Supply a value for the final key."
-                          :interactive (lambda () (prompt-new-value (format nil "Value for key ~a: " key)))
-                          (recurse acc (list key value))))))
-                   (t (let ((v (safe-call f acc (cl:cons (car items) (second items)))))
-                        (if (reduced-p v)
-                            (reduced-val v)
-                            (recurse v (cdr (cdr items)))))))))
-    (recurse identity (plist-list lst))))
+(transduce (map #'1+) #'cons #(1 2 3 4 5))
 
 #+nil
 (transduce #'pass #'cons (plist `(:a 1 :b 2 :c 3)))
@@ -269,3 +158,29 @@ responsiblity of the caller!"
 (transduce (map #'cdr) #'+ (plist `(:a 1 :b 2 :c)))  ;; Imbalanced plist for testing.
 #+nil
 (transduce #'pass #'cons '((:a . 1) (:b . 2) (:c . 3)))
+#+nil
+(transduce (map #'char-upcase) #'string "hello")
+#+nil
+(transduce (map #'1+) #'vector '(1 2 3 4))
+#+nil
+(vector-transduce (map #'1+) #'cons #(1 2 3 4 5))
+#+nil
+(transduce (map #'1+) #'+ #(1 2 3 4))
+#+nil
+(let ((hm (make-hash-table :test #'equal)))
+  (setf (gethash 'a hm) 1)
+  (setf (gethash 'b hm) 2)
+  (setf (gethash 'c hm) 3)
+  (transduce (filter #'evenp) (max 0) hm))
+#+nil
+(transduce (map #'1+) #'+ 1)  ;; Expected to fail.
+#+nil
+(transduce (map (lambda (item) (if (= item 1) (error "無念") item)))
+           #'cons '(0 1 2 3))
+#+nil
+(transduce #'pass #'count #p"/home/colin/history.txt")
+#+nil
+(vector-transduce (map #'1+) #'cons #(1 2 3 4 5))
+#+nil
+(with-open-file (stream #p"/home/colin/.sbclrc")
+  (transduce #'pass #'count stream))

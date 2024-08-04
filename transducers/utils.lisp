@@ -5,19 +5,30 @@
         ((symbolp arg) (ensure-function (symbol-function arg)))
         (t (error "Argument is not a function: ~a" arg))))
 
-;; TODO Make this a macro.
-(defun comp (function &rest functions)
+(defmacro comp (function &rest functions)
   "Function composition.
 
 (funcall (comp #'1+ #'length) \"foo\") == (1+ (length \"foo\"))"
-  (reduce (lambda (f g)
-            (let ((f (ensure-function f))
-                  (g (ensure-function g)))
-              (lambda (&rest arguments)
-                (funcall f (apply g arguments)))))
-          functions
-          :initial-value function))
+  (let ((args (gensym "COMP-ARGS-"))
+        (reversed (reverse (cl:cons function functions))))
+    `(lambda (&rest ,args)
+       ,(reduce (lambda (data fn)
+                 `(funcall ,fn ,data))
+               (cdr reversed)
+               :initial-value `(apply ,(car reversed) ,args)))))
 
+#+nil
+(macroexpand-1 '(comp (f)))
+#+nil
+(macroexpand-1 '(comp (f x)))
+#+nil
+(macroexpand-1 '(comp (f) (g)))
+#+nil
+(macroexpand-1 '(comp (f x) (g)))
+#+nil
+(macroexpand-1 '(comp (f x) (g x)))
+#+nil
+(macroexpand-1 '(comp (const 1337) (lambda (n) (* 2 n)) #'1+))
 #+nil
 (funcall (comp (const 1337) (lambda (n) (* 2 n)) #'1+) 1)
 
@@ -43,12 +54,12 @@
 
 (defun preserving-reduced (reducer)
   "A helper function that wraps a reduced value twice since reducing
-functions (like list-reduce) unwraps them. tconcatenate is a good example: it
-re-uses its reducer on its input using list-reduce. If that reduction finishes
-early and returns a reduced value, list-reduce would 'unreduce' that value and
+functions (like `source-iter-reduce') unwraps them. `concatenate' is a good example: it
+re-uses its reducer on its input using `source-iter-reduce'. If that reduction finishes
+early and returns a reduced value, `suorce-iter-reduce' would 'unreduce' that value and
 try to continue the transducing process."
-  (lambda (a b)
-    (let ((result (funcall reducer a b)))
+  (lambda (&rest args)
+    (let ((result (apply reducer args)))
       (if (reduced-p result)
           (make-reduced :val result)
           result))))
