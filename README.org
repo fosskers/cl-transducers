@@ -959,8 +959,6 @@ An ancient method of calculating Prime Numbers.
 
 1. This library is generally portable, but assumes your CL implementation
    supports tail-call elimination within ~labels~.
-2. A way to model the common =zip= function has not yet been found, but I suspect
-   the answer lies in being able to pass multiple sources as ~&rest~ arguments.
 
 * Resources
 

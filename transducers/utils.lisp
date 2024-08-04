@@ -54,12 +54,12 @@
 
 (defun preserving-reduced (reducer)
   "A helper function that wraps a reduced value twice since reducing
-functions (like list-reduce) unwraps them. tconcatenate is a good example: it
-re-uses its reducer on its input using list-reduce. If that reduction finishes
-early and returns a reduced value, list-reduce would 'unreduce' that value and
+functions (like `source-iter-reduce') unwraps them. `concatenate' is a good example: it
+re-uses its reducer on its input using `source-iter-reduce'. If that reduction finishes
+early and returns a reduced value, `suorce-iter-reduce' would 'unreduce' that value and
 try to continue the transducing process."
-  (lambda (a b)
-    (let ((result (funcall reducer a b)))
+  (lambda (&rest args)
+    (let ((result (apply reducer args)))
       (if (reduced-p result)
           (make-reduced :val result)
           result))))

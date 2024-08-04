@@ -184,7 +184,7 @@ transduction as soon as any element fails the test."
   "Transducer: Concatenate all the sublists in the transduction."
   (let ((preserving-reducer (preserving-reduced reducer)))
     (lambda (result &optional (input nil i-p))
-      (if i-p (list-reduce preserving-reducer result input)
+      (if i-p (source-iter-reduce preserving-reducer result (source->source-iter input))
           (funcall reducer result)))))
 
 #+nil
@@ -195,7 +195,7 @@ transduction as soon as any element fails the test."
 nesting."
   (lambda (result &optional (input nil i-p))
     (if i-p (if (listp input)
-                (list-reduce (preserving-reduced (flatten reducer)) result input)
+                (source-iter-reduce (preserving-reduced (flatten reducer)) result (source->source-iter input))
                 (funcall reducer result input))
         (funcall reducer result))))
 
