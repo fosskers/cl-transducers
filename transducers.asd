@@ -8,6 +8,7 @@
                 ((:file "transducers")
                  (:file "reducers")
                  (:file "sources")
+                 (:file "iterator")
                  (:file "entry")
                  (:file "conditions")
                  (:file "utils"))))

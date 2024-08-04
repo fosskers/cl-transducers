@@ -6,7 +6,8 @@
            #:random)
   ;; --- Entry Points --- ;;
   (:export #:transduce
-           #:pipe)
+           #:pipe
+           #:iterator #:make-iterator #:with-iterator #:iter #:iter* #:next)
   ;; --- Transducers -- ;;
   (:export #:pass #:map
            #:filter #:filter-map #:unique #:dedup
