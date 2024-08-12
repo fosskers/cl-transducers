@@ -1,7 +1,7 @@
 (defsystem "transducers"
   :version "1.2.0"
   :author "Colin Woodbury <colin@fosskers.ca>"
-  :license "LGPL-3.0-only"
+  :license "MPL-2.0"
   :depends-on (:fset)
   :components ((:module "transducers"
                 :components
@@ -16,7 +16,7 @@
 
 (defsystem "transducers/tests"
   :author "Colin Woodbury <colin@fosskers.ca>"
-  :license "LGPL-3.0-only"
+  :license "MPL-2.0"
   :depends-on (:transducers
                :transducers/jzon
                :transducers/fset
@@ -32,7 +32,7 @@
 (defsystem "transducers/jzon"
   :version "1.2.0"
   :author "Colin Woodbury <colin@fosskers.ca>"
-  :license "LGPL-3.0-only"
+  :license "MPL-2.0"
   :depends-on (:transducers :com.inuoe.jzon :trivia)
   :components ((:module "jzon"
                 :components
@@ -42,7 +42,7 @@
 (defsystem "transducers/fset"
   :version "1.2.0"
   :author "Colin Woodbury <colin@fosskers.ca>"
-  :license "LGPL-3.0-only"
+  :license "MPL-2.0"
   :depends-on (:transducers :fset)
   :components ((:module "fset"
                 :components

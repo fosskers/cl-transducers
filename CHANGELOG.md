@@ -1,5 +1,11 @@
 # Transducers
 
+### Unreleased
+
+#### Changed
+
+- Licenses further relaxed to MPL.
+
 ### 1.2.0 (2024-07-20)
 
 #### Added
