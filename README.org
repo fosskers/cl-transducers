@@ -597,8 +597,8 @@ Calculate the average value of all numeric elements in a transduction.
 : 7/2
 
 Calculate the median value of all elements in a transduction, provided that they
-are numbers or strings. The elements are sorted once before the median is
-extracted.
+are numbers, strings, or characters. The elements are sorted once before the
+median is extracted.
 
 #+begin_src lisp :exports both
 (in-package :transducers)

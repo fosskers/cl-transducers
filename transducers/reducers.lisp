@@ -74,6 +74,7 @@ The elements are sorted once before the median is extracted.
              ;; the user could pass in a function for this.
              (let* ((cmp    (etypecase (car acc)
                               (cl:string #'string<)
+                              (cl:character #'char<)
                               (t #'<)))
                     (len    (length acc))
                     (ix     (floor (/ len 2)))

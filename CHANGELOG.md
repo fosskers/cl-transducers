@@ -2,6 +2,10 @@
 
 ### Unreleased
 
+#### Added
+
+- lib: The `median` reducer.
+
 #### Changed
 
 - Licenses further relaxed to MPL.
