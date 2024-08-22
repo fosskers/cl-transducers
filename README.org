@@ -574,7 +574,7 @@ Collect a stream of key-value cons pairs into a hash table.
 #+RESULTS:
 : #<COMMON-LISP:HASH-TABLE :TEST EQUAL :COUNT 3 {1004E83BF3}>
 
-*** count, average
+*** count, average, median
 
 Count the number of elements that made it through the transduction.
 
@@ -595,6 +595,18 @@ Calculate the average value of all numeric elements in a transduction.
 
 #+RESULTS:
 : 7/2
+
+Calculate the median value of all elements in a transduction, provided that they
+are numbers or strings. The elements are sorted once before the median is
+extracted.
+
+#+begin_src lisp :exports both
+(in-package :transducers)
+(transduce #'pass #'median '(1 1 1 0 2 4 1 4 9))
+#+end_src
+
+#+RESULTS:
+: 1
 
 *** anyp, allp
 

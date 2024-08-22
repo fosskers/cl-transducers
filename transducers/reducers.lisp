@@ -57,8 +57,39 @@ reversal."
 #+nil
 (transduce #'pass #'count '(1 2 3 4 5))
 
+(defun median (&optional (acc nil a-p) (input nil i-p))
+  "Reducer: Calculate the median value of all numeric elements in a transduction.
+The elements are sorted once before the median is extracted.
+
+# Conditions
+
+- `empty-transduction': when no values made it through the transduction."
+  (cond ((and a-p i-p) (cl:cons input acc))
+        ((and a-p (not i-p))
+         (if (null acc)
+             (error 'empty-transduction :msg "`median' called on an empty transduction.")
+             ;; HACK 2024-08-22 More robust comparison.
+             ;;
+             ;; It would be nice if there were a generic way to compare, or if
+             ;; the user could pass in a function for this.
+             (let* ((cmp    (etypecase (car acc)
+                              (cl:string #'string<)
+                              (t #'<)))
+                    (len    (length acc))
+                    (ix     (floor (/ len 2)))
+                    (sorted (sort acc cmp)))
+               (nth ix sorted))))
+        (t '())))
+
+#+nil
+(transduce #'pass #'median '(0 1 2 3 4))
+
 (defun average (&optional (acc nil a-p) (input nil i-p))
-  "Reducer: Calculate the average value of all numeric elements in a transduction."
+  "Reducer: Calculate the average value of all numeric elements in a transduction.
+
+# Conditions
+
+- `empty-transduction': when no values made it through the transduction."
   (cond ((and a-p i-p)
          (destructuring-bind (count . total) acc
            (cl:cons (1+ count) (+ total input))))
