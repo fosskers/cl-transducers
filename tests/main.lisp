@@ -193,7 +193,9 @@
   (is equal '() (t:transduce (t:take 7) #'t:cons (t:cycle '())))
   (is equal (list (cons :a 1) (cons :b 2) (cons :c 3))
       (t:transduce #'t:pass #'t:cons (t:plist '(:a 1 :b 2 :c 3))))
-  (fail (t:transduce #'t:pass #'t:cons 1)))
+  (fail (t:transduce #'t:pass #'t:cons 1))
+  (is equal (list 3 2 1) (t:transduce #'t:pass #'t:cons (t:reversed #(1 2 3))))
+  (is equal nil (t:transduce #'t:pass #'t:cons (t:reversed #()))))
 
 (define-test "Higher Order Transducers"
   :depends-on (reduction transduction)

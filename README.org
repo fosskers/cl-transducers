@@ -806,6 +806,28 @@ pairs are passed as a cons cell.
 
 See also the ~uncons~ transducer for another way to handle incoming cons cells.
 
+*** reversed
+
+Yield a vector's elements in reverse order.
+
+#+begin_src lisp :exports both :results verbatim
+(in-package :transducers)
+(transduce (take 2) #'cons (reversed #(1 2 3 4)))
+#+end_src
+
+#+RESULTS:
+: (4 3)
+
+Recall that strings are also vectors.
+
+#+begin_src lisp :exports both :results verbatim
+(in-package :transducers)
+(transduce #'pass #'string (reversed "Hello"))
+#+end_src
+
+#+RESULTS:
+: olleH
+
 ** Utilities
 
 *** comp, const

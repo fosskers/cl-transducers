@@ -26,7 +26,7 @@
            #:for-each)
   ;; --- Sources --- ;;
   (:export #:ints #:cycle #:repeat #:random #:shuffle
-           #:plist)
+           #:plist #:reversed)
   ;; --- Conditions --- ;;
   (:export #:empty-transduction
            #:imbalanced-plist)

@@ -62,6 +62,9 @@ streamed as-is as cons cells."
 (defmethod transduce (xform f (source cl:vector))
   (vector-transduce xform f source))
 
+(defmethod transduce (xform f (source reversed))
+  (reversed-transduce xform f source))
+
 (defmethod transduce (xform f (source cl:hash-table))
   "Yields key-value pairs as cons cells."
   (hash-table-transduce xform f source))
@@ -148,6 +151,27 @@ streamed as-is as cons cells."
 
 #+nil
 (vector-transduce (map #'1+) #'cons #(1 2 3 4 5))
+
+(defun reversed-transduce (xform f coll)
+  (let* ((init   (funcall f))
+         (xf     (funcall xform f))
+         (result (reversed-reduce xf init coll)))
+    (funcall xf result)))
+
+(defun reversed-reduce (f identity rev)
+  (let* ((vec (reversed-vector rev))
+         (len (length vec)))
+    (labels ((recurse (acc i)
+               (if (< i 0)
+                   acc
+                   (let ((acc (safe-call f acc (aref vec i))))
+                     (if (reduced-p acc)
+                         (reduced-val acc)
+                         (recurse acc (1- i)))))))
+      (recurse identity (1- len)))))
+
+#+nil
+(transduce #'pass #'cons (reversed (cl:vector 1 2 3)))
 
 (declaim (ftype (function (t t cl:string) *) string-transduce))
 (defun string-transduce (xform f coll)

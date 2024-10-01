@@ -16,7 +16,15 @@
 The pairs are passed as a cons cell."
   (make-plist :list plist))
 
-;; FIXME type signature, expecting `values' to be called within the given
+(defstruct (reversed (:copier nil) (:predicate nil))
+  (vector #() :read-only t :type cl:vector))
+
+(declaim (ftype (function (cl:vector) reversed) reversed))
+(defun reversed (vector)
+  "Source: Yield a VECTOR's elements in reverse order."
+  (make-reversed :vector vector))
+
+;; FIXME: type signature, expecting `values' to be called within the given
 ;; function.
 (declaim (ftype (function ((function (t) *) t) generator) unfold))
 (defun unfold (f seed)
