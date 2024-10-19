@@ -292,15 +292,15 @@ input than N, then this yields nothing.
           (window value)))
       (lambda (reducer)
         (let ((i 0)
-              (q (fset:empty-seq)))
+              (q '()))
           (lambda (result &optional (input nil i-p))
             (cond (i-p
-                   (setf q (fset:with-last q input))
+                   (setf q (append q (list input)))
                    (setf i (1+ i))
                    (cond ((< i n) result)
-                         ((= i n) (funcall reducer result (fset:convert 'list q)))
-                         (t (setf q (fset:less-first q))
-                            (funcall reducer result (fset:convert 'list q)))))
+                         ((= i n) (funcall reducer result q))
+                         (t (setf q (cdr q))
+                            (funcall reducer result q))))
                   (t (funcall reducer result))))))))
 
 #+nil
@@ -310,13 +310,13 @@ input than N, then this yields nothing.
 
 (defun unique (reducer)
   "Transducer: Only allow values to pass through the transduction once each.
-Stateful; this uses a set internally so could get quite heavy if you're not
-careful."
-  (let ((seen (fset:empty-set)))
+Stateful; this uses a Hash Table internally so could get quite heavy if you're
+not careful."
+  (let ((seen (make-hash-table :test #'equal)))
     (lambda (result &optional (input nil i-p))
-      (if i-p (if (fset:contains? seen input)
+      (if i-p (if (gethash input seen)
                   result
-                  (progn (setf seen (fset:with seen input))
+                  (progn (setf (gethash input seen) t)
                          (funcall reducer result input)))
           (funcall reducer result)))))
 

@@ -2,7 +2,7 @@
   :version "1.2.0"
   :author "Colin Woodbury <colin@fosskers.ca>"
   :license "MPL-2.0"
-  :depends-on (:fset)
+  :depends-on ()
   :components ((:module "transducers"
                 :components
                 ((:file "package")

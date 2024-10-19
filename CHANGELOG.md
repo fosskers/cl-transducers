@@ -5,9 +5,11 @@
 #### Added
 
 - lib: The `median` reducer.
+- lib: The `reduced` source to iterate from the end of a vector.
 
 #### Changed
 
+- Dropped dependency on `fset` within the main lib.
 - Licenses further relaxed to MPL.
 
 ### 1.2.0 (2024-07-20)
