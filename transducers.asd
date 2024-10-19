@@ -5,7 +5,8 @@
   :depends-on (:fset)
   :components ((:module "transducers"
                 :components
-                ((:file "transducers")
+                ((:file "package")
+                 (:file "transducers")
                  (:file "reducers")
                  (:file "sources")
                  (:file "entry")
