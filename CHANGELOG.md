@@ -9,6 +9,7 @@
 
 #### Changed
 
+- `concatenate` and `flatten` now support vectors/strings.
 - Dropped dependency on `fset` within the main lib.
 - Licenses further relaxed to MPL.
 

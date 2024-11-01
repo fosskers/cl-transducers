@@ -141,8 +141,7 @@ transduction as soon as any element fails the test."
       (if i-p (etypecase input
                 (cl:list   (list-reduce preserving-reducer result input))
                 (cl:vector (vector-reduce preserving-reducer result input))
-                ;; TODO 2024-03-27 Proper condition.
-                (t (error "Oh no!!!")))
+                (t (error 'unusable-type :type (type-of input))))
           (funcall reducer result)))))
 
 #+nil
@@ -153,6 +152,8 @@ transduction as soon as any element fails the test."
 #+nil
 (transduce (comp #'concatenate (intersperse #\!))
            #'string '("hello" "there"))
+#+nil
+(transduce #'concatenate #'cons '(1 2 3))
 
 (defun flatten (reducer)
   "Transducer: Entirely flatten all lists in the transduction, regardless of

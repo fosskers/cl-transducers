@@ -343,7 +343,7 @@ Split up a transduction of cons cells.
 #+RESULTS:
 : (:A 1 :B 2 :C 3)
 
-Concatenate all the sublists in the transduction.
+Concatenate all the sublists, subvectors, or substrings in the transduction.
 
 #+begin_src lisp :results verbatim :exports both
 (in-package :transducers)
@@ -352,6 +352,15 @@ Concatenate all the sublists in the transduction.
 
 #+RESULTS:
 : (1 2 3 4 5 6 7 8 9)
+
+#+begin_src lisp :results verbatim :exports both
+(in-package :transducers)
+(transduce (comp #'concatenate (intersperse #\!))
+           #'string '("hello" "there"))
+#+end_src
+
+#+RESULTS:
+: h!e!l!l!o!t!h!e!r!e
 
 Entirely flatten all lists in the transduction, regardless of nesting.
 

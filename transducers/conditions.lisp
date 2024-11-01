@@ -36,6 +36,13 @@
              (format stream "The type ~a cannot be transduced over. Did you mean to pass a list?"
                      (no-transduce-implementation-type condition)))))
 
+(define-condition unusable-type (error)
+  ((type :initarg :type :reader unusable-type-type))
+  (:documentation "The user attempted to call `concatenate' with a non-list/vector.")
+  (:report (lambda (condition stream)
+             (format stream "The type ~a cannot be concatenated."
+                     (unusable-type-type condition)))))
+
 (defun prompt-new-value (prompt)
   (format *query-io* prompt)
   (force-output *query-io*)
