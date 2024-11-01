@@ -1,11 +1,11 @@
 # Transducers
 
-### Unreleased
+### 1.3.0 (2024-11-02)
 
 #### Added
 
 - lib: The `median` reducer.
-- lib: The `reduced` source to iterate from the end of a vector.
+- lib: The `reversed` source to iterate from the end of a vector.
 
 #### Changed
 
