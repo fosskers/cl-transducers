@@ -973,6 +973,332 @@ An ancient method of calculating Prime Numbers.
 
 #+RESULTS:
 : (2 3 5 7 11 13 17 19 23 29 31)
+* Writing your own Primitives
+
+One of the advantages of the Transducers pattern is that there is no "magic".
+As you'll see below, it's all just function composition.
+
+** Transducers
+
+A Transducer is a function that _continues the stream_. It operates on one
+element at a time. It receives input, optionally does something to it, and then
+optionally continues by calling the next function in the chain, or it ignores
+the current input, or it short-circuits the stream entirely. We'll see examples
+of all of these below.
+
+*** =map= - A simple transformation
+
+Here is how =map= is implemented in the library. Let's study it to learn the
+overall structure of transducers in general.
+
+#+begin_src lisp
+(defun map (f)  ;; (1) Top-level arguments needed throughout.
+  (lambda (reducer)  ;; (2) The rest of the composed function chain.
+    (lambda (result &optional (input nil i-p))  ;; (3) The main body of the transducer.
+      (if i-p
+          (funcall reducer result (funcall f input))  ;; (4) The primary logic and a call to the next stage.
+          (funcall reducer result)))))  ;; (5) The base case.
+#+end_src
+
+Recall that =map= would be called like:
+
+#+begin_src lisp :exports both :results verbatim
+(in-package :transducers)
+(transduce (map #'1+) #'cons '(1 2 3 4 5))
+#+end_src
+
+#+RESULTS:
+: (2 3 4 5 6)
+
+So we can see at (1) that the =f= corresponds to the function we're passing in,
+which we expect to be applied to all elements of the stream.
+
+(2) might be a surprise. What is =reducer= and where does it come from? Is it the
+=cons= call seen above? Well, it's actually the transducer chain (possibly
+combined via =comp=), followed by the reducer. Like this:
+
+[[file:transducers.png]]
+
+It is the call to =transduce= that puts this all together for you.
+
+(3) is what actually gets called during the iteration. The ~&optional (input nil
+i-p)~ may be new to you; this is how Common Lisp handles the potential lack of
+optional arguments.
+
+#+begin_example
+(input nil i-p)
+ ^     ^   ^---- Was the optional argument actually given? nil or non-nil.
+ |     `---- The default value if the optional arg was missing. Can be anything.
+ `---- The name of the optional arg. Either what the user passed, or the default.
+#+end_example
+
+Unfortunately due to "nil punning", testing the =input= for =nil= is not enough to
+determine if the argument was given or not, since they may have legitimately
+passed =nil=. Hence we need a second signal, named =i-p= here, to do that test.
+Clojure and Scheme can pattern match on the number of arguments directly, but
+Common Lisp cannot. If the =i-p= test fails, then we know the transduction is over.
+
+(4) should be clear; apply =f= and then call the =reducer= the continue the chain.
+
+(5) will become clearer once we've learned about the structure of Reducers. For
+now, just know that this is the last thing that the top-level =transduce= call
+attempts as it is finalising the result.
+
+*** =filter= - Ignoring input
+
+With =map= fresh in your mind, now stare at this:
+
+#+begin_src lisp
+(defun filter (pred)
+  (lambda (reducer)
+    (lambda (result &optional (input nil i-p))
+      (if i-p
+          ;; vvv (4) vvv
+          (if (funcall pred input)
+              (funcall reducer result input) ;; (4a)
+              result) ;; (4b)
+          ;; ^^^ (4) ^^^
+          (funcall reducer result)))))
+#+end_src
+
+Point (4) in the previous example was the "meat", the actual logic of the
+transducer. Here we see it expanded a bit. Notice that we only continue the
+chain at (4a) if the predicate passed. Otherwise, we _yield the result we were
+given_ and directly return, going no further for this particular input element.
+Then, =transduce= will supply the next one. The effect is what we'd expect of
+=filter=; some elements make it through the stream and some don't.
+
+*** =take-while= - Short-circuiting
+
+Similar to =filter= is =take-while=, except that the latter halts the stream
+entirely as soon as an element fails the predicate.
+
+#+begin_src lisp
+(defun take-while (pred)
+  (lambda (reducer)
+    (lambda (result &optional (input nil i-p))
+      (if i-p
+          ;; vvv (4) vvv
+          (if (not (funcall pred input))
+              (reduced result)
+              (funcall reducer result input))
+          ;; ^^^ (4) ^^^
+          (funcall reducer result)))))
+#+end_src
+
+Here =reduced= makes its debut. This wraps the given value in a special type that
+signals to =transduce= that the transduction has been short-circuited and must
+end. Nothing further will be pulled from the Source.
+
+*** =unique= - Stateful transduction
+
+Despite just being a group of composed functions, individual transducers can
+hold state. Consider =unique=, which is called like:
+
+#+begin_src lisp :exports both :results verbatim
+(in-package :transducers)
+(transduce #'unique #'cons '(1 2 1 3 2 1 2 "abc"))
+#+end_src
+
+#+RESULTS:
+: (1 2 3 "abc")
+
+Here's its definition:
+
+#+begin_src lisp
+(defun unique (reducer)
+  (let ((seen (make-hash-table :test #'equal)))
+    (lambda (result &optional (input nil i-p)) ;; (3)
+      (if i-p
+          ;; vvv (4) vvv
+          (if (gethash input seen)
+              result
+              (progn (setf (gethash input seen) t)
+                     (funcall reducer result input)))
+          ;; ^^^ (4) ^^^
+          (funcall reducer result)))))
+#+end_src
+
+There are two immediate differences here:
+
+1. Since =unique= requires no top-level argument (like =map= or =filter=), it is
+   passed directly to =transduce= as =#'unique=. This means we don't need another
+   inner =lambda= and can accept the =reducer= directly.
+2. We can open a =let= before Point (3), and the =seen= Hash Table is then captured
+   by the =lambda=. This has the effect of persisting it between every call of the
+   =lambda= on each element.
+
+Once again we notice a bare =result= being returned if we've seen the current
+element already.
+
+** Reducers
+
+A Reducer is a function that _consumes a stream_. It accepts two, one, or no
+arguments.
+
+*** =count= - Simple cumulative state
+
+An example of =count= being called:
+
+#+begin_src lisp :exports both
+(in-package :transducers)
+(transduce #'pass #'count '(1 2 3 4 5))
+#+end_src
+
+#+RESULTS:
+: 5
+
+Here is its definition:
+
+#+begin_src lisp
+(defun count (&optional (acc 0 a-p) (input nil i-p))
+  (cond ((and a-p i-p) (1+ acc))   ;; (I) Iterative case. The stream is still running.
+        ((and a-p (not i-p)) acc)  ;; (D) We're done! Do any post-processing here.
+        (t 0)))  ;; (M) "Monoidal" / base case.
+#+end_src
+
+Similar to Transducers, we use the =&optional= trick to test how many arguments we
+were given. Let's start from the bottom with the (M) base case. =transduce= calls
+this internally in order to generate an initial value. This corresponds to the
+=result= seen in the Transducer examples. Since each Reducer behaves differently
+and we are not using a static type system, we must define the Reducer's unique
+"zero value" here.
+
+(D) is what was hinted at before - this case is called last by =transduce= in
+order to allow the Reducer to do any post-processing before the final value is
+yielded to the user. This is necessary as occasionally the =acc= value grown by
+the Reducer can be a complicated structure and we may want to sort it, unwrap
+it, etc.
+
+(I) is the usual case and corresponds to some Transducer calling down into the
+reducer with the cumulative state thusfar and the current stream element. The
+Reducer then decides what to do with them. In the case of =count=, the element
+itself is ignored and we just add 1 to our growing =acc=.
+
+*** =cons= - Some post-processing
+
+#+begin_src lisp
+(defun cons (&optional (acc nil a-p) (input nil i-p))
+  (cond ((and a-p i-p) (cl:cons input acc))   ;; (I)
+        ((and a-p (not i-p)) (nreverse acc))  ;; (D)
+        (t '())))
+#+end_src
+
+Here in (I) we see the =input= actually being saved. This then loops back around
+within =transduce=, which pulls the next value from the Source and calls the
+Transducer chain again.
+
+In (D) we see some realistic post-processing. Since (I) was naively consing, the
+order of our elements is backwards from what we intend. Thus they must be
+reversed once before being yielded to the user.
+
+*** =anyp= - Short-circuiting
+
+=anyp= stops as soon as anything satisfies its predicate.
+
+#+begin_src lisp :exports both
+(in-package :transducers)
+(transduce #'pass (anyp #'evenp) '(1 3 5 2 7 9))
+#+end_src
+
+#+RESULTS:
+: T
+
+Usage of =reduced= isn't limited to Transducers; Reducers can short-circuit the
+stream as well.
+
+#+begin_src lisp
+(defun anyp (pred)
+  (lambda (&optional (acc nil a-p) (input nil i-p))
+    (cond ((and a-p i-p)
+           ;; vvv (I) vvv
+           (if (funcall pred input)
+               (reduced t)
+               nil))
+          ;; ^^^ (I) ^^^
+          ((and a-p (not i-p)) acc) ;; (D)
+          (t nil))))
+#+end_src
+
+Like with =filter=, this Reducer requires a top-level predicate, so we add an
+inner =lambda=.
+
+Within (I) we can see =reduced= employed. Seeing this, =transduce= will not continue
+and will instead go right to the (D) case. The final =acc= is =T=.
+
+** Sources
+
+=transduce= is a =defgeneric=, and so can be called on anything that has a
+corresponding =defmethod= for it. There are many "natural" Sources like lists and
+vectors, but we can easily define our own and then supply a =transduce= method to
+add it to the family of things we can iterate over.
+
+Let's review the =reversed= Source, a means by which to iterate over a vector in
+reverse order.
+
+#+begin_src lisp :exports both :results verbatim
+(in-package :transducers)
+(transduce #'pass #'string (reversed "Hello"))
+#+end_src
+
+#+RESULTS:
+: olleH
+
+In order to have a distinct type to associate a =transduce= method with, we need a
+wrapper type:
+
+#+begin_src lisp
+(defstruct reversed
+  (vector #() :type cl:vector))
+#+end_src
+
+We also supply a prettier constructor:
+
+#+begin_src lisp
+(defun reversed (vector)
+  "Source: Yield a VECTOR's elements in reverse order."
+  (make-reversed :vector vector))
+#+end_src
+
+Now come a trio of functions that drive the iteration:
+
+#+begin_src lisp
+(defmethod transduce (xform f (source reversed))
+  (reversed-transduce xform f source))
+
+(defun reversed-transduce (xform f coll)
+  (let* ((init   (funcall f))  ;; (1) The (M) case of the Reducer.
+         (xf     (funcall xform f))  ;; (2) Putting the transducer/reducer chain together.
+         (result (reversed-reduce xf init coll)))  ;; (3) The work.
+    (funcall xf result)))  ;; (7) The (D) case of the Reducer.
+
+(defun reversed-reduce (f identity rev)
+  (let* ((vec (reversed-vector rev))
+         (len (length vec)))
+    ;; Simple recursion to drive the iteration.
+    (labels ((recurse (acc i)
+               (if (< i 0)
+                   acc  ;; (4) We're done.
+                   (let ((acc (safe-call f acc (aref vec i)))) ;; (5) "Safe" application of the transducer chain.
+                     (if (reduced-p acc)  ;; (6a) Short-circuiting occured. Time to go home.
+                         (reduced-val acc)
+                         (recurse acc (1- i))))))) ;; (6b) Otherwise, keep going.
+      (recurse identity (1- len)))))
+#+end_src
+
+All types follow this pattern. In (1) and (2) we do initial setup. In (4) we've
+reached the natural end of the Source (e.g. the end of the vector).
+
+At (5) you're free to do a =funcall= on =f=, however using =safe-call= instead
+provides you with protection against a number of common failure cases and offers
+a variety of handy restarts. Who wants to bail halfway through processing a
+multi-gigabyte data file? No, just skip the bad line and keep going! Etc, etc.
+
+At (6a) we see that we always need to check if the result of the current call
+was "reduced", i.e. short-circuited.
+
+That's it! The beauty of =defgeneric= is that its methods can be defined in other
+systems. This is precisely how the extensions for =jzon=, =fset=, and [[https://codeberg.org/fosskers/nonempty/src/branch/master/src/transducers.lisp#L10-L11][nonempty]] are done.
 
 * Limitations
 

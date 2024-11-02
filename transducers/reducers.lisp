@@ -117,17 +117,16 @@ The elements are sorted once before the median is extracted.
 Short-circuits the transduction as soon as the condition is met."
   (lambda (&optional (acc nil a-p) (input nil i-p))
     (cond ((and a-p i-p)
-           (let ((test (funcall pred input)))
-             (if test
-                 (reduced t)
-                 nil)))
+           (if (funcall pred input)
+               (reduced t)
+               nil))
           ((and a-p (not i-p)) acc)
           (t nil))))
 
 #+nil
-(transduce #'pass (any #'evenp) '(1 3 5 7 9))
+(transduce #'pass (anyp #'evenp) '(1 3 5 7 9))
 #+nil
-(transduce #'pass (any #'evenp) '(1 3 5 7 9 2))
+(transduce #'pass (anyp #'evenp) '(1 3 5 2 7 9))
 
 (defmacro all (pred)
   "Deprecated: Use `allp'."
