@@ -997,7 +997,7 @@ overall structure of transducers in general.
     (lambda (result &optional (input nil i-p))  ;; (3) The main body of the transducer.
       (if i-p
           (funcall reducer result (funcall f input))  ;; (4) The primary logic and a call to the next stage.
-          (funcall reducer result)))))  ;; (5) The base case.
+          (funcall reducer result)))))  ;; (5) The finalisation pass.
 #+end_src
 
 Recall that =map= would be called like:
@@ -1157,12 +1157,12 @@ Here is its definition:
         (t 0)))  ;; (M) "Monoidal" / base case.
 #+end_src
 
-Similar to Transducers, we use the =&optional= trick to test how many arguments we
-were given. Let's start from the bottom with the (M) base case. =transduce= calls
-this internally in order to generate an initial value. This corresponds to the
-=result= seen in the Transducer examples. Since each Reducer behaves differently
-and we are not using a static type system, we must define the Reducer's unique
-"zero value" here.
+Similar to the Transducer functions, we use the =&optional= trick to test how many
+arguments we were given. Let's start from the bottom with the (M) base case.
+=transduce= calls this internally in order to generate an initial value. This
+corresponds to the =result= seen in the Transducer examples. Since each Reducer
+behaves differently and we are not using a static type system, we must define
+the Reducer's unique "zero value" here.
 
 (D) is what was hinted at before - this case is called last by =transduce= in
 order to allow the Reducer to do any post-processing before the final value is
@@ -1171,7 +1171,7 @@ the Reducer can be a complicated structure and we may want to sort it, unwrap
 it, etc.
 
 (I) is the usual case and corresponds to some Transducer calling down into the
-reducer with the cumulative state thusfar and the current stream element. The
+Reducer with the cumulative state thusfar and the current stream element. The
 Reducer then decides what to do with them. In the case of =count=, the element
 itself is ignored and we just add 1 to our growing =acc=.
 
@@ -1181,7 +1181,7 @@ itself is ignored and we just add 1 to our growing =acc=.
 (defun cons (&optional (acc nil a-p) (input nil i-p))
   (cond ((and a-p i-p) (cl:cons input acc))   ;; (I)
         ((and a-p (not i-p)) (nreverse acc))  ;; (D)
-        (t '())))
+        (t '()))) ;; (M)
 #+end_src
 
 Here in (I) we see the =input= actually being saved. This then loops back around
@@ -1191,6 +1191,9 @@ Transducer chain again.
 In (D) we see some realistic post-processing. Since (I) was naively consing, the
 order of our elements is backwards from what we intend. Thus they must be
 reversed once before being yielded to the user.
+
+In (M) our "zero value" is the empty list. Otherwise, what would we be consing
+onto on the first pass of (I)?
 
 *** =anyp= - Short-circuiting
 
@@ -1215,7 +1218,7 @@ stream as well.
            (if (funcall pred input)
                (reduced t)
                nil))
-          ;; ^^^ (I) ^^^
+           ;; ^^^ (I) ^^^
           ((and a-p (not i-p)) acc) ;; (D)
           (t nil))))
 #+end_src
