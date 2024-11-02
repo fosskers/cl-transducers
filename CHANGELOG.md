@@ -1,5 +1,11 @@
 # Transducers
 
+### Unreleased
+
+#### Added
+
+- `reduced` as a better wrapper than calling the constructor `make-reduced` manually.
+
 ### 1.3.0 (2024-11-02)
 
 #### Added

@@ -109,7 +109,7 @@ transduction as soon as any element fails the test."
   (lambda (reducer)
     (lambda (result &optional (input nil i-p))
       (if i-p (if (not (funcall pred input))
-                  (make-reduced :val result)
+                  (reduced result)
                   (funcall reducer result input))
           (funcall reducer result)))))
 
@@ -135,7 +135,7 @@ transduction as soon as any element fails the test."
            #'cons (plist '(:a 1 :b 2 :c 3)))
 
 (defun concatenate (reducer)
-  "Transducer: Concatenate all the sublists in the transduction."
+  "Transducer: Concatenate all the sublists and subvectors in the transduction."
   (let ((preserving-reducer (preserving-reduced reducer)))
     (lambda (result &optional (input nil i-p))
       (if i-p (etypecase input
@@ -156,8 +156,8 @@ transduction as soon as any element fails the test."
 (transduce #'concatenate #'cons '(1 2 3))
 
 (defun flatten (reducer)
-  "Transducer: Entirely flatten all lists in the transduction, regardless of
-nesting."
+  "Transducer: Entirely flatten all lists and vectors in the transduction,
+regardless of nesting."
   (lambda (result &optional (input nil i-p))
     (if i-p (etypecase input
               (cl:list (list-reduce (preserving-reduced (flatten reducer)) result input))

@@ -32,7 +32,7 @@
   "Ensure that X is reduced."
   (if (reduced-p x)
       x
-      (make-reduced :val x)))
+      (reduced x)))
 
 (declaim (ftype (function ((or t reduced)) *) ensure-unreduced))
 (defun ensure-unreduced (x)
@@ -50,7 +50,7 @@ try to continue the transducing process."
   (lambda (a b)
     (let ((result (funcall reducer a b)))
       (if (reduced-p result)
-          (make-reduced :val result)
+          (reduced result)
           result))))
 
 (defun zipmap (keys vals)

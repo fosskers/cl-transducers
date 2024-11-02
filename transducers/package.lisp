@@ -35,7 +35,7 @@
            #:retry-item)
   ;; --- Utilities --- ;;
   (:export #:comp #:const
-           #:make-reduced #:reduced-p #:reduced-val)
+           #:reduced #:make-reduced #:reduced-p #:reduced-val)
   (:documentation "Ergonomic, efficient data processing."))
 
 (in-package :transducers)
@@ -45,3 +45,7 @@
 (defstruct reduced
   "A wrapper that signals that reduction has completed."
   val)
+
+(defun reduced (item)
+  "Wrap a value to signal that reduction has completed."
+  (make-reduced :val item))

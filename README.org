@@ -877,7 +877,7 @@ Return a function that ignores its argument and returns ITEM instead.
 #+RESULTS:
 : 108
 
-*** make-reduced, reduced-p, reduced-val
+*** reduced, reduced-p, reduced-val
 
 When writing your own transducers and reducers, these functions allow you to
 short-circuit the entire operation.
@@ -887,13 +887,13 @@ Here is a simplified definition of ~first~:
 #+begin_src lisp :exports code
 (in-package :transducers)
 (defun first (&optional (acc nil a-p) (input nil i-p))
-  (cond ((and a-p i-p) (make-reduced :val input))
+  (cond ((and a-p i-p) (reduced input))
         ((and a-p (not i-p)) acc)
         (t acc)))
 #+end_src
 
-You can see ~make-reduced~ being used to wrap the return value. ~transduce~ sees
-this wrapping and immediately halts further processing.
+You can see ~reduced~ being used to wrap the return value. ~transduce~ sees this
+wrapping and immediately halts further processing.
 
 ~reduced-p~ and ~reduced-val~ can similarly be used (mostly within transducer
 functions) to check if some lower transducer (or the reducer) has signaled a
