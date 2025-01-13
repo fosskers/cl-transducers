@@ -1,5 +1,5 @@
 (defsystem "transducers"
-  :version "1.3.0"
+  :version "1.3.1"
   :author "Colin Woodbury <colin@fosskers.ca>"
   :license "MPL-2.0"
   :depends-on ()
@@ -17,7 +17,7 @@
   :in-order-to ((test-op (test-op :transducers/tests))))
 
 (defsystem "transducers/jzon"
-  :version "1.3.0"
+  :version "1.3.1"
   :author "Colin Woodbury <colin@fosskers.ca>"
   :license "MPL-2.0"
   :depends-on (:transducers :com.inuoe.jzon :trivia)
@@ -27,7 +27,7 @@
   :description "JSON extension for Transducers.")
 
 (defsystem "transducers/fset"
-  :version "1.3.0"
+  :version "1.3.1"
   :author "Colin Woodbury <colin@fosskers.ca>"
   :license "MPL-2.0"
   :depends-on (:transducers :fset)
