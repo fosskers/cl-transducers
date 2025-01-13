@@ -409,13 +409,13 @@ applications of a given function F.
 (defun once (item)
   "Transducer: Inject some ITEM onto the front of the transduction."
   (lambda (reducer)
-    (let ((item item))
+    (let ((unused? t))
       (lambda (result &optional (input nil i-p))
-        (if i-p (if item
+        (if i-p (if unused?
                     (let ((res (funcall reducer result item)))
                       (if (reduced-p res)
                           res
-                          (progn (setf item nil)
+                          (progn (setf unused? nil)
                                  (funcall reducer res input))))
                     (funcall reducer result input))
             (funcall reducer result))))))
@@ -425,6 +425,11 @@ applications of a given function F.
                  (once 'hi)
                  (take 3))
            #'cons (ints 1))
+
+#++
+(transduce (once nil) #'cons '(0))
+#++
+(transduce (once nil) #'cons '())
 
 (defun from-csv (reducer)
   "Transducer: Interpret the data stream as CSV data.
