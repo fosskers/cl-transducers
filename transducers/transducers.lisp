@@ -457,7 +457,7 @@ need for the caller to manually pass a REDUCER."
 
 This removes any extra whitespace that might be hanging around between elements."
   (mapcar (lambda (s) (string-trim " " s))
-          (uiop:split-string line :separator ",")))
+          (string-split line :separator #\,)))
 
 (defun into-csv (headers)
   "Transducer: Given a sequence of HEADERS, rerender each item in the data stream
@@ -468,7 +468,9 @@ table whose keys are strings that match the values found in HEADERS.
 
 - `empty-argument': when an empty HEADERS sequence is given.
 "
-  (if (uiop:emptyp headers)
+  (if (etypecase headers
+        (list      (null headers))
+        (cl:vector (zerop (length headers))))
       (restart-case (error 'empty-argument :fn "headers")
         (use-value (value)
           :report "Supply a default value and reattempt the transduction."
@@ -488,10 +490,10 @@ table whose keys are strings that match the values found in HEADERS.
 
 #+nil
 (transduce (comp #'from-csv (into-csv '("Name" "Age")))
-           #'cons '("Name,Age,Hair" "Colin,35,Blond" "Tamayo,26,Black"))
+           #'cons '("Name,Age,Hair" "Colin,35,Blond" "Jack,26,Black"))
 #+nil
 (transduce (comp #'from-csv (into-csv '()))
-           #'cons '("Name,Age,Hair" "Colin,35,Blond" "Tamayo,26,Black"))
+           #'cons '("Name,Age,Hair" "Colin,35,Blond" "Jack,26,Black"))
 
 (defun table-vals->csv (headers table)
   "Given some HEADERS to compare to, convert a hash TABLE to a rendered CSV string

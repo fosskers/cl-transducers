@@ -234,9 +234,9 @@
         (t:transduce #'t:pass (j:write stream) '((:name "Colin" :age 35) (:name "Jack" :age 10))))))
 
 (define-test "CSV: Reading and Writing"
-  (is equal '("Name,Age" "Colin,35" "Tamayo,26")
+  (is equal '("Name,Age" "Colin,35" "Jack,26")
       (t:transduce (t:comp #'t:from-csv (t:into-csv '("Name" "Age")))
-                   #'t:cons '("Name,Age,Hair" "Colin,35,Blond" "Tamayo,26,Black"))))
+                   #'t:cons '("Name,Age,Hair" "Colin,35,Blond" "Jack,26,Black"))))
 
 (define-test "Fset: Immutable Collections"
   (let ((set (fset:set 1 2 3 1)))

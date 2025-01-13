@@ -1,4 +1,4 @@
-(ql:quickload :transducers/tests)
+(asdf:load-system :transducers/tests)
 (in-package :transducers/tests)
 
 (let ((status (parachute:status (parachute:test 'transducers/tests))))

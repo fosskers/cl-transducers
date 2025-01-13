@@ -80,7 +80,7 @@ strings are vectors too, so:
     (make-generator :func func)))
 
 #+nil
-(transduce (take 5) #'cons (shuffle #("Colin" "Tamayo" "Natsume")))
+(transduce (take 5) #'cons (shuffle #("Colin" "Jack" "Natsume")))
 
 (defgeneric cycle (seq)
   (:documentation "Source: Yield the values of a given SEQ endlessly."))
