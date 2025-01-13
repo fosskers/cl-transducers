@@ -10,6 +10,7 @@
 
 - Purged usage of `uiop` which was causing problems downstream.
 - `once` handles a `nil` argument better.
+- Apply `(optimize (speed 3))` on all `*-reduce` functions.
 
 ### 1.3.0 (2024-11-02)
 
