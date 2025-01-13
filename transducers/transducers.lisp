@@ -411,14 +411,21 @@ applications of a given function F.
   (lambda (reducer)
     (let ((unused? t))
       (lambda (result &optional (input nil i-p))
-        (if i-p (if unused?
-                    (let ((res (funcall reducer result item)))
-                      (if (reduced-p res)
-                          res
-                          (progn (setf unused? nil)
-                                 (funcall reducer res input))))
-                    (funcall reducer result input))
-            (funcall reducer result))))))
+        (cond ((and i-p unused?)
+               (let ((res (funcall reducer result item)))
+                 (if (reduced-p res)
+                     res
+                     (progn (setf unused? nil)
+                            (funcall reducer res input)))))
+              (i-p (funcall reducer result input))
+              ;; A weird case where they specified `once', but the original
+              ;; Source itself was empty.
+              ((and (not i-p) unused?)
+               (let ((res (funcall reducer result item)))
+                 (if (reduced-p res)
+                     (funcall reducer (reduced-val res))
+                     (funcall reducer res))))
+              (t (funcall reducer result)))))))
 
 #+nil
 (transduce (comp (filter (lambda (n) (> n 10)))

@@ -126,7 +126,9 @@
       (t:transduce (t:comp (t:filter (lambda (n) (> n 10)))
                            (t:once 'hi)
                            (t:take 3))
-                   #'t:cons (t:ints 1))))
+                   #'t:cons (t:ints 1)))
+  (is equal '(nil 0) (t:transduce (t:once nil) #'t:cons '(0)))
+  (is equal '(nil) (t:transduce (t:once nil) #'t:cons '())))
 
 (define-test "Composition"
   :parent transduction
