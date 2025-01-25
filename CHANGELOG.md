@@ -1,5 +1,11 @@
 # Transducers
 
+### Unreleased
+
+#### Added
+
+- `unique-by` for more control over how uniqueness is determined.
+
 ### 1.3.1 (2025-01-13)
 
 #### Added

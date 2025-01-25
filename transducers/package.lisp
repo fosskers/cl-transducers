@@ -7,7 +7,7 @@
   (:export #:transduce)
   ;; --- Transducers -- ;;
   (:export #:pass #:map
-           #:filter #:filter-map #:unique #:dedup
+           #:filter #:filter-map #:unique #:unique-by #:dedup
            #:drop #:drop-while #:take #:take-while
            #:uncons #:concatenate #:flatten
            #:segment #:window #:group-by

@@ -324,16 +324,33 @@ input than N, then this yields nothing.
   "Transducer: Only allow values to pass through the transduction once each.
 Stateful; this uses a Hash Table internally so could get quite heavy if you're
 not careful."
-  (let ((seen (make-hash-table :test #'equal)))
-    (lambda (result &optional (input nil i-p))
-      (if i-p (if (gethash input seen)
-                  result
-                  (progn (setf (gethash input seen) t)
-                         (funcall reducer result input)))
-          (funcall reducer result)))))
+  (funcall (unique-by #'identity) reducer))
 
 #+nil
 (transduce #'unique #'cons '(1 2 1 3 2 1 2 "abc"))
+
+(defun unique-by (f)
+  "Transducer: Only allow values to pass through the transduction once each,
+determined by some key-mapping function. The function is only used to map the
+values to something they should be compared to; the original values themselves
+are what is passed through.
+
+Stateful; this uses a Hash Table internally so could get quite heavy if you're
+not careful."
+  (lambda (reducer)
+    (let ((seen (make-hash-table :test #'equal)))
+      (lambda (result &optional (input nil i-p))
+        (if i-p (let ((mapped (funcall f input)))
+                  (if (gethash mapped seen)
+                      result
+                      (progn (setf (gethash mapped seen) t)
+                             (funcall reducer result input))))
+            (funcall reducer result))))))
+
+#++
+(transduce (unique-by #'identity) #'cons '(1 2 1 3 2 1 2 "abc"))
+#++
+(transduce (unique-by #'cdr) #'cons '(("a" . 1) ("b" . 2) ("c" . 1) ("d" . 3)))
 
 (defun dedup (reducer)
   "Transducer: Remove adjacent duplicates from the transduction."
