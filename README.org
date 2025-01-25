@@ -36,17 +36,26 @@ evenly-lengthed lines./
 #+end_src
 
 #+RESULTS:
-: 7026
-
-_This library has been confirmed to work with SBCL, CCL, ECL, Clasp and LispWorks 8._
-
-#+begin_quote
-⚠ ABCL cannot be used due to lack of support for tail-call elimination within ~labels~.
-
-⚠ Allegro support is partial for the same reason; large sources blow the stack.
-#+end_quote
+: 10696
 
 Looking for Transducers in other Lisps? Check out the [[https://codeberg.org/fosskers/transducers.el][Emacs Lisp]] and [[https://git.sr.ht/~fosskers/transducers.fnl][Fennel]] implementations!
+
+* Compatibility
+
+- Compiles: does =(asdf:load-system :transducers)= succeed?
+- Tests: does =(asdf:test-system :transducers)= succeed?
+
+| Compiler  | Compiles? | Tests? | Notes                      |
+|-----------+-----------+--------+----------------------------|
+| SBCL      | ✅       | ✅    |                            |
+| ECL       | ✅       | ✅    |                            |
+| Clasp     | ✅       | -      |                            |
+| ABCL      | ✅       | ❌    | No [[https://en.wikipedia.org/wiki/Tail_call][TCO]] in recursive =labels= |
+| CCL       | ✅       | ✅    |                            |
+| Allegro   | ✅       | -      |                            |
+| LispWorks | ✅       | -      |                            |
+
+[[https://wiki.archlinux.org/title/Common_Lisp#Historical][Historical implementations]] are not considered.
 
 * History and Motivation
 
