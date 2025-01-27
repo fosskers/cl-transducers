@@ -47,13 +47,14 @@ Looking for Transducers in other Lisps? Check out the [[https://codeberg.org/fos
 
 | Compiler  | Compiles? | Tests? | Notes                      |
 |-----------+-----------+--------+----------------------------|
-| SBCL      | ✅       | ✅    |                            |
-| ECL       | ✅       | ✅    |                            |
-| Clasp     | ✅       | -      |                            |
-| ABCL      | ✅       | ❌    | No [[https://en.wikipedia.org/wiki/Tail_call][TCO]] in recursive =labels= |
-| CCL       | ✅       | ✅    |                            |
-| Allegro   | ✅       | -      |                            |
-| LispWorks | ✅       | -      |                            |
+| SBCL      | ✅        | ✅     |                            |
+| ECL       | ✅        | ✅     |                            |
+| Clasp     | ✅        | -      |                            |
+| ABCL      | ✅        | ❌     | [[https://github.com/armedbear/abcl/issues/675][No TCO]] in recursive =labels= |
+| CCL       | ✅        | ✅     |                            |
+| [[https://gitlab.com/gnu-clisp/clisp][Clisp]]     | ✅        | -      | Supports TCO but not [[https://gitlab.com/gnu-clisp/clisp/-/merge_requests/3][PLN]]   |
+| Allegro   | ✅        | -      |                            |
+| LispWorks | ✅        | -      |                            |
 
 [[https://wiki.archlinux.org/title/Common_Lisp#Historical][Historical implementations]] are not considered.
 
