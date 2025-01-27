@@ -92,6 +92,7 @@ streamed as-is as cons cells."
 # Conditions
 
 - `no-transduce-implementation': an unsupported type was transduced over."
+  (declare (ignore xform f))
   (error 'no-transduce-implementation :type (type-of fallback)))
 
 #+nil
@@ -118,7 +119,7 @@ streamed as-is as cons cells."
 
 (declaim (ftype (function ((function (&optional t t) *) t list) *) list-reduce))
 (defun list-reduce (f identity lst)
-  (declare (optimize (speed 3)))
+  (declare (optimize (speed 3) (safety 1) (debug 1)))
   (labels ((recurse (acc items)
              (if (null items)
                  acc
@@ -140,7 +141,7 @@ streamed as-is as cons cells."
     (funcall xf result)))
 
 (defun vector-reduce (f identity vec)
-  (declare (optimize (speed 3)))
+  (declare (optimize (speed 3) (safety 1) (debug 1)))
   (let ((len (length vec)))
     (labels ((recurse (acc i)
                (if (= i len)
@@ -161,7 +162,7 @@ streamed as-is as cons cells."
     (funcall xf result)))
 
 (defun reversed-reduce (f identity rev)
-  (declare (optimize (speed 3)))
+  (declare (optimize (speed 3) (safety 1) (debug 1)))
   (let* ((vec (reversed-vector rev))
          (len (length vec)))
     (labels ((recurse (acc i)
@@ -192,7 +193,7 @@ streamed as-is as cons cells."
     (funcall xf result)))
 
 (defun hash-table-reduce (f identity ht)
-  (declare (optimize (speed 3)))
+  (declare (optimize (speed 3) (safety 1) (debug 1)))
   (with-hash-table-iterator (iter ht)
     (labels ((recurse (acc)
                (multiple-value-bind (entry-p key value) (iter)
@@ -234,7 +235,7 @@ responsiblity of the caller!"
     (funcall xf result)))
 
 (defun stream-reduce (f identity stream)
-  (declare (optimize (speed 3)))
+  (declare (optimize (speed 3) (safety 1) (debug 1)))
   (labels ((recurse (acc)
              (let ((line (read-line stream nil)))
                (if (not line)
@@ -257,7 +258,7 @@ responsiblity of the caller!"
     (funcall xf result)))
 
 (defun generator-reduce (f identity gen)
-  (declare (optimize (speed 3)))
+  (declare (optimize (speed 3) (safety 1) (debug 1)))
   (labels ((recurse (acc)
              (let ((val (funcall (generator-func gen))))
                (cond ((eq *done* val) acc)
@@ -276,7 +277,7 @@ responsiblity of the caller!"
 
 (declaim (ftype (function ((function (&optional t t) *) t plist) *) plist-reduce))
 (defun plist-reduce (f identity lst)
-  (declare (optimize (speed 3)))
+  (declare (optimize (speed 3) (safety 1) (debug 1)))
   (labels ((recurse (acc items)
              (cond ((null items) acc)
                    ((null (cdr items))

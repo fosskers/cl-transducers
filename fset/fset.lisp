@@ -29,7 +29,7 @@
     (funcall xf result)))
 
 (defun set-reduce (f identity set)
-  (declare (optimize (speed 3)))
+  (declare (optimize (speed 3) (safety 1) (debug 1)))
   (let ((iter (s:iterator set)))
     (labels ((recurse (acc)
                (if (funcall iter :done?)
@@ -50,7 +50,7 @@
     (funcall xf result)))
 
 (defun map-reduce (f identity set)
-  (declare (optimize (speed 3)))
+  (declare (optimize (speed 3) (safety 1) (debug 1)))
   (let ((iter (s:iterator set)))
     (labels ((recurse (acc)
                (if (funcall iter :done?)
@@ -72,7 +72,7 @@
     (funcall xf result)))
 
 (defun seq-reduce (f identity set)
-  (declare (optimize (speed 3)))
+  (declare (optimize (speed 3) (safety 1) (debug 1)))
   (let ((iter (s:iterator set)))
     (labels ((recurse (acc)
                (if (funcall iter :done?)
@@ -93,7 +93,7 @@
     (funcall xf result)))
 
 (defun bag-reduce (f identity set)
-  (declare (optimize (speed 3)))
+  (declare (optimize (speed 3) (safety 1) (debug 1)))
   (let ((iter (s:iterator set)))
     (labels ((recurse (acc)
                (if (funcall iter :done?)

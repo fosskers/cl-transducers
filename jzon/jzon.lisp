@@ -34,7 +34,7 @@
 
 (declaim (ftype (function (t t stream) *) json-reduce))
 (defun json-reduce (f identity stream)
-  (declare (optimize (speed 3)))
+  (declare (optimize (speed 3) (safety 1) (debug 1)))
   (j:with-parser (parser stream)
     (multiple-value-bind (event value) (j:parse-next parser)
       (declare (ignore value))
