@@ -1,0 +1,24 @@
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: Unit Tests
+    strategy:
+      matrix:
+        compiler: ["sbcl", "ecl"]
+    steps:
+      - name: Clone the Project
+        uses: actions/checkout@v4
+
+      - name: Set up Common Lisp
+        uses: fosskers/common-lisp@v1.0.0
+        with:
+          compiler: ${{ matrix.compiler }}
+
+      - name: Test
+        run: |
+          vend test ${{ matrix.compiler }}
