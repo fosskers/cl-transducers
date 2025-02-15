@@ -38,7 +38,7 @@ evenly-lengthed lines./
 #+RESULTS:
 : 10696
 
-Looking for Transducers in other Lisps? Check out the [[https://codeberg.org/fosskers/transducers.el][Emacs Lisp]] and [[https://git.sr.ht/~fosskers/transducers.fnl][Fennel]] implementations!
+Looking for Transducers in other Lisps? Check out the [[https://github.com/fosskers/transducers.el][Emacs Lisp]] and [[https://github.com/fosskers/transducers.fnl][Fennel]] implementations!
 
 * Table of Contents :TOC_5_gh:noexport:
 - [[#compatibility][Compatibility]]
