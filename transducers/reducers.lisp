@@ -1,71 +1,71 @@
 (in-package :transducers)
 
 (declaim (ftype (function (&optional list t) list) cons))
-(defun cons (&optional (acc nil a-p) (input nil i-p))
+(defun cons (&optional (acc nil a?) (input nil i?))
   "Reducer: Collect all results as a list."
-  (cond ((and a-p i-p) (cl:cons input acc))
-        ((and a-p (not i-p)) (nreverse acc))
+  (cond ((and a? i?) (cl:cons input acc))
+        ((and a? (not i?)) (nreverse acc))
         (t '())))
 
 (declaim (ftype (function (&optional list t) list) snoc))
-(defun snoc (&optional (acc nil a-p) (input nil i-p))
+(defun snoc (&optional (acc nil a?) (input nil i?))
   "Reducer: Collect all results as a list, but results are reversed.
 In theory, slightly more performant than `cons' since it performs no final
 reversal."
-  (cond ((and a-p i-p) (cl:cons input acc))
-        ((and a-p (not i-p)) acc)
+  (cond ((and a? i?) (cl:cons input acc))
+        ((and a? (not i?)) acc)
         (t '())))
 
-(defun string (&optional (acc nil a-p) (input #\z i-p))
+(defun string (&optional (acc nil a?) (input #\z i?))
   "Reducer: Collect a stream of characters into to a single string."
-  (cond ((and a-p i-p) (cl:cons input acc))
-        ((and a-p (not i-p)) (cl:concatenate 'cl:string (nreverse acc)))
+  (cond ((and a? i?) (cl:cons input acc))
+        ((and a? (not i?)) (cl:concatenate 'cl:string (nreverse acc)))
         (t '())))
 
 #+nil
 (string-transduce (map #'char-upcase) #'string "hello")
 
-(defun vector (&optional (acc nil a-p) (input nil i-p))
+(defun vector (&optional (acc nil a?) (input nil i?))
   "Reducer: Collect a stream of values into a vector."
-  (cond ((and a-p i-p) (cl:cons input acc))
-        ((and a-p (not i-p)) (cl:concatenate 'cl:vector (nreverse acc)))
+  (cond ((and a? i?) (cl:cons input acc))
+        ((and a? (not i?)) (cl:concatenate 'cl:vector (nreverse acc)))
         (t '())))
 
 #+nil
 (vector-transduce (map #'1+) #'vector #(1 2 3))
 
 (declaim (ftype (function (&optional (or cl:hash-table null) t) cl:hash-table) hash-table))
-(defun hash-table (&optional (acc nil a-p) (input nil i-p))
+(defun hash-table (&optional (acc nil a?) (input nil i?))
   "Reducer: Collect a stream of key-value cons pairs into a hash table."
-  (cond ((and a-p i-p) (destructuring-bind (key . val) input
-                         (setf (gethash key acc) val)
-                         acc))
-        ((and a-p (not i-p)) acc)
+  (cond ((and a? i?) (destructuring-bind (key . val) input
+                       (setf (gethash key acc) val)
+                       acc))
+        ((and a? (not i?)) acc)
         (t (make-hash-table :test #'equal))))
 
 #+nil
 (transduce #'enumerate #'hash-table '("a" "b" "c"))
 
 (declaim (ftype (function (&optional fixnum t) fixnum) count))
-(defun count (&optional (acc 0 a-p) (input nil i-p))
+(defun count (&optional (acc 0 a?) (input nil i?))
   "Reducer: Count the number of elements that made it through the transduction."
   (declare (ignore input))
-  (cond ((and a-p i-p) (1+ acc))
-        ((and a-p (not i-p)) acc)
+  (cond ((and a? i?) (1+ acc))
+        ((and a? (not i?)) acc)
         (t 0)))
 
 #+nil
 (transduce #'pass #'count '(1 2 3 4 5))
 
-(defun median (&optional (acc nil a-p) (input nil i-p))
+(defun median (&optional (acc nil a?) (input nil i?))
   "Reducer: Calculate the median value of all numeric elements in a transduction.
 The elements are sorted once before the median is extracted.
 
 # Conditions
 
 - `empty-transduction': when no values made it through the transduction."
-  (cond ((and a-p i-p) (cl:cons input acc))
-        ((and a-p (not i-p))
+  (cond ((and a? i?) (cl:cons input acc))
+        ((and a? (not i?))
          (if (null acc)
              (error 'empty-transduction :msg "`median' called on an empty transduction.")
              ;; HACK 2024-08-22 More robust comparison.
@@ -85,16 +85,16 @@ The elements are sorted once before the median is extracted.
 #+nil
 (transduce #'pass #'median '(0 1 2 3 4))
 
-(defun average (&optional (acc nil a-p) (input nil i-p))
+(defun average (&optional (acc nil a?) (input nil i?))
   "Reducer: Calculate the average value of all numeric elements in a transduction.
 
 # Conditions
 
 - `empty-transduction': when no values made it through the transduction."
-  (cond ((and a-p i-p)
+  (cond ((and a? i?)
          (destructuring-bind (count . total) acc
            (cl:cons (1+ count) (+ total input))))
-        ((and a-p (not i-p))
+        ((and a? (not i?))
          (destructuring-bind (count . total) acc
            (if (= 0 count)
                (error 'empty-transduction :msg "`average' called on an empty transduction.")
@@ -115,12 +115,12 @@ The elements are sorted once before the median is extracted.
 (defun anyp (pred)
   "Reducer: Yield t if any element in the transduction satisfies PRED.
 Short-circuits the transduction as soon as the condition is met."
-  (lambda (&optional (acc nil a-p) (input nil i-p))
-    (cond ((and a-p i-p)
+  (lambda (&optional (acc nil a?) (input nil i?))
+    (cond ((and a? i?)
            (if (funcall pred input)
                (reduced t)
                nil))
-          ((and a-p (not i-p)) acc)
+          ((and a? (not i?)) acc)
           (t nil))))
 
 #+nil
@@ -137,13 +137,13 @@ Short-circuits the transduction as soon as the condition is met."
 (defun allp (pred)
   "Reducer: Yield t if all elements of the transduction satisfy PRED.
 Short-circuits with NIL if any element fails the test."
-  (lambda (&optional (acc nil a-p) (input nil i-p))
-    (cond ((and a-p i-p)
+  (lambda (&optional (acc nil a?) (input nil i?))
+    (cond ((and a? i?)
            (let ((test (funcall pred input)))
              (if (and acc test)
                  t
                  (reduced nil))))
-          ((and a-p (not i-p)) acc)
+          ((and a? (not i?)) acc)
           (t t))))
 
 #+nil
@@ -151,7 +151,7 @@ Short-circuits with NIL if any element fails the test."
 #+nil
 (transduce #'pass (all #'oddp) '(1 3 5 7 9 2))
 
-(defun first (&optional (acc 'transducers-none a-p) (input nil i-p))
+(defun first (&optional (acc 'transducers-none a?) (input nil i?))
   "Reducer: Yield the first value of the transduction. As soon as this first value
 is yielded, the entire transduction stops.
 
@@ -159,8 +159,8 @@ is yielded, the entire transduction stops.
 
 - `empty-transduction': when no values made it through the transduction.
 "
-  (cond ((and a-p i-p) (reduced input))
-        ((and a-p (not i-p))
+  (cond ((and a? i?) (reduced input))
+        ((and a? (not i?))
          (if (eq 'transducers-none acc)
              (restart-case (error 'empty-transduction :msg "first: the transduction was empty.")
                (use-value (value)
@@ -175,15 +175,15 @@ is yielded, the entire transduction stops.
 #+nil
 (transduce (filter #'oddp) #'first '(2 4 6 10))
 
-(defun last (&optional (acc 'transducers-none a-p) (input nil i-p))
+(defun last (&optional (acc 'transducers-none a?) (input nil i?))
   "Reducer: Yield the last value of the transduction.
 
 # Conditions
 
 - `empty-transduction': when no values made it through the transduction.
 "
-  (cond ((and a-p i-p) input)
-        ((and a-p (not i-p))
+  (cond ((and a? i?) input)
+        ((and a? (not i?))
          (if (eq 'transducers-none acc)
              (restart-case (error 'empty-transduction :msg "last: the transduction was empty.")
                (use-value (value)
@@ -215,16 +215,16 @@ functions like this, `fold' is appropriate.
 - `empty-transduction': if no SEED is given and the transduction is empty.
 "
   (if seed-p
-      (lambda (&optional (acc nil a-p) (input nil i-p))
-        (cond ((and a-p i-p) (funcall f acc input))
-              ((and a-p (not i-p)) acc)
+      (lambda (&optional (acc nil a?) (input nil i?))
+        (cond ((and a? i?) (funcall f acc input))
+              ((and a? (not i?)) acc)
               (t seed)))
-      (lambda (&optional (acc nil a-p) (input nil i-p))
-        (cond ((and a-p i-p)
+      (lambda (&optional (acc nil a?) (input nil i?))
+        (cond ((and a? i?)
                (if (eq acc 'transducers-none)
                    input
                    (funcall f acc input)))
-              ((and a-p (not i-p))
+              ((and a? (not i?))
                (if (eq acc 'transducers-none)
                    (restart-case (error 'empty-transduction :msg "fold was called without a seed, but the transduction was also empty.")
                      (use-value (value)
@@ -255,12 +255,12 @@ functions like this, `fold' is appropriate.
 (defun find (pred &key default)
   "Reducer: Find the first element in the transduction that satisfies a given PRED.
 Yields `nil' if no such element were found, unless a DEFAULT is provided."
-  (lambda (&optional (acc nil a-p) (input nil i-p))
-    (cond ((and a-p i-p)
+  (lambda (&optional (acc nil a?) (input nil i?))
+    (cond ((and a? i?)
            (if (funcall pred input)
                (reduced input)
                default))
-          ((and a-p (not i-p)) acc)
+          ((and a? (not i?)) acc)
           (t default))))
 
 #+nil
