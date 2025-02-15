@@ -82,14 +82,14 @@ Looking for Transducers in other Lisps? Check out the [[https://codeberg.org/fos
   - [[#sieve-of-eratosthenes][Sieve of Eratosthenes]]
 - [[#writing-your-own-primitives][Writing your own Primitives]]
   - [[#transducers-1][Transducers]]
-    - [[#map---a-simple-transformation][=map= - A simple transformation]]
-    - [[#filter---ignoring-input][=filter= - Ignoring input]]
-    - [[#take-while---short-circuiting][=take-while= - Short-circuiting]]
-    - [[#unique---stateful-transduction][=unique= - Stateful transduction]]
+    - [[#map---a-simple-transformation][map - A simple transformation]]
+    - [[#filter---ignoring-input][filter - Ignoring input]]
+    - [[#take-while---short-circuiting][take-while - Short-circuiting]]
+    - [[#unique---stateful-transduction][unique - Stateful transduction]]
   - [[#reducers-1][Reducers]]
-    - [[#count---simple-cumulative-state][=count= - Simple cumulative state]]
-    - [[#cons---some-post-processing][=cons= - Some post-processing]]
-    - [[#anyp---short-circuiting][=anyp= - Short-circuiting]]
+    - [[#count---simple-cumulative-state][count - Simple cumulative state]]
+    - [[#cons---some-post-processing][cons - Some post-processing]]
+    - [[#anyp---short-circuiting][anyp - Short-circuiting]]
   - [[#sources-1][Sources]]
 - [[#limitations][Limitations]]
 - [[#resources][Resources]]
@@ -1064,7 +1064,7 @@ optionally continues by calling the next function in the chain, or it ignores
 the current input, or it short-circuits the stream entirely. We'll see examples
 of all of these below.
 
-*** =map= - A simple transformation
+*** map - A simple transformation
 
 Here is how =map= is implemented in the library. Let's study it to learn the
 overall structure of transducers in general.
@@ -1122,7 +1122,7 @@ Common Lisp cannot. If the =i-p= test fails, then we know the transduction is ov
 now, just know that this is the last thing that the top-level =transduce= call
 attempts as it is finalising the result.
 
-*** =filter= - Ignoring input
+*** filter - Ignoring input
 
 With =map= fresh in your mind, now stare at this:
 
@@ -1146,7 +1146,7 @@ given_ and directly return, going no further for this particular input element.
 Then, =transduce= will supply the next one. The effect is what we'd expect of
 =filter=; some elements make it through the stream and some don't.
 
-*** =take-while= - Short-circuiting
+*** take-while - Short-circuiting
 
 Similar to =filter= is =take-while=, except that the latter halts the stream
 entirely as soon as an element fails the predicate.
@@ -1168,7 +1168,7 @@ Here =reduced= makes its debut. This wraps the given value in a special type tha
 signals to =transduce= that the transduction has been short-circuited and must
 end. Nothing further will be pulled from the Source.
 
-*** =unique= - Stateful transduction
+*** unique - Stateful transduction
 
 Despite just being a group of composed functions, individual transducers can
 hold state. Consider =unique=, which is called like:
@@ -1214,7 +1214,7 @@ element already.
 A Reducer is a function that _consumes a stream_. It accepts two, one, or no
 arguments.
 
-*** =count= - Simple cumulative state
+*** count - Simple cumulative state
 
 An example of =count= being called:
 
@@ -1253,7 +1253,7 @@ Reducer with the cumulative state thusfar and the current stream element. The
 Reducer then decides what to do with them. In the case of =count=, the element
 itself is ignored and we just add 1 to our growing =acc=.
 
-*** =cons= - Some post-processing
+*** cons - Some post-processing
 
 #+begin_src lisp
 (defun cons (&optional (acc nil a-p) (input nil i-p))
@@ -1273,7 +1273,7 @@ reversed once before being yielded to the user.
 In (M) our "zero value" is the empty list. Otherwise, what would we be consing
 onto on the first pass of (I)?
 
-*** =anyp= - Short-circuiting
+*** anyp - Short-circuiting
 
 =anyp= stops as soon as anything satisfies its predicate.
 
