@@ -125,18 +125,7 @@ while adding many other convenient operations commonly found in other languages.
 
 * Installation
 
-This library is available on [[https://quickdocs.org/cl-transducers][Quicklisp]] and [[https://ultralisp.org/projects/fosskers/cl-transducers][Ultralisp]]. To download the main
-system:
-
-#+begin_src lisp
-(ql:quickload :transducers)
-#+end_src
-
-For the JSON extensions:
-
-#+begin_src lisp
-(ql:quickload :transducers/jzon)
-#+end_src
+This library is available through [[https://github.com/fosskers/vend][vend]], as well as [[https://quickdocs.org/cl-transducers][Quicklisp]] and [[https://ultralisp.org/projects/fosskers/cl-transducers][Ultralisp]].
 
 * Usage and Theory
 
