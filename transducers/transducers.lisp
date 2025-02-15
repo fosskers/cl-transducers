@@ -119,7 +119,7 @@ transduction as soon as any element fails the test."
   "Transducer: Split up a transduction of cons cells."
   (lambda (result &optional (input nil i?))
     (if i? (let ((res (funcall reducer result (car input))))
-             (if (reduced-p res)
+             (if (reduced? res)
                  res
                  (funcall reducer res (cdr input))))
         (funcall reducer result))))
@@ -199,7 +199,7 @@ any accumulated state, which may be shorter than N.
                                        result
                                        (funcall reducer result (reverse collect)))))
                        (setf i 0)
-                       (if (reduced-p result)
+                       (if (reduced? result)
                            (funcall reducer (reduced-val result))
                            (funcall reducer result))))))))))
 
@@ -234,7 +234,7 @@ transduction.
                               result
                               (funcall reducer result (reverse collect)))))
               (setf collect '())
-              (if (reduced-p result)
+              (if (reduced? result)
                   (funcall reducer (reduced-val result))
                   (funcall reducer result))))))))
 
@@ -248,7 +248,7 @@ transduction.
       (lambda (result &optional (input nil i?))
         (if i? (if send-elem?
                    (let ((result (funcall reducer result elem)))
-                     (if (reduced-p result)
+                     (if (reduced? result)
                          result
                          (funcall reducer result input)))
                    (progn (setf send-elem? t)
@@ -409,12 +409,12 @@ applications of a given function F.
       (lambda (result &optional (input nil i?))
         (if i? (let* ((old prev)
                       (result (funcall reducer result old)))
-                 (cond ((reduced-p result) result)
+                 (cond ((reduced? result) result)
                        (t (let ((new (funcall f prev input)))
                             (setf prev new)
                             result))))
             (let ((result (funcall reducer result prev)))
-              (cond ((reduced-p result) (funcall reducer (reduced-val result)))
+              (cond ((reduced? result) (funcall reducer (reduced-val result)))
                     (t (funcall reducer result)))))))))
 
 #+nil
@@ -429,7 +429,7 @@ applications of a given function F.
       (lambda (result &optional (input nil i?))
         (cond ((and i? unused?)
                (let ((res (funcall reducer result item)))
-                 (if (reduced-p res)
+                 (if (reduced? res)
                      res
                      (progn (setf unused? nil)
                             (funcall reducer res input)))))
@@ -438,7 +438,7 @@ applications of a given function F.
               ;; Source itself was empty.
               ((and (not i?) unused?)
                (let ((res (funcall reducer result item)))
-                 (if (reduced-p res)
+                 (if (reduced? res)
                      (funcall reducer (reduced-val res))
                      (funcall reducer res))))
               (t (funcall reducer result)))))))
@@ -509,7 +509,7 @@ table whose keys are strings that match the values found in HEADERS.
           (lambda (result &optional (input nil i?))
             (if i? (if unsent
                        (let ((res (funcall reducer result (recsv headers))))
-                         (if (reduced-p res)
+                         (if (reduced? res)
                              res
                              (progn (setf unsent nil)
                                     (funcall reducer res (table-vals->csv headers input)))))
@@ -590,7 +590,7 @@ of the branch."
           (other-res (funcall ra)))
       (lambda (result &optional (input nil i?))
         (cond (i?
-               (unless (reduced-p other-res)
+               (unless (reduced? other-res)
                  (setf other-res (funcall fa other-res input)))
                (funcall reducer result input))
               (t (cl:cons (funcall reducer result)
@@ -658,8 +658,8 @@ transducer `tri' for an alternative.
       (lambda (result &optional (input nil i?))
         (if i? (let ((ra (funcall fa result input))
                      (rb (funcall fb result input)))
-                 (cond ((reduced-p ra) ra)
-                       ((reduced-p rb) rb)
+                 (cond ((reduced? ra) ra)
+                       ((reduced? rb) rb)
                        ((eq ra result) result)
                        ((eq rb result) result)
                        (t (funcall reducer result (funcall f ra rb)))))
@@ -688,12 +688,12 @@ transducer `tri' for an alternative.
            (res-b b-id))
       (lambda (result &optional (input nil i?))
         (cond (i?
-               (unless (reduced-p res-a)
+               (unless (reduced? res-a)
                  (setf res-a (funcall fa res-a input)))
-               (unless (reduced-p res-b)
+               (unless (reduced? res-b)
                  (setf res-b (funcall fb res-b input)))
-               (when (and (reduced-p res-a)
-                          (reduced-p res-b))
+               (when (and (reduced? res-a)
+                          (reduced? res-b))
                  (let* ((fused (funcall f
                                         (funcall fa (reduced-val res-a))
                                         (funcall fb (reduced-val res-b))))

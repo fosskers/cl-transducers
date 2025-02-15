@@ -124,7 +124,7 @@ streamed as-is as cons cells."
              (if (null items)
                  acc
                  (let ((v (safe-call f acc (car items))))
-                   (if (reduced-p v)
+                   (if (reduced? v)
                        (reduced-val v)
                        (recurse v (cdr items)))))))
     (recurse identity lst)))
@@ -147,7 +147,7 @@ streamed as-is as cons cells."
                (if (= i len)
                    acc
                    (let ((acc (safe-call f acc (aref vec i))))
-                     (if (reduced-p acc)
+                     (if (reduced? acc)
                          (reduced-val acc)
                          (recurse acc (1+ i)))))))
       (recurse identity 0))))
@@ -169,7 +169,7 @@ streamed as-is as cons cells."
                (if (< i 0)
                    acc
                    (let ((acc (safe-call f acc (aref vec i))))
-                     (if (reduced-p acc)
+                     (if (reduced? acc)
                          (reduced-val acc)
                          (recurse acc (1- i)))))))
       (recurse identity (1- len)))))
@@ -200,7 +200,7 @@ streamed as-is as cons cells."
                  (if (not entry-p)
                      acc
                      (let ((acc (safe-call f acc (cl:cons key value))))
-                       (if (reduced-p acc)
+                       (if (reduced? acc)
                            (reduced-val acc)
                            (recurse acc)))))))
       (recurse identity))))
@@ -241,7 +241,7 @@ responsiblity of the caller!"
                (if (not line)
                    acc
                    (let ((acc (safe-call f acc line)))
-                     (if (reduced-p acc)
+                     (if (reduced? acc)
                          (reduced-val acc)
                          (recurse acc)))))))
     (recurse identity)))
@@ -263,7 +263,7 @@ responsiblity of the caller!"
              (let ((val (funcall (generator-func gen))))
                (cond ((eq *done* val) acc)
                      (t (let ((acc (safe-call f acc val)))
-                          (if (reduced-p acc)
+                          (if (reduced? acc)
                               (reduced-val acc)
                               (recurse acc))))))))
     (recurse identity)))
@@ -288,7 +288,7 @@ responsiblity of the caller!"
                           :interactive (lambda () (prompt-new-value (format nil "Value for key ~a: " key)))
                           (recurse acc (list key value))))))
                    (t (let ((v (safe-call f acc (cl:cons (car items) (second items)))))
-                        (if (reduced-p v)
+                        (if (reduced? v)
                             (reduced-val v)
                             (recurse v (cdr (cdr items)))))))))
     (recurse identity (plist-list lst))))

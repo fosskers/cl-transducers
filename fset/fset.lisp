@@ -35,7 +35,7 @@
                (if (funcall iter :done?)
                    acc
                    (let ((acc (t::safe-call f acc (funcall iter :get))))
-                     (if (t:reduced-p acc)
+                     (if (t:reduced? acc)
                          (t:reduced-val acc)
                          (recurse acc))))))
       (recurse identity))))
@@ -57,7 +57,7 @@
                    acc
                    (multiple-value-bind (key val) (funcall iter :get)
                      (let ((acc (t::safe-call f acc (cl:cons key val))))
-                       (if (t:reduced-p acc)
+                       (if (t:reduced? acc)
                            (t:reduced-val acc)
                            (recurse acc)))))))
       (recurse identity))))
@@ -78,7 +78,7 @@
                (if (funcall iter :done?)
                    acc
                    (let ((acc (t::safe-call f acc (funcall iter :get))))
-                     (if (t:reduced-p acc)
+                     (if (t:reduced? acc)
                          (t:reduced-val acc)
                          (recurse acc))))))
       (recurse identity))))
@@ -99,7 +99,7 @@
                (if (funcall iter :done?)
                    acc
                    (let ((acc (t::safe-call f acc (funcall iter :get))))
-                     (if (t:reduced-p acc)
+                     (if (t:reduced? acc)
                          (t:reduced-val acc)
                          (recurse acc))))))
       (recurse identity))))

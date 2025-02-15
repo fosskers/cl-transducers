@@ -46,7 +46,7 @@
                                                      :eof-value :done)
                    (:done acc)
                    (json (let ((acc (t::safe-call f acc json)))
-                           (if (t:reduced-p acc)
+                           (if (t:reduced? acc)
                                (t:reduced-val acc)
                                (recurse acc)))))))
         (recurse identity)))))

@@ -63,7 +63,7 @@ Looking for Transducers in other Lisps? Check out the [[https://codeberg.org/fos
   - [[#reducers][Reducers]]
     - [[#cons-snoc-vector-string-hash-table][cons, snoc, vector, string, hash-table]]
     - [[#count-average-median][count, average, median]]
-    - [[#anyp-allp][anyp, allp]]
+    - [[#any-all][any?, all?]]
     - [[#first-last-find][first, last, find]]
     - [[#fold][fold]]
     - [[#for][for]]
@@ -74,7 +74,7 @@ Looking for Transducers in other Lisps? Check out the [[https://codeberg.org/fos
     - [[#reversed][reversed]]
   - [[#utilities][Utilities]]
     - [[#comp-const][comp, const]]
-    - [[#reduced-reduced-p-reduced-val][reduced, reduced-p, reduced-val]]
+    - [[#reduced-reduced-reduced-val][reduced, reduced?, reduced-val]]
 - [[#example-gallery][Example Gallery]]
   - [[#reading-lines-from-a-file][Reading lines from a File]]
   - [[#reducing-into-property-lists-and-assocation-lists][Reducing into Property Lists and Assocation Lists]]
@@ -696,25 +696,25 @@ median is extracted.
 #+RESULTS:
 : 1
 
-*** anyp, allp
+*** any?, all?
 
-Yield t if any element in the transduction satisfies PRED. Short-circuits the
+Yield =t= if any element in the transduction satisfies PRED. Short-circuits the
 transduction as soon as the condition is met.
 
 #+begin_src lisp :results verbatim :exports both
 (in-package :transducers)
-(transduce #'pass (anyp #'evenp) '(1 3 5 7 9 2))
+(transduce #'pass (any? #'evenp) '(1 3 5 7 9 2))
 #+end_src
 
 #+RESULTS:
 : T
 
-Yield t if all elements of the transduction satisfy PRED. Short-circuits with
+Yield =t= if all elements of the transduction satisfy PRED. Short-circuits with
 NIL if any element fails the test.
 
 #+begin_src lisp :results verbatim :exports both
 (in-package :transducers)
-(transduce #'pass (allp #'oddp) '(1 3 5 7 9))
+(transduce #'pass (all? #'oddp) '(1 3 5 7 9))
 #+end_src
 
 #+RESULTS:
@@ -955,7 +955,7 @@ Return a function that ignores its argument and returns ITEM instead.
 #+RESULTS:
 : 108
 
-*** reduced, reduced-p, reduced-val
+*** reduced, reduced?, reduced-val
 
 When writing your own transducers and reducers, these functions allow you to
 short-circuit the entire operation.
@@ -973,7 +973,7 @@ Here is a simplified definition of ~first~:
 You can see ~reduced~ being used to wrap the return value. ~transduce~ sees this
 wrapping and immediately halts further processing.
 
-~reduced-p~ and ~reduced-val~ can similarly be used (mostly within transducer
+~reduced?~ and ~reduced-val~ can similarly be used (mostly within transducer
 functions) to check if some lower transducer (or the reducer) has signaled a
 short-circuit, and if so potentially perform some clean-up. This is important
 for transducers that carry internal state.
@@ -1361,7 +1361,7 @@ Now come a trio of functions that drive the iteration:
                (if (< i 0)
                    acc  ;; (4) We're done.
                    (let ((acc (safe-call f acc (aref vec i)))) ;; (5) "Safe" application of the transducer chain.
-                     (if (reduced-p acc)  ;; (6a) Short-circuiting occured. Time to go home.
+                     (if (reduced? acc)  ;; (6a) Short-circuiting occured. Time to go home.
                          (reduced-val acc)
                          (recurse acc (1- i))))))) ;; (6b) Otherwise, keep going.
       (recurse identity (1- len)))))

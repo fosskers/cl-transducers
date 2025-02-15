@@ -30,14 +30,14 @@
 (declaim (ftype (function ((or t reduced)) reduced) ensure-reduced))
 (defun ensure-reduced (x)
   "Ensure that X is reduced."
-  (if (reduced-p x)
+  (if (reduced? x)
       x
       (reduced x)))
 
 (declaim (ftype (function ((or t reduced)) *) ensure-unreduced))
 (defun ensure-unreduced (x)
   "Ensure that X is unreduced."
-  (if (reduced-p x)
+  (if (reduced? x)
       (reduced-val x)
       x))
 
@@ -49,7 +49,7 @@ early and returns a reduced value, list-reduce would 'unreduce' that value and
 try to continue the transducing process."
   (lambda (a b)
     (let ((result (funcall reducer a b)))
-      (if (reduced-p result)
+      (if (reduced? result)
           (reduced result)
           result))))
 

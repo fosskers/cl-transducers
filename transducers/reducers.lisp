@@ -107,12 +107,15 @@ The elements are sorted once before the median is extracted.
 (transduce (filter #'evenp) #'average '(1 3 5))
 
 (defmacro any (pred)
-  "Deprecated: Use `anyp'."
-  (warn "`any' is deprecated; use `anyp' instead.")
+  "Deprecated: Use `any?'."
+  (warn "`any' is deprecated; use `any?' instead.")
   `(anyp ,pred))
 
-(declaim (ftype (function ((function (t) *)) *) anyp))
-(defun anyp (pred)
+(defmacro anyp (pred)
+  `(any? ,pred))
+
+(declaim (ftype (function ((function (t) *)) *) any?))
+(defun any? (pred)
   "Reducer: Yield t if any element in the transduction satisfies PRED.
 Short-circuits the transduction as soon as the condition is met."
   (lambda (&optional (acc nil a?) (input nil i?))
@@ -124,17 +127,20 @@ Short-circuits the transduction as soon as the condition is met."
           (t nil))))
 
 #+nil
-(transduce #'pass (anyp #'evenp) '(1 3 5 7 9))
+(transduce #'pass (any? #'evenp) '(1 3 5 7 9))
 #+nil
-(transduce #'pass (anyp #'evenp) '(1 3 5 2 7 9))
+(transduce #'pass (any? #'evenp) '(1 3 5 2 7 9))
 
 (defmacro all (pred)
-  "Deprecated: Use `allp'."
-  (warn "`all' is deprecated; use `allp' instead.")
+  "Deprecated: Use `all?'."
+  (warn "`all' is deprecated; use `all?' instead.")
   `(allp ,pred))
 
-(declaim (ftype (function ((function (t) *)) *) allp))
-(defun allp (pred)
+(defmacro allp (pred)
+  `(all? ,pred))
+
+(declaim (ftype (function ((function (t) *)) *) all?))
+(defun all? (pred)
   "Reducer: Yield t if all elements of the transduction satisfy PRED.
 Short-circuits with NIL if any element fails the test."
   (lambda (&optional (acc nil a?) (input nil i?))
@@ -147,9 +153,9 @@ Short-circuits with NIL if any element fails the test."
           (t t))))
 
 #+nil
-(transduce #'pass (all #'oddp) '(1 3 5 7 9))
+(transduce #'pass (all? #'oddp) '(1 3 5 7 9))
 #+nil
-(transduce #'pass (all #'oddp) '(1 3 5 7 9 2))
+(transduce #'pass (all? #'oddp) '(1 3 5 7 9 2))
 
 (defun first (&optional (acc 'transducers-none a?) (input nil i?))
   "Reducer: Yield the first value of the transduction. As soon as this first value
