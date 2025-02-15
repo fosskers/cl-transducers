@@ -66,7 +66,7 @@ Looking for Transducers in other Lisps? Check out the [[https://codeberg.org/fos
     - [[#anyp-allp][anyp, allp]]
     - [[#first-last-find][first, last, find]]
     - [[#fold][fold]]
-    - [[#for-each][for-each]]
+    - [[#for][for]]
   - [[#sources][Sources]]
     - [[#ints-random][ints, random]]
     - [[#cycle-repeat-shuffle][cycle, repeat, shuffle]]
@@ -786,14 +786,14 @@ With a seed:
 
 In Clojure this function is called =completing=.
 
-*** for-each
+*** for
 
 Run through every item in a transduction for their side effects. Throws away all
-results and yields t.
+results and yields a final =t=.
 
 #+begin_src lisp :results verbatim :exports both
 (in-package :transducers)
-(transduce (map (lambda (n) (format t "~a~%" n))) #'for-each #(1 2 3 4))
+(transduce (map #'1+) (for (lambda (n) (format t "~a~%" n))) #(1 2 3 4))
 #+end_src
 
 #+RESULTS:

@@ -23,7 +23,7 @@
            #:anyp #:allp #:any #:all
            #:first #:last
            #:fold #:max #:min #:find
-           #:for-each)
+           #:for #:for-each)
   ;; --- Sources --- ;;
   (:export #:ints #:cycle #:repeat #:random #:shuffle
            #:plist #:reversed)

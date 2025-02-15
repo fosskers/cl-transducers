@@ -94,8 +94,8 @@ output that JSON into the given STREAM."
 
 (defmethod j:write-value ((writer j:writer) (value t:plist))
   (j:with-object writer
-    (t:transduce (t:map (lambda (pair)
+    (t:transduce #'t:pass
+                 (t:for (lambda (pair)
                           (j:write-key writer (car pair))
                           (j:write-value writer (cdr pair))))
-                 #'t:for-each
                  value)))

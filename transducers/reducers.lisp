@@ -269,10 +269,21 @@ Yields `nil' if no such element were found, unless a DEFAULT is provided."
 (transduce #'pass (find #'evenp :default 1000) '(1 3 5 9))
 
 (defun for-each (&rest vargs)
-  "Reducer: Run through every item in a transduction for their side effects.
-Throws away all results and yields t."
+  "Reducer: Deprecated. Use `for' instead."
   (declare (ignore vargs))
   t)
 
 #+nil
 (transduce (map (lambda (n) (format t "~a~%" n))) #'for-each #(1 2 3 4))
+
+(defun for (f)
+  "Reducer: Call some effectful function on every item to be reduced, and yield a
+final T."
+  (lambda (&optional (acc nil a?) (input nil i?))
+    (declare (ignore acc))
+    (cond ((and a? i?) (funcall f input))
+          ((and a? (not i?)) t)
+          (t nil))))
+
+#++
+(transduce #'pass (for (lambda (n) (format t "~a~%" n))) #(1 2 3 4))
