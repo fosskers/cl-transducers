@@ -106,14 +106,6 @@ The elements are sorted once before the median is extracted.
 #+nil
 (transduce (filter #'evenp) #'average '(1 3 5))
 
-(defmacro any (pred)
-  "Deprecated: Use `any?'."
-  (warn "`any' is deprecated; use `any?' instead.")
-  `(anyp ,pred))
-
-(defmacro anyp (pred)
-  `(any? ,pred))
-
 (declaim (ftype (function ((function (t) *)) *) any?))
 (defun any? (pred)
   "Reducer: Yield t if any element in the transduction satisfies PRED.
@@ -130,14 +122,6 @@ Short-circuits the transduction as soon as the condition is met."
 (transduce #'pass (any? #'evenp) '(1 3 5 7 9))
 #+nil
 (transduce #'pass (any? #'evenp) '(1 3 5 2 7 9))
-
-(defmacro all (pred)
-  "Deprecated: Use `all?'."
-  (warn "`all' is deprecated; use `all?' instead.")
-  `(allp ,pred))
-
-(defmacro allp (pred)
-  `(all? ,pred))
 
 (declaim (ftype (function ((function (t) *)) *) all?))
 (defun all? (pred)

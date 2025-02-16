@@ -49,6 +49,3 @@
 (defun reduced (item)
   "Wrap a value to signal that reduction has completed."
   (make-reduced :val item))
-
-(defmacro reduced-p (item)
-  `(reduced? ,item))

@@ -7,6 +7,7 @@
   :components ((:module "transducers"
                 :components
                 ((:file "package")
+                 (:file "deprecated")
                  (:file "utils")
                  (:file "transducers")
                  (:file "reducers")
