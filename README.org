@@ -107,7 +107,7 @@ Looking for Transducers in other Lisps? Check out the [[https://github.com/fossk
 | ABCL      | ✅        | ❌     | [[https://github.com/armedbear/abcl/issues/675][No TCO]] in recursive =labels= |
 | CCL       | ✅        | ✅     |                            |
 | [[https://gitlab.com/gnu-clisp/clisp][Clisp]]     | ✅        | -      | Supports TCO but not [[https://gitlab.com/gnu-clisp/clisp/-/merge_requests/3][PLN]]   |
-| Allegro   | ✅        | -      |                            |
+| Allegro   | ✅        | ✅     |                            |
 | LispWorks | ✅        | -      |                            |
 
 [[https://wiki.archlinux.org/title/Common_Lisp#Historical][Historical implementations]] are not considered.

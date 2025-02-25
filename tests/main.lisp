@@ -222,6 +222,7 @@
   :depends-on (reduction transduction)
   (let ((huge (t:transduce (t:take 1000000) #'t:cons (t:ints 1))))
     (is = 1000000 (t:transduce #'t:pass #'t:count huge)))
+  #-allegro
   (is = 1000000
       (labels ((recurse (acc)
                  (if (= acc 1000000)
