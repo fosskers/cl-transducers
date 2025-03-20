@@ -1,5 +1,11 @@
 # Transducers
 
+### Unreleased
+
+#### Fixed
+
+- A forgotten `all?` export.
+
 ### 1.4.0 (2025-02-15)
 
 #### Added
