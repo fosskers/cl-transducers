@@ -82,15 +82,17 @@ starting the separation from the end, e.g. when called with arguments
               (incf words)
               (setf end start))))))
 
+(declaim (ftype (function (cl:string &key (:separator character)) list) string-split))
 (defun string-split (string &key (separator #\space))
   "You know what this does."
   (labels ((recurse (acc start end)
+             (declare (type fixnum start end))
              (cond ((and (<= start 0) (<= end 0)) acc)
                    ;; FIXME: 2025-01-13 This case can probably be simplified.
-                   ((and (zerop start) (eql separator (aref string start)))
+                   ((and (zerop start) (eql separator (char string start)))
                     (cl:cons "" (cl:cons (subseq string (1+ start) (1+ end)) acc)))
                    ((zerop start) (cl:cons (subseq string start (1+ end)) acc))
-                   ((eql separator (aref string start))
+                   ((eql separator (char string start))
                     (recurse (cl:cons (subseq string (1+ start) (1+ end)) acc)
                              (1- start)
                              (1- start)))
@@ -100,5 +102,7 @@ starting the separation from the end, e.g. when called with arguments
 
 #++
 (subseq "hello" 0 2)
+
 #++
 (string-split ",Hello,my,name,is,Colin," :separator #\,)
+

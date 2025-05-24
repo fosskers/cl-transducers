@@ -87,6 +87,7 @@ keep results that are non-nil.
   (lambda (reducer)
     (let ((new-n n))
       (lambda (result &optional (input nil i?))
+        (declare (type fixnum new-n))
         (if i? (let ((result (if (> new-n 0)
                                  (funcall reducer result input)
                                  result)))
