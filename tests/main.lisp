@@ -257,3 +257,16 @@
 (test 'transducers/tests)
 #+nil
 (test 'transducers/tests :report 'interactive)
+
+(define-test utilities)
+
+(define-test "String Splitting"
+  :parent utilities
+  (is equal '() (t::string-split "" :separator #\,))
+  (is equal '("Hello") (t::string-split "Hello" :separator #\,))
+  (is equal '("Hello" "there") (t::string-split "Hello,there" :separator #\,))
+  (is equal '("" "Hello" "there") (t::string-split ",Hello,there" :separator #\,))
+  (is equal '("" "Hello" "there" "") (t::string-split ",Hello,there," :separator #\,))
+  (is equal '("" "") (t::string-split "," :separator #\,))
+  (is equal '("" "" "") (t::string-split ",," :separator #\,))
+  (is equal '("a" "bee") (t::string-split "a,bee" :separator #\,)))
