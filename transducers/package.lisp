@@ -19,7 +19,7 @@
   (:export #:branch #:inject #:split)
   ;; --- Reducers -- ;;
   (:export #:cons #:snoc #:vector #:string #:hash-table
-           #:count #:average #:median
+           #:count #:average #:median #:quantities
            #:any? #:all? #:anyp #:allp #:any #:all
            #:first #:last
            #:fold #:max #:min #:find
