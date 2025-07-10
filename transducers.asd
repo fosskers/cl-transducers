@@ -22,9 +22,7 @@
   :author "Colin Woodbury <colin@fosskers.ca>"
   :license "MPL-2.0"
   :depends-on (:transducers :com.inuoe.jzon :trivia)
-  :components ((:module "jzon"
-                :components
-                ((:file "jzon"))))
+  :components ((:module "jzon" :components ((:file "jzon"))))
   :description "JSON extension for Transducers.")
 
 (defsystem "transducers/fset"
@@ -32,9 +30,7 @@
   :author "Colin Woodbury <colin@fosskers.ca>"
   :license "MPL-2.0"
   :depends-on (:transducers :fset)
-  :components ((:module "fset"
-                :components
-                ((:file "fset"))))
+  :components ((:module "fset" :components ((:file "fset"))))
   :description "Fset extension for Transducers.")
 
 (defsystem "transducers/tests"
@@ -46,8 +42,6 @@
                :fset
                :parachute
                :str)
-  :components ((:module "tests"
-                :components
-                ((:file "main"))))
+  :components ((:module "tests" :components ((:file "tests"))))
   :description "Test system for transducers"
   :perform (test-op (op c) (symbol-call :parachute :test :transducers/tests)))

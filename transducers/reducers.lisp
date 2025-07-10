@@ -294,3 +294,28 @@ equality predicate."
 #+nil
 (transduce #'pass (quantities #'eql) '(1 1 2 1 3 4 5 4 3 2 1))
 
+(defun partition (pred)
+  "Reducer: Given some predicate function, split the stream and collect its values
+into two lists, those items that passed the check, and those that failed."
+  (lambda (&optional (acc nil a?) (input nil i?))
+    (cond ((and a? i?)
+           (destructuring-bind (passed . failed) acc
+             (cond ((funcall pred input)
+                    (setf (car acc) (cl:cons input passed))
+                    acc)
+                   (t (setf (cdr acc) (cl:cons input failed))
+                      acc))))
+          ((and a? (not i?))
+           (destructuring-bind (passed . failed) acc
+             (values (nreverse passed) (nreverse failed))))
+          (t (cl:cons '() '())))))
+
+;; TODO: Start here. Use this to clean up the `fold' in `read-tilemap'.
+
+#+nil
+(transduce #'pass (partition #'evenp) '(1 2 3 4 5))
+#+nil
+(transduce #'pass (partition #'evenp) #(1 2 3 4 5))
+#+nil
+(transduce #'pass (partition (lambda (c) (eql c #\l))) "hello")
+
