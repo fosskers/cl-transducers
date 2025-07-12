@@ -310,12 +310,5 @@ into two lists, those items that passed the check, and those that failed."
              (values (nreverse passed) (nreverse failed))))
           (t (cl:cons '() '())))))
 
-;; TODO: Start here. Use this to clean up the `fold' in `read-tilemap'.
-
 #+nil
 (transduce #'pass (partition #'evenp) '(1 2 3 4 5))
-#+nil
-(transduce #'pass (partition #'evenp) #(1 2 3 4 5))
-#+nil
-(transduce #'pass (partition (lambda (c) (eql c #\l))) "hello")
-

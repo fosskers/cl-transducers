@@ -19,7 +19,14 @@
   (is = 0 (t:transduce #'t:pass #'t:count '()))
   (is = 3 (t:transduce #'t:pass #'t:count '(1 2 3)))
   (is = 0 (t:transduce #'t:pass #'t:count #()))
-  (is = 3 (t:transduce #'t:pass #'t:count #(1 2 3))))
+  (is = 3 (t:transduce #'t:pass #'t:count #(1 2 3)))
+  (let ((ht (make-hash-table :test #'eql)))
+    (setf (gethash 1 ht) 4)
+    (setf (gethash 2 ht) 2)
+    (setf (gethash 3 ht) 2)
+    (setf (gethash 4 ht) 2)
+    (setf (gethash 5 ht) 1)
+    (is equalp ht (t:transduce #'t:pass (t:quantities #'eql) '(1 1 2 1 3 4 5 4 3 2 1)))))
 
 (define-test "Predicates"
   :parent reduction
@@ -47,6 +54,21 @@
   (is = 4    (t:transduce #'t:pass #'t:median '(1 2 3 4 5 6)))
   (is string-equal "b" (t:transduce #'t:pass #'t:median '("a" "c" "b")))
   (fail      (t:transduce #'t:pass #'t:median '())))
+
+(define-test "Partitions"
+  :parent reduction
+  (is-values (t:transduce #'t:pass (t:partition #'evenp) '(1 2 3 4 5))
+    (equal '(2 4))
+    (equal '(1 3 5)))
+  (is-values (t:transduce #'t:pass (t:partition #'evenp) #(1 2 3 4 5))
+    (equal '(2 4))
+    (equal '(1 3 5)))
+  (is-values (t:transduce #'t:pass (t:partition (lambda (c) (eql c #\l))) "hello")
+    (equal '(#\l #\l))
+    (equal '(#\h #\e #\o)))
+  (is-values (t:transduce #'t:pass (t:partition #'evenp) '())
+    (equal '())
+    (equal '())))
 
 (define-test transduction)
 
