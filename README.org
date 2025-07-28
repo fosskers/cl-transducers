@@ -560,8 +560,8 @@ in this case ~cons~, thus a list.
 
 *** sexp
 
-Interpret the data stream as S-expressions, yielding one at a time. Assumes that
-the stream is one of individual characters."
+Interpret the data stream as S-expressions, yielding one at a time. Can either process
+a stream of individual characters directly from a string...
 
 #+begin_src lisp :results verbatim :exports both
 (in-package :transducers)
@@ -570,6 +570,17 @@ the stream is one of individual characters."
 
 #+RESULTS:
 : ("(+ 1 1)" "(+ 2 2)" "(+ 3 (* 4 5))")
+
+...or of chunks of strings, for instance from a file stream.
+
+#+begin_src lisp :results verbatim :exports both
+(in-package :transducers)
+(transduce #'sexp #'cons '("(+ 1" " 1) (+ 2 2)"))
+#+end_src
+
+#+RESULTS:
+: ("(+ 1 1)" "(+ 2 2)")
+
 
 *** from-csv, into-csv
 

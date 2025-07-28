@@ -140,7 +140,8 @@
   (is equal '() (t:transduce #'t:sexp #'t:cons ""))
   (is equal '("(+ 1 1)") (t:transduce #'t:sexp #'t:cons "(+ 1 1)"))
   (is equal '("(+ 1 1)" "(+ 2 2)") (t:transduce #'t:sexp #'t:cons "(+ 1 1) (+ 2 2)"))
-  (is equal '("(+ 1 (* 1 1))") (t:transduce #'t:sexp #'t:cons "(+ 1 (* 1 1))")))
+  (is equal '("(+ 1 (* 1 1))") (t:transduce #'t:sexp #'t:cons "(+ 1 (* 1 1))"))
+  (is equal '("(+ 1 1)" "(+ 2 2)") (t:transduce #'t:sexp #'t:cons '("(+ 1 " "1) (+ 2 2)"))))
 
 (define-test "Other"
   :parent transduction
