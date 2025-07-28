@@ -43,6 +43,13 @@
              (format stream "The type ~a cannot be concatenated."
                      (unusable-type-type condition)))))
 
+(define-condition unmatched-closing-paren (error)
+  ()
+  (:documentation "A character stream contained an unmatched closing parenthesis.")
+  (:report (lambda (condition stream)
+             (declare (ignore condition))
+             (format stream "Unmatched closing parenthesis in sexp stream"))))
+
 (defun prompt-new-value (prompt)
   (format *query-io* prompt)
   (force-output *query-io*)

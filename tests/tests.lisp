@@ -133,6 +133,15 @@
     (is equal '(1 2 3)    (sort (t:transduce (t:map #'cdr) #'t:cons table) #'<))
     (is equal '(:a :b :c) (sort (t:transduce (t:map #'car) #'t:cons table) #'string<))))
 
+(define-test "S-Expressions"
+  :parent transduction
+  :depends-on (reduction)
+  (fail (t:transduce #'t:sexp #'t:cons "(+ 1 1))"))
+  (is equal '() (t:transduce #'t:sexp #'t:cons ""))
+  (is equal '("(+ 1 1)") (t:transduce #'t:sexp #'t:cons "(+ 1 1)"))
+  (is equal '("(+ 1 1)" "(+ 2 2)") (t:transduce #'t:sexp #'t:cons "(+ 1 1) (+ 2 2)"))
+  (is equal '("(+ 1 (* 1 1))") (t:transduce #'t:sexp #'t:cons "(+ 1 (* 1 1))")))
+
 (define-test "Other"
   :parent transduction
   :depends-on (reduction)

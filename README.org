@@ -59,6 +59,7 @@ Looking for Transducers in other Lisps? Check out the [[https://github.com/fossk
     - [[#intersperse-enumerate-step-scan][intersperse, enumerate, step, scan]]
     - [[#once][once]]
     - [[#log][log]]
+    - [[#sexp][sexp]]
     - [[#from-csv-into-csv][from-csv, into-csv]]
   - [[#reducers][Reducers]]
     - [[#cons-snoc-vector-string-hash-table][cons, snoc, vector, string, hash-table]]
@@ -556,6 +557,19 @@ of the transduction are passed through as-is.
 
 These are STDOUT results. The actual return value is the result of the reducer,
 in this case ~cons~, thus a list.
+
+*** sexp
+
+Interpret the data stream as S-expressions, yielding one at a time. Assumes that
+the stream is one of individual characters."
+
+#+begin_src lisp :results verbatim :exports both
+(in-package :transducers)
+(transduce #'sexp #'cons "(+ 1 1) (+ 2 2) (+ 3 (* 4 5))")
+#+end_src
+
+#+RESULTS:
+: ("(+ 1 1)" "(+ 2 2)" "(+ 3 (* 4 5))")
 
 *** from-csv, into-csv
 

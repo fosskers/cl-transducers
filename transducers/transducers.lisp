@@ -455,6 +455,37 @@ applications of a given function F.
 #++
 (transduce (once nil) #'cons '())
 
+(defun sexp (reducer)
+  "Transducer: Interpret the data stream as S-expressions, yielding one at a time.
+Assumes that the stream is one of individual characters."
+  (let ((acc (make-array 16 :element-type 'character :adjustable t :fill-pointer 0))
+        (parens 0))
+    (lambda (result &optional (input nil i?))
+      (declare (type fixnum parens))
+      (cond (i? (case input
+                  (#\(
+                   (incf parens)
+                   (vector-push-extend input acc)
+                   result)
+                  (#\)
+                   (decf parens)
+                   (vector-push-extend input acc)
+                   (cond ((zerop parens)
+                          (let ((curr acc))
+                            (setf acc (make-array 16 :element-type 'character :adjustable t :fill-pointer 0))
+                            (funcall reducer result curr)))
+                         ((< parens 0) (error 'unmatched-closing-paren))
+                         (t result)))
+                  (t (cond ((zerop parens) result)
+                           (t (vector-push-extend input acc)
+                              result)))))
+            (t (funcall reducer result))))))
+
+#+nil
+(transduce #'sexp #'cons "(+ 1 1)")
+#+nil
+(transduce #'sexp #'cons "(+ 1 1) (+ 2 2) (+ 3 (* 4 5))")
+
 (defun from-csv (reducer)
   "Transducer: Interpret the data stream as CSV data.
 
@@ -534,6 +565,7 @@ of its values."
 (defun recsv (items)
   "Reconvert some ITEMS into a comma-separated string."
   (format nil "~{~a~^,~}" items))
+
 
 ;; --- Higher Order Transducers --- ;;
 

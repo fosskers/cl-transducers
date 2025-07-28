@@ -14,6 +14,7 @@
            #:intersperse #:enumerate #:step #:scan
            #:log
            #:once
+           #:sexp
            #:from-csv #:into-csv)
   ;; --- Higher Order Transducers --- ;;
   (:export #:branch #:inject #:split)
@@ -30,7 +31,8 @@
            #:plist #:reversed)
   ;; --- Conditions --- ;;
   (:export #:empty-transduction
-           #:imbalanced-plist)
+           #:imbalanced-plist
+           #:unmatched-closing-paren)
   ;; --- Restarts --- ;;
   (:export #:next-item
            #:retry-item)
