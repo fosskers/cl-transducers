@@ -581,7 +581,6 @@ a stream of individual characters directly from a string...
 #+RESULTS:
 : ("(+ 1 1)" "(+ 2 2)")
 
-
 *** from-csv, into-csv
 
 Interpret the data stream as CSV data.

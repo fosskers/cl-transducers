@@ -460,7 +460,7 @@ applications of a given function F.
 The stream can consist of either individual characters or whole strings. The
 former would occur when transducing over a string directly. The latter would
 occur when transducing over a stream/file line-by-line."
-  (let ((acc (make-array 16 :element-type 'character :adjustable t :fill-pointer 0))
+  (let ((acc (short-string))
         (parens 0))
     (lambda (result &optional (input nil i?))
       (declare (type fixnum parens))
@@ -475,7 +475,7 @@ occur when transducing over a stream/file line-by-line."
                     (vector-push-extend c acc)
                     (cond ((zerop parens)
                            (let ((curr acc))
-                             (setf acc (make-array 16 :element-type 'character :adjustable t :fill-pointer 0))
+                             (setf acc (short-string))
                              (funcall reducer res curr)))
                           ((< parens 0) (error 'unmatched-closing-paren))
                           (t res)))
@@ -499,6 +499,10 @@ occur when transducing over a stream/file line-by-line."
 (transduce #'sexp #'cons "(+ 1 1) (+ 2 2) (+ 3 (* 4 5))")
 #+nil
 (transduce #'sexp #'cons '("(+ 1 1)" "(+ 2 2)"))
+
+(defun short-string ()
+  "Allocate an adjustable short string for filling up later."
+  (make-array 16 :element-type 'character :adjustable t :fill-pointer 0))
 
 (defun from-csv (reducer)
   "Transducer: Interpret the data stream as CSV data.
