@@ -11,7 +11,7 @@
 
 #### Changed
 
-- `vector` and `string` reducers are now faster and use slightly less memory.
+- The `vector`, `string`, and `average` reducers are now faster and use less memory.
 
 #### Fixed
 

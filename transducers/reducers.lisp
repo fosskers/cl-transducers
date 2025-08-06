@@ -87,6 +87,11 @@ The elements are sorted once before the median is extracted.
 #+nil
 (transduce #'pass #'median '(0 1 2 3 4))
 
+(defstruct avg
+  "A helper struct for the `average' reducer."
+  (count 0 :type fixnum)
+  (total 0 :type real))
+
 (defun average (&optional (acc nil a?) (input nil i?))
   "Reducer: Calculate the average value of all numeric elements in a transduction.
 
@@ -94,14 +99,14 @@ The elements are sorted once before the median is extracted.
 
 - `empty-transduction': when no values made it through the transduction."
   (cond ((and a? i?)
-         (destructuring-bind (count . total) acc
-           (cl:cons (1+ count) (+ total input))))
+         (incf (avg-count acc))
+         (incf (avg-total acc) input)
+         acc)
         ((and a? (not i?))
-         (destructuring-bind (count . total) acc
-           (if (= 0 count)
-               (error 'empty-transduction :msg "`average' called on an empty transduction.")
-               (/ total count))))
-        (t (cl:cons 0 0))))
+         (if (zerop (avg-count acc))
+             (error 'empty-transduction :msg "`average' called on an empty transduction.")
+             (/ (avg-total acc) (avg-count acc))))
+        (t (make-avg :count 0 :total 0))))
 
 #+nil
 (transduce #'pass #'average '(1 2 3 4 5 6))
