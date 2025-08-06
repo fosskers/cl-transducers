@@ -140,10 +140,12 @@ streamed as-is as cons cells."
          (result (vector-reduce xf init coll)))
     (funcall xf result)))
 
+(declaim (ftype (function (t t cl:vector) *) vector-reduce))
 (defun vector-reduce (f identity vec)
   (declare (optimize (speed 3) (safety 1) (debug 1)))
   (let ((len (length vec)))
     (labels ((recurse (acc i)
+               (declare (type fixnum i))
                (if (= i len)
                    acc
                    (let ((acc (safe-call f acc (aref vec i))))
@@ -166,6 +168,7 @@ streamed as-is as cons cells."
   (let* ((vec (reversed-vector rev))
          (len (length vec)))
     (labels ((recurse (acc i)
+               (declare (type fixnum i))
                (if (< i 0)
                    acc
                    (let ((acc (safe-call f acc (aref vec i))))
@@ -179,10 +182,27 @@ streamed as-is as cons cells."
 
 (declaim (ftype (function (t t cl:string) *) string-transduce))
 (defun string-transduce (xform f coll)
-  (vector-transduce xform f coll))
+  (let* ((init   (funcall f))
+         (xf     (funcall xform f))
+         (result (string-reduce xf init coll)))
+    (funcall xf result)))
 
 #+nil
-(string-transduce (map #'char-upcase) #'cons "hello")
+(string-transduce (map #'char-upcase) #'string "hello")
+
+(declaim (ftype (function (t t cl:string) *) string-reduce))
+(defun string-reduce (f identity str)
+  (declare (optimize (speed 3) (safety 1) (debug 1)))
+  (let ((len (length str)))
+    (labels ((recurse (acc i)
+               (declare (type fixnum i))
+               (if (= i len)
+                   acc
+                   (let ((acc (safe-call f acc (char str i))))
+                     (if (reduced? acc)
+                         (reduced-val acc)
+                         (recurse acc (1+ i)))))))
+      (recurse identity 0))))
 
 (declaim (ftype (function (t t cl:hash-table) *) hash-table-transduce))
 (defun hash-table-transduce (xform f coll)
