@@ -13,22 +13,10 @@
         (reversed (reverse (cl:cons function functions))))
     `(lambda (&rest ,args)
        ,(reduce (lambda (data fn)
-                 `(funcall ,fn ,data))
-               (cdr reversed)
-               :initial-value `(apply ,(car reversed) ,args)))))
+                  `(funcall ,fn ,data))
+                (cdr reversed)
+                :initial-value `(apply ,(car reversed) ,args)))))
 
-#+nil
-(macroexpand-1 '(comp (f)))
-#+nil
-(macroexpand-1 '(comp (f x)))
-#+nil
-(macroexpand-1 '(comp (f) (g)))
-#+nil
-(macroexpand-1 '(comp (f x) (g)))
-#+nil
-(macroexpand-1 '(comp (f x) (g x)))
-#+nil
-(macroexpand-1 '(comp (const 1337) (lambda (n) (* 2 n)) #'1+))
 #+nil
 (funcall (comp (const 1337) (lambda (n) (* 2 n)) #'1+) 1)
 

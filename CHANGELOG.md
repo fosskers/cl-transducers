@@ -12,6 +12,7 @@
 #### Changed
 
 - The `vector`, `string`, and `average` reducers are now faster and use less memory.
+- `comp` is now a macro and uses less memory for long composition chains.
 
 #### Fixed
 
