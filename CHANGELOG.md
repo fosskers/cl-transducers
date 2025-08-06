@@ -9,6 +9,10 @@
 - Reducer: `quantities` for counting unique occurrences of streamed items.
 - Reducer: `partition` for splitting the stream results.
 
+#### Changed
+
+- `vector` and `string` reducers are now faster and use slightly less memory.
+
 #### Fixed
 
 - A forgotten `all?` export.
