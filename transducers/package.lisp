@@ -1,7 +1,8 @@
 (defpackage transducers
   (:use :cl)
   (:shadow #:map #:concatenate #:log #:step #:split
-           #:cons #:count #:first #:last #:max #:min #:find #:string #:vector #:hash-table
+           #:string #:base-string #:vector #:hash-table
+           #:cons #:count #:first #:last #:max #:min #:find
            #:random)
   ;; --- Entry Points --- ;;
   (:export #:transduce)

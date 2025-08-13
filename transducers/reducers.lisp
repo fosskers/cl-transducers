@@ -16,15 +16,27 @@ reversal."
         ((and a? (not i?)) acc)
         (t '())))
 
-(declaim (ftype (function (&optional (or cl:string null) character) cl:string) string))
 (defun string (&optional (acc nil a?) (input #\z i?))
-  "Reducer: Collect a stream of characters into to a single string."
-  (cond ((and a? i?) (vector-push-extend input acc) acc)
-        ((and a? (not i?)) acc)
-        (t (make-array 16 :element-type 'character :adjustable t :fill-pointer 0))))
+  "Reducer: Collect a stream of characters into to a `simple-string'."
+  (cond ((and a? i?)
+         (write-char input acc)
+         acc)
+        ((and a? (not i?)) (get-output-stream-string acc))
+        (t (make-string-output-stream :element-type 'character))))
 
 #+nil
-(string-transduce (map #'char-upcase) #'string "hello")
+(transduce (map #'char-upcase) #'string "hello")
+
+(defun base-string (&optional (acc nil a?) (input #\z i?))
+  "Reducer: Collect a stream of characters into to a single string of `base-char'."
+  (cond ((and a? i?)
+         (write-char input acc)
+         acc)
+        ((and a? (not i?)) (get-output-stream-string acc))
+        (t (make-string-output-stream :element-type 'base-char))))
+
+#+nil
+(transduce (map #'char-upcase) #'base-string "hello")
 
 (declaim (ftype (function (&optional (or cl:vector null) t) cl:vector) vector))
 (defun vector (&optional (acc nil a?) (input nil i?))

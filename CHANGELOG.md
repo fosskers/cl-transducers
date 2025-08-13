@@ -8,10 +8,13 @@
   SEXP strings.
 - Reducer: `quantities` for counting unique occurrences of streamed items.
 - Reducer: `partition` for splitting the stream results.
+- Reducer: `base-string` for reducing into a `simple-base-string`.
 
 #### Changed
 
-- The `vector`, `string`, and `average` reducers are now faster and use less memory.
+- Reducer: `vector` and `average` are now faster and use less memory.
+- Reducer: `string` is now more efficient and yields the specialized
+  `(simple-array character (*))` type.
 - `comp` is now a macro and uses less memory for long composition chains.
 
 #### Fixed
