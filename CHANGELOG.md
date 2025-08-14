@@ -11,6 +11,7 @@
 - Reducer: `partition` for splitting the stream results.
 - Reducer: `base-string` for reducing into a `simple-base-string`.
 - Reducer: `bit-vector` for reducing into a `bit-vector`.
+- Can now `transduce` over a `bit-vector` (e.g. `#*0101`).
 
 #### Changed
 

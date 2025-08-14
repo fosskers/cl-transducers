@@ -238,7 +238,8 @@
       (t:transduce #'t:pass #'t:cons (t:plist '(:a 1 :b 2 :c 3))))
   (fail (t:transduce #'t:pass #'t:cons 1))
   (is equal (list 3 2 1) (t:transduce #'t:pass #'t:cons (t:reversed #(1 2 3))))
-  (is equal nil (t:transduce #'t:pass #'t:cons (t:reversed #()))))
+  (is equal nil (t:transduce #'t:pass #'t:cons (t:reversed #())))
+  (is equal #*0101 (t:transduce #'t:pass #'t:bit-vector #*0101)))
 
 (define-test "Higher Order Transducers"
   :depends-on (reduction transduction)

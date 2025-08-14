@@ -52,6 +52,7 @@ sources. See `sources.lisp' and `entry.lisp' for examples of how to do this.
 "))
 
 (defmethod transduce (xform f (source cl:string))
+  "Elements are indexed via `char'."
   (string-transduce xform f source))
 
 (defmethod transduce (xform f (source list))
@@ -60,16 +61,23 @@ streamed as-is as cons cells."
   (list-transduce xform f source))
 
 (defmethod transduce (xform f (source cl:vector))
+  "Elements are indexed via `aref'."
   (vector-transduce xform f source))
 
 (defmethod transduce (xform f (source reversed))
+  "Operate over a vector in reversed order."
   (reversed-transduce xform f source))
+
+(defmethod transduce (xform f (source cl:bit-vector))
+  "Elements are indexed via `bit'."
+  (bit-vector-transduce xform f source))
 
 (defmethod transduce (xform f (source cl:hash-table))
   "Yields key-value pairs as cons cells."
   (hash-table-transduce xform f source))
 
 (defmethod transduce (xform f (source pathname))
+  "Opens the file and yields individual lines."
   (file-transduce xform f source))
 
 (defmethod transduce (xform f (source generator))
@@ -156,6 +164,30 @@ streamed as-is as cons cells."
 
 #+nil
 (vector-transduce (map #'1+) #'cons #(1 2 3 4 5))
+
+(declaim (ftype (function (t t cl:bit-vector) *) bit-vector-transduce))
+(defun bit-vector-transduce (xform f coll)
+  (let* ((init   (funcall f))
+         (xf     (funcall xform f))
+         (result (bit-vector-reduce xf init coll)))
+    (funcall xf result)))
+
+(declaim (ftype (function (t t cl:bit-vector) *) bit-vector-reduce))
+(defun bit-vector-reduce (f identity vec)
+  (declare (optimize (speed 3) (safety 1) (debug 1)))
+  (let ((len (length vec)))
+    (labels ((recurse (acc i)
+               (declare (type fixnum i))
+               (if (= i len)
+                   acc
+                   (let ((acc (funcall f acc (bit vec i))))
+                     (if (reduced? acc)
+                         (reduced-val acc)
+                         (recurse acc (1+ i)))))))
+      (recurse identity 0))))
+
+#+nil
+(bit-vector-transduce (map #'1+) #'cons #*0101)
 
 (defun reversed-transduce (xform f coll)
   (let* ((init   (funcall f))
