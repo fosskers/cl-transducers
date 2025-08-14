@@ -123,7 +123,7 @@ streamed as-is as cons cells."
   (labels ((recurse (acc items)
              (if (null items)
                  acc
-                 (let ((v (safe-call f acc (car items))))
+                 (let ((v (funcall f acc (car items))))
                    (if (reduced? v)
                        (reduced-val v)
                        (recurse v (cdr items)))))))
@@ -148,7 +148,7 @@ streamed as-is as cons cells."
                (declare (type fixnum i))
                (if (= i len)
                    acc
-                   (let ((acc (safe-call f acc (aref vec i))))
+                   (let ((acc (funcall f acc (aref vec i))))
                      (if (reduced? acc)
                          (reduced-val acc)
                          (recurse acc (1+ i)))))))
@@ -171,7 +171,7 @@ streamed as-is as cons cells."
                (declare (type fixnum i))
                (if (< i 0)
                    acc
-                   (let ((acc (safe-call f acc (aref vec i))))
+                   (let ((acc (funcall f acc (aref vec i))))
                      (if (reduced? acc)
                          (reduced-val acc)
                          (recurse acc (1- i)))))))
@@ -198,7 +198,7 @@ streamed as-is as cons cells."
                (declare (type fixnum i))
                (if (= i len)
                    acc
-                   (let ((acc (safe-call f acc (char str i))))
+                   (let ((acc (funcall f acc (char str i))))
                      (if (reduced? acc)
                          (reduced-val acc)
                          (recurse acc (1+ i)))))))
@@ -219,7 +219,7 @@ streamed as-is as cons cells."
                (multiple-value-bind (entry-p key value) (iter)
                  (if (not entry-p)
                      acc
-                     (let ((acc (safe-call f acc (cl:cons key value))))
+                     (let ((acc (funcall f acc (cl:cons key value))))
                        (if (reduced? acc)
                            (reduced-val acc)
                            (recurse acc)))))))
@@ -260,7 +260,7 @@ responsiblity of the caller!"
              (let ((line (read-line stream nil)))
                (if (not line)
                    acc
-                   (let ((acc (safe-call f acc line)))
+                   (let ((acc (funcall f acc line)))
                      (if (reduced? acc)
                          (reduced-val acc)
                          (recurse acc)))))))
@@ -282,7 +282,7 @@ responsiblity of the caller!"
   (labels ((recurse (acc)
              (let ((val (funcall (generator-func gen))))
                (cond ((eq *done* val) acc)
-                     (t (let ((acc (safe-call f acc val)))
+                     (t (let ((acc (funcall f acc val)))
                           (if (reduced? acc)
                               (reduced-val acc)
                               (recurse acc))))))))
@@ -307,7 +307,7 @@ responsiblity of the caller!"
                           :report "Supply a value for the final key."
                           :interactive (lambda () (prompt-new-value (format nil "Value for key ~a: " key)))
                           (recurse acc (list key value))))))
-                   (t (let ((v (safe-call f acc (cl:cons (car items) (second items)))))
+                   (t (let ((v (funcall f acc (cl:cons (car items) (second items)))))
                         (if (reduced? v)
                             (reduced-val v)
                             (recurse v (cdr (cdr items)))))))))

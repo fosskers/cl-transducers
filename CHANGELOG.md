@@ -6,6 +6,7 @@
 
 - Transducer: `sexp` for interpretting a streams of chars or strings as separate
   SEXP strings.
+- Transducer: `safe` for handling conditions within individual transducers. 
 - Reducer: `quantities` for counting unique occurrences of streamed items.
 - Reducer: `partition` for splitting the stream results.
 - Reducer: `base-string` for reducing into a `simple-base-string`.
@@ -16,6 +17,10 @@
 - Reducer: `string` is now more efficient and yields the specialized
   `(simple-array character (*))` type.
 - `comp` is now a macro and uses less memory for long composition chains.
+- All iterations are no longer implicitly wrapped in a `restart-case`. Doing so
+  improves performance (2x in the case of SBCL, 10x in the case of ECL, etc.)
+  and drastically reduces memory usage. As mentioned above, if you know that
+  specific transducers may fail, you can now wrap them in `safe`.
 
 #### Fixed
 

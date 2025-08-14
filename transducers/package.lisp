@@ -18,7 +18,7 @@
            #:sexp
            #:from-csv #:into-csv)
   ;; --- Higher Order Transducers --- ;;
-  (:export #:branch #:inject #:split)
+  (:export #:safe #:branch #:inject #:split)
   ;; --- Reducers -- ;;
   (:export #:cons #:snoc #:vector #:string #:hash-table
            #:count #:average #:median #:quantities
@@ -53,3 +53,4 @@
 (defun reduced (item)
   "Wrap a value to signal that reduction has completed."
   (make-reduced :val item))
+

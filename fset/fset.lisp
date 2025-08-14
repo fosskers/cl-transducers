@@ -34,7 +34,7 @@
     (labels ((recurse (acc)
                (if (funcall iter :done?)
                    acc
-                   (let ((acc (t::safe-call f acc (funcall iter :get))))
+                   (let ((acc (funcall f acc (funcall iter :get))))
                      (if (t:reduced? acc)
                          (t:reduced-val acc)
                          (recurse acc))))))
@@ -56,7 +56,7 @@
                (if (funcall iter :done?)
                    acc
                    (multiple-value-bind (key val) (funcall iter :get)
-                     (let ((acc (t::safe-call f acc (cl:cons key val))))
+                     (let ((acc (funcall f acc (cl:cons key val))))
                        (if (t:reduced? acc)
                            (t:reduced-val acc)
                            (recurse acc)))))))
@@ -77,7 +77,7 @@
     (labels ((recurse (acc)
                (if (funcall iter :done?)
                    acc
-                   (let ((acc (t::safe-call f acc (funcall iter :get))))
+                   (let ((acc (funcall f acc (funcall iter :get))))
                      (if (t:reduced? acc)
                          (t:reduced-val acc)
                          (recurse acc))))))
@@ -98,7 +98,7 @@
     (labels ((recurse (acc)
                (if (funcall iter :done?)
                    acc
-                   (let ((acc (t::safe-call f acc (funcall iter :get))))
+                   (let ((acc (funcall f acc (funcall iter :get))))
                      (if (t:reduced? acc)
                          (t:reduced-val acc)
                          (recurse acc))))))

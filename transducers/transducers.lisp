@@ -584,8 +584,39 @@ of its values."
   "Reconvert some ITEMS into a comma-separated string."
   (format nil "~{~a~^,~}" items))
 
-
 ;; --- Higher Order Transducers --- ;;
+
+(defun safe (tr)
+  "Transducer: Given a transducer that may error, wrap it in `restart-case'
+to provide various ways of skipping or handling that error."
+  (lambda (reducer)
+    (let ((callable (funcall tr reducer)))
+      (lambda (result &optional (input nil i?))
+        (if (not i?)
+            (funcall callable result)
+            (labels ((recurse (item)
+                       (restart-case (funcall callable result item)
+                         (next-item ()
+                           :report "Skip this item and continue the transduction."
+                           result)
+                         (retry-item ()
+                           :report "Put this item through the transduction chain once more."
+                           (recurse item))
+                         (alter-item (alter)
+                           :report "Transform this item via a given function, then try the transduction again."
+                           :interactive (lambda () (prompt-for-function-name))
+                           (recurse (funcall alter item)))
+                         (use-value (value)
+                           :report "Supply a different value and reattempt the transduction."
+                           :interactive (lambda () (prompt-new-value "Value: "))
+                           (recurse value)))))
+              (recurse input)))))))
+
+#+nil
+(transduce (comp (drop 1)
+                 (safe (map (lambda (item) (if (= item 1) (error "無念") item))))
+                 (take 1))
+           #'cons '(0 1 2 3))
 
 (defun branch (pred ta tb)
   "Transducer: If a PRED yields non-NIL on a value, proceed with transducer chain

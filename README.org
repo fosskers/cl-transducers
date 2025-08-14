@@ -61,6 +61,7 @@ Looking for Transducers in other Lisps? Check out the [[https://github.com/fossk
     - [[#log][log]]
     - [[#sexp][sexp]]
     - [[#from-csv-into-csv][from-csv, into-csv]]
+    - [[#safe][safe]]
   - [[#reducers][Reducers]]
     - [[#cons-snoc-vector-string-hash-table][cons, snoc, vector, string, hash-table]]
     - [[#count-average-median-quantities][count, average, median, quantities]]
@@ -614,6 +615,20 @@ keys are strings that match the values found in HEADERS.
 
 #+RESULTS:
 : ("Name,Age" "Alice,35" "Bob,26")
+*** safe
+
+Given a transducer that may error, wrap it in =restart-case= to provide various
+ways of skipping or handling that error.
+
+#+begin_src lisp :results verbatim :exports both
+(in-package :transducers)
+(handler-bind ((error #'(lambda (c) (invoke-restart 'next-item))))
+  (transduce (safe (map (lambda (item) (if (= item 1) (error "Mercy!") item))))
+             #'cons '(0 1 2 3)))
+#+end_src
+
+#+RESULTS:
+: (0 2 3)
 
 ** Reducers
 
@@ -1398,7 +1413,7 @@ Now come a trio of functions that drive the iteration:
     (labels ((recurse (acc i)
                (if (< i 0)
                    acc  ;; (4) We're done.
-                   (let ((acc (safe-call f acc (aref vec i)))) ;; (5) "Safe" application of the transducer chain.
+                   (let ((acc (funcall f acc (aref vec i)))) ;; (5) Call the transducer chain.
                      (if (reduced? acc)  ;; (6a) Short-circuiting occured. Time to go home.
                          (reduced-val acc)
                          (recurse acc (1- i))))))) ;; (6b) Otherwise, keep going.
@@ -1408,10 +1423,7 @@ Now come a trio of functions that drive the iteration:
 All types follow this pattern. In (1) and (2) we do initial setup. In (4) we've
 reached the natural end of the Source (e.g. the end of the vector).
 
-At (5) you're free to do a =funcall= on =f=, however using =safe-call= instead
-provides you with protection against a number of common failure cases and offers
-a variety of handy restarts. Who wants to bail halfway through processing a
-multi-gigabyte data file? No, just skip the bad line and keep going! Etc, etc.
+(5) is us actually calling the whole transducer chain.
 
 At (6a) we see that we always need to check if the result of the current call
 was "reduced", i.e. short-circuited.

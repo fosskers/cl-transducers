@@ -55,28 +55,6 @@
   (force-output *query-io*)
   (list (read *query-io*)))
 
-;; FIXME 2024-07-05 It's my birthday. Should this be a macro?
-(defun safe-call (f acc item)
-  "Call a transduction chain with the given arguments, wrapping the possibilities
-in various restart cases."
-  (labels ((recurse (acc item)
-             (restart-case (funcall f acc item)
-               (next-item ()
-                 :report "Skip this item and continue the transduction."
-                 acc)
-               (retry-item ()
-                 :report "Put this item through the transduction chain once more."
-                 (recurse acc item))
-               (alter-item (alter)
-                 :report "Transform this item via a given function, then try the transduction again."
-                 :interactive (lambda () (prompt-for-function-name))
-                 (recurse acc (funcall alter item)))
-               (use-value (value)
-                 :report "Supply a different value and reattempt the transduction."
-                 :interactive (lambda () (prompt-new-value "Value: "))
-                 (recurse acc value)))))
-    (recurse acc item)))
-
 (defun prompt-for-function-name ()
   "Prompt the user for a function name."
   (format *query-io* "Function name: ")
