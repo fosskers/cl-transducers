@@ -51,10 +51,6 @@ sources. See `sources.lisp' and `entry.lisp' for examples of how to do this.
 
 "))
 
-(defmethod transduce (xform f (source cl:string))
-  "Elements are indexed via `char'."
-  (string-transduce xform f source))
-
 (defmethod transduce (xform f (source list))
   "Transducing over an alist works automatically via this method, and the pairs are
 streamed as-is as cons cells."
@@ -71,6 +67,20 @@ streamed as-is as cons cells."
 (defmethod transduce (xform f (source cl:bit-vector))
   "Elements are indexed via `bit'."
   (bit-vector-transduce xform f source))
+
+#-(or ecl allegro)
+(defmethod transduce (xform f (source cl:simple-bit-vector))
+  "Elements are indexed via `sbit'."
+  (simple-bit-vector-transduce xform f source))
+
+(defmethod transduce (xform f (source cl:string))
+  "Elements are indexed via `char'."
+  (string-transduce xform f source))
+
+#-(or ecl allegro)
+(defmethod transduce (xform f (source cl:simple-string))
+  "Elements are indexed via `schar'."
+  (simple-string-transduce xform f source))
 
 (defmethod transduce (xform f (source cl:hash-table))
   "Yields key-value pairs as cons cells."
@@ -189,6 +199,30 @@ streamed as-is as cons cells."
 #+nil
 (bit-vector-transduce (map #'1+) #'cons #*0101)
 
+(declaim (ftype (function (t t cl:simple-bit-vector) *) simple-bit-vector-transduce))
+(defun simple-bit-vector-transduce (xform f coll)
+  (let* ((init   (funcall f))
+         (xf     (funcall xform f))
+         (result (simple-bit-vector-reduce xf init coll)))
+    (funcall xf result)))
+
+(declaim (ftype (function (t t cl:simple-bit-vector) *) simple-bit-vector-reduce))
+(defun simple-bit-vector-reduce (f identity vec)
+  (declare (optimize (speed 3) (safety 1) (debug 1)))
+  (let ((len (length vec)))
+    (labels ((recurse (acc i)
+               (declare (type fixnum i))
+               (if (= i len)
+                   acc
+                   (let ((acc (funcall f acc (sbit vec i))))
+                     (if (reduced? acc)
+                         (reduced-val acc)
+                         (recurse acc (1+ i)))))))
+      (recurse identity 0))))
+
+#+nil
+(simple-bit-vector-transduce (map #'1+) #'cons #*0101)
+
 (defun reversed-transduce (xform f coll)
   (let* ((init   (funcall f))
          (xf     (funcall xform f))
@@ -231,6 +265,30 @@ streamed as-is as cons cells."
                (if (= i len)
                    acc
                    (let ((acc (funcall f acc (char str i))))
+                     (if (reduced? acc)
+                         (reduced-val acc)
+                         (recurse acc (1+ i)))))))
+      (recurse identity 0))))
+
+(declaim (ftype (function (t t cl:simple-string) *) simple-string-transduce))
+(defun simple-string-transduce (xform f coll)
+  (let* ((init   (funcall f))
+         (xf     (funcall xform f))
+         (result (simple-string-reduce xf init coll)))
+    (funcall xf result)))
+
+#+nil
+(simple-string-transduce (map #'char-upcase) #'string "hello")
+
+(declaim (ftype (function (t t cl:simple-string) *) simple-string-reduce))
+(defun simple-string-reduce (f identity str)
+  (declare (optimize (speed 3) (safety 1) (debug 1)))
+  (let ((len (length str)))
+    (labels ((recurse (acc i)
+               (declare (type fixnum i))
+               (if (= i len)
+                   acc
+                   (let ((acc (funcall f acc (schar str i))))
                      (if (reduced? acc)
                          (reduced-val acc)
                          (recurse acc (1+ i)))))))

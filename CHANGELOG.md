@@ -12,6 +12,8 @@
 - Reducer: `base-string` for reducing into a `simple-base-string`.
 - Reducer: `bit-vector` for reducing into a `bit-vector`.
 - Can now `transduce` over a `bit-vector` (e.g. `#*0101`).
+- Can now `transduce` specially over `simple-string` and `simple-bit-vector`,
+  but only with certain compilers.
 
 #### Changed
 
