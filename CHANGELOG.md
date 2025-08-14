@@ -10,6 +10,7 @@
 - Reducer: `quantities` for counting unique occurrences of streamed items.
 - Reducer: `partition` for splitting the stream results.
 - Reducer: `base-string` for reducing into a `simple-base-string`.
+- Reducer: `bit-vector` for reducing into a `bit-vector`.
 
 #### Changed
 

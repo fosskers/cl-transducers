@@ -1,7 +1,7 @@
 (defpackage transducers
   (:use :cl)
   (:shadow #:map #:concatenate #:log #:step #:split
-           #:string #:base-string #:vector #:hash-table
+           #:string #:base-string #:vector #:bit-vector #:hash-table
            #:cons #:count #:first #:last #:max #:min #:find
            #:random)
   ;; --- Entry Points --- ;;
@@ -20,7 +20,10 @@
   ;; --- Higher Order Transducers --- ;;
   (:export #:safe #:branch #:inject #:split)
   ;; --- Reducers -- ;;
-  (:export #:cons #:snoc #:vector #:string #:hash-table
+  (:export #:cons #:snoc
+           #:vector #:bit-vector
+           #:string #:base-string
+           #:hash-table
            #:count #:average #:median #:quantities
            #:any? #:all? #:anyp #:allp #:any #:all
            #:partition

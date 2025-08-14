@@ -48,6 +48,15 @@ reversal."
 #+nil
 (vector-transduce (map #'1+) #'vector #(1 2 3))
 
+(defun bit-vector (&optional (acc nil a?) (input 0 i?))
+  "Reducer: Collect a stream of `bit' values into a `bit-vector'."
+  (cond ((and a? i?) (vector-push-extend input acc) acc)
+        ((and a? (not i?)) acc)
+        (t (make-array 16 :element-type 'bit :adjustable t :fill-pointer 0))))
+
+#+nil
+(transduce (take 20) #'bit-vector (cycle #(0 1)))
+
 (declaim (ftype (function (&optional (or cl:hash-table null) t) cl:hash-table) hash-table))
 (defun hash-table (&optional (acc nil a?) (input nil i?))
   "Reducer: Collect a stream of key-value cons pairs into a hash table."

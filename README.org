@@ -63,7 +63,10 @@ Looking for Transducers in other Lisps? Check out the [[https://github.com/fossk
     - [[#from-csv-into-csv][from-csv, into-csv]]
     - [[#safe][safe]]
   - [[#reducers][Reducers]]
-    - [[#cons-snoc-vector-string-hash-table][cons, snoc, vector, string, hash-table]]
+    - [[#cons-snoc][cons, snoc]]
+    - [[#vector-bit-vector][vector, bit-vector]]
+    - [[#string-base-string][string, base-string]]
+    - [[#hash-table][hash-table]]
     - [[#count-average-median-quantities][count, average, median, quantities]]
     - [[#any-all][any?, all?]]
     - [[#partition][partition]]
@@ -638,7 +641,7 @@ it either a new collection or a scalar.
 Some reducers, like ~first~, can also force the entire transduction to
 short-circuit.
 
-*** cons, snoc, vector, string, hash-table
+*** cons, snoc
 
 Collect all results as a list.
 
@@ -661,6 +664,8 @@ more performant than ~cons~ since it performs no final reversal.
 #+RESULTS:
 : (3 2 1)
 
+*** vector, bit-vector
+
 Collect a stream of values into a vector.
 
 #+begin_src lisp :results verbatim :exports both
@@ -671,15 +676,42 @@ Collect a stream of values into a vector.
 #+RESULTS:
 : #(1 2 3)
 
-Collect a stream of characters into to a single string.
+If the elements are all either 0 or 1, you can reduce into a =bit-vector= instead:
 
 #+begin_src lisp :results verbatim :exports both
 (in-package :transducers)
-(transduce (map #'char-upcase) #'string "hello")
+(transduce #'pass #'bit-vector '(0 1 0 1))
 #+end_src
 
 #+RESULTS:
-: HELLO
+: #*0101
+
+*** string, base-string
+
+Collect a stream of characters into a single string. The result is the ideal
+=(simple-array character (*))= type.
+
+#+begin_src lisp :results verbatim :exports both
+(in-package :transducers)
+(transduce (map #'char-upcase) #'string "I see 富士山.")
+#+end_src
+
+#+RESULTS:
+: I SEE 富士山.
+
+However, if you know your source characters are all ASCII (rather, the =base-char=
+range for your particular compiler), then =base-string= often has much lower
+memory consumption:
+
+#+begin_src lisp :results verbatim :exports both
+(in-package :transducers)
+(transduce (map #'char-upcase) #'base-string "I see Mt. Fuji.")
+#+end_src
+
+#+RESULTS:
+: I SEE MT. FUJI.
+
+*** hash-table
 
 Collect a stream of key-value cons pairs into a hash table.
 
