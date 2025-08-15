@@ -4,7 +4,7 @@
 
 #### Added
 
-- Transducer: `sexp` for interpretting a streams of chars or strings as separate
+- Transducer: `sexp` for interpretting streams of chars or strings as separate
   SEXP strings.
 - Transducer: `safe` for handling conditions within individual transducers. 
 - Reducer: `quantities` for counting unique occurrences of streamed items.

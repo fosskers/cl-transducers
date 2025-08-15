@@ -460,7 +460,7 @@ applications of a given function F.
 The stream can consist of either individual characters or whole strings. The
 former would occur when transducing over a string directly. The latter would
 occur when transducing over a stream/file line-by-line."
-  (let ((acc (short-string))
+  (let ((acc (make-string-output-stream :element-type 'character))
         (parens 0))
     (lambda (result &optional (input nil i?))
       (declare (type fixnum parens))
@@ -468,19 +468,19 @@ occur when transducing over a stream/file line-by-line."
                  (case c
                    (#\(
                     (incf parens)
-                    (vector-push-extend c acc)
+                    (write-char c acc)
                     res)
                    (#\)
                     (decf parens)
-                    (vector-push-extend c acc)
+                    (write-char c acc)
                     (cond ((zerop parens)
-                           (let ((curr acc))
-                             (setf acc (short-string))
+                           (let ((curr (get-output-stream-string acc)))
+                             (setf acc (make-string-output-stream :element-type 'character))
                              (funcall reducer res curr)))
                           ((< parens 0) (error 'unmatched-closing-paren))
                           (t res)))
                    (t (cond ((zerop parens) res)
-                            (t (vector-push-extend c acc)
+                            (t (write-char c acc)
                                res)))))
                (a-string (res i)
                  (declare (type fixnum i))
