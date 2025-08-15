@@ -68,7 +68,7 @@ streamed as-is as cons cells."
   "Elements are indexed via `bit'."
   (bit-vector-transduce xform f source))
 
-#-(or ecl allegro)
+#+(or sbcl ccl abcl)
 (defmethod transduce (xform f (source cl:simple-bit-vector))
   "Elements are indexed via `sbit'."
   (simple-bit-vector-transduce xform f source))
@@ -77,7 +77,7 @@ streamed as-is as cons cells."
   "Elements are indexed via `char'."
   (string-transduce xform f source))
 
-#-(or ecl allegro)
+#+(or sbcl ccl abcl)
 (defmethod transduce (xform f (source cl:simple-string))
   "Elements are indexed via `schar'."
   (simple-string-transduce xform f source))
