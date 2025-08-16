@@ -32,8 +32,7 @@
                :transducers/jzon
                :transducers/fset
                :fset
-               :parachute
-               :str)
+               :parachute)
   :components ((:module "tests" :components ((:file "tests"))))
   :description "Test system for transducers"
   :perform (test-op (op c) (symbol-call :parachute :test :transducers/tests)))

@@ -296,3 +296,26 @@ occur when transducing over a stream/file line-by-line."
 ;; - For SBCL it performs the best.
 ;; - It is competitive with other compilers.
 ;; - It yields a favourable return type without extra conversions.
+
+;; --- Looping --- ;;
+
+(defun loop-foldl (function initial-value list)
+  (unless list
+    (return-from loop-foldl initial-value))
+  (loop for x in list
+        for result = (funcall function initial-value x)
+          then (funcall function result x)
+        finally (return result)))
+
+#+nil
+(let ((a (make-list 1000000 :initial-element 1)))
+  (format t "--- TRANSDUCERS ---~%")
+  (time (dotimes (n 100)
+          (transduce #'pass #'+ a)))
+  (format t "--- LOOP ---~%")
+  (time (dotimes (n 100)
+          (loop-foldl #'+ 0 a))))
+
+;; OBSERVATIONS
+;;
+;; Transducers is allocating, likely due to the closure inside of `pass'.

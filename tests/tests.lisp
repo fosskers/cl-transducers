@@ -207,7 +207,7 @@
                 #'<))))
   (is = 4
       (handler-bind ((error #'(lambda (c) (declare (ignore c)) (invoke-restart 't:next-item))))
-        (t:transduce (t:safe (t:map (lambda (line) (if (str:emptyp (str:trim line)) (error "Empty!") line)))) #'t:count #p"tests/file.txt")))
+        (t:transduce (t:safe (t:map (lambda (line) (if (string= "" (string-trim '(#\space) line)) (error "Empty!") line)))) #'t:count #p"tests/file.txt")))
   (is equal '(0 2 3)
       (handler-bind ((error #'(lambda (c) (declare (ignore c)) (invoke-restart 't:next-item))))
         (t:transduce (t:comp (t:take 4)
