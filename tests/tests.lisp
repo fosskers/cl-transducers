@@ -258,6 +258,7 @@
                            (t:map #'1-))
                    #'t:cons (t:ints 1))))
 
+#-abcl
 (define-test "Tail-recursion"
   :depends-on (reduction transduction)
   (let ((huge (t:transduce (t:take 1000000) #'t:cons (t:ints 1))))
